@@ -17,6 +17,13 @@ class NacEvent:
 
     Methods:
         __init__(self, event: dict): Initializes the NacEvent object.
+        security(self): Parses certificate and TLS information from the event.
+        idp(self): Parses IDP information from the event.
+        nac(self): Parses NAC/RADIUS information from the event.
+        connection(self): Parses connection information from the event.
+        event(self): Parses event information from the event.
+        mdm(self): Parses MDM information from the event.
+        session(self): Parses session information from the event.
     """
 
     def __init__(
@@ -33,6 +40,12 @@ class NacEvent:
         # The event data from the webhook; Remove entries as they are processed
         self.raw_event = event
 
+        # Remove some fields that are not needed
+        self.raw_event.pop("crc", None)
+        self.raw_event.pop("org_id", None)
+        self.raw_event.pop("tls_states", None)
+        self.raw_event.pop("cert_template", None)
+
         # Collect certificate information
         self.security()
 
@@ -47,6 +60,12 @@ class NacEvent:
 
         # Collect event information
         self.event()
+
+        # Collect MDM information
+        self.mdm()
+
+        # Collect session information
+        self.session()
 
     def security(
         self
@@ -77,6 +96,12 @@ class NacEvent:
         self.cert_template = self.raw_event.get("cert_template")
         self.raw_event.pop("cert_template", None)
 
+        self.cert_san_upn = self.raw_event.get("cert_san_upn")
+        self.raw_event.pop("cert_san_upn", None)
+
+        self.cert_san_email = self.raw_event.get("cert_san_email")
+        self.raw_event.pop("cert_san_email", None)
+
         # TLS information
         self.tls_cipher_suite = self.raw_event.get("tls_cipher_suite")
         self.raw_event.pop("tls_cipher_suite", None)
@@ -85,9 +110,6 @@ class NacEvent:
             "tls_client_preferred_version"
         )
         self.raw_event.pop("tls_client_preferred_version", None)
-
-        self.tls_states = self.raw_event.get("tls_states")
-        self.raw_event.pop("tls_states", None)
 
         self.tls_version = self.raw_event.get("tls_version")
         self.raw_event.pop("tls_version", None)
@@ -145,6 +167,26 @@ class NacEvent:
         self.nas_vendor = self.raw_event.get("nas_vendor")
         self.raw_event.pop("nas_vendor", None)
 
+        # Whether a NAC rule was matched (true or false)
+        self.nacrule_matched = self.raw_event.get("nacrule_matched")
+        self.raw_event.pop("nacrule_matched", None)
+
+        # The name of the NAC rule that was applied
+        self.nacrule_name = self.raw_event.get("nacrule_name")
+        self.raw_event.pop("nacrule_name", None)
+
+        # Labels associated with the NAC result
+        self.usermac_labels = self.raw_event.get("usermac_labels")
+        self.raw_event.pop("usermac_labels", None)
+
+        # The VLAN assigned to the client
+        self.vlan = self.raw_event.get("vlan")
+        self.raw_event.pop("vlan", None)
+
+        # The VLAN source (eg, 'nactag')
+        self.vlan_source = self.raw_event.get("vlan_source")
+        self.raw_event.pop("vlan_source", None)
+
     def connection(
         self,
     ) -> None:
@@ -177,6 +219,18 @@ class NacEvent:
         self.random_mac = self.raw_event.get("random_mac")
         self.raw_event.pop("random_mac", None)
 
+        # MAC - Wired
+        self.device_mac = self.raw_event.get("device_mac")
+        self.raw_event.pop("device_mac", None)
+
+        # Port ID - Wired
+        self.port_id = self.raw_event.get("port_id")
+        self.raw_event.pop("port_id", None)
+
+        # Site ID
+        self.site_id = self.raw_event.get("site_id")
+        self.raw_event.pop("site_id", None)
+
     def event(
         self,
     ) -> None:
@@ -195,6 +249,100 @@ class NacEvent:
         # Friendly event message
         self.text = self.raw_event.get("text")
         self.raw_event.pop("text", None)
+
+    def mdm(
+        self,
+    ) -> None:
+        """
+        Collect MDM information.
+        """
+
+        self.mdm_account_id = self.raw_event.get("mdm_account_id")
+        self.raw_event.pop("mdm_account_id", None)
+
+        self.mdm_client_id = self.raw_event.get("mdm_client_id")
+        self.raw_event.pop("mdm_client_id", None)
+
+        self.mdm_compliance = self.raw_event.get("mdm_compliance")
+        self.raw_event.pop("mdm_compliance", None)
+
+        self.mdm_last_checked = self.raw_event.get("mdm_last_checked")
+        self.raw_event.pop("mdm_last_checked", None)
+
+        self.mdm_manufacturer = self.raw_event.get("mdm_manufacturer")
+        self.raw_event.pop("mdm_manufacturer", None)
+
+        self.mdm_model = self.raw_event.get("mdm_model")
+        self.raw_event.pop("mdm_model", None)
+
+        self.mdm_operating_system = self.raw_event.get("mdm_operating_system")
+        self.raw_event.pop("mdm_operating_system", None)
+
+        self.mdm_os_version = self.raw_event.get("mdm_os_version")
+        self.raw_event.pop("mdm_os_version", None)
+
+        self.mdm_provider = self.raw_event.get("mdm_provider")
+        self.raw_event.pop("mdm_provider", None)
+
+        self.coa_source = self.raw_event.get("coa_source")
+        self.raw_event.pop("coa_source", None)
+
+        self.pre_mdm_compliance = self.raw_event.get("pre_mdm_compliance")
+        self.raw_event.pop("pre_mdm_compliance", None)
+
+    def session(
+        self,
+    ) -> None:
+        """
+        Collect session information.
+        This seems to happen when wifi clients roam
+        """
+
+        # AP/BSSID that has seen the client (list)
+        self.aps = self.raw_event.get("aps")
+        self.raw_event.pop("aps", None)
+
+        self.bssids = self.raw_event.get("bssids")
+        self.raw_event.pop("bssids", None)
+
+        # The client IP address
+        self.client_ip = self.raw_event.get("client_ip")
+        self.raw_event.pop("client_ip", None)
+
+        self.client_ips = self.raw_event.get("client_ips")
+        self.raw_event.pop("client_ips", None)
+
+        # Session times
+        self.session_duration_in_mins = self.raw_event.get(
+            "session_duration_in_mins"
+        )
+        self.raw_event.pop("session_duration_in_mins", None)
+
+        self.session_ended_at = self.raw_event.get("session_ended_at")
+        self.raw_event.pop("session_ended_at", None)
+
+        self.session_last_updated_at = self.raw_event.get(
+            "session_last_updated_at"
+        )
+        self.raw_event.pop("session_last_updated_at", None)
+
+        self.session_started_at = self.raw_event.get("session_started_at")
+        self.raw_event.pop("session_started_at", None)
+
+        # Session bytes and packets
+        self.total_bytes_received = self.raw_event.get("total_bytes_received")
+        self.raw_event.pop("total_bytes_received", None)
+
+        self.total_bytes_sent = self.raw_event.get("total_bytes_sent")
+        self.raw_event.pop("total_bytes_sent", None)
+
+        self.total_packets_received = self.raw_event.get(
+            "total_packets_received"
+        )
+        self.raw_event.pop("total_packets_received", None)
+
+        self.total_packets_sent = self.raw_event.get("total_packets_sent")
+        self.raw_event.pop("total_packets_sent", None)
 
 
 if __name__ == "__main__":

@@ -25,12 +25,12 @@ def webhook():
     data = request.get_json()
 
     # Debug - print the alert
-    print(
-        Fore.YELLOW,
-        "DEBUG: Parsed alert:",
-        data,
-        Style.RESET_ALL
-    )
+    # print(
+    #     Fore.YELLOW,
+    #     "DEBUG: Parsed alert:",
+    #     data,
+    #     Style.RESET_ALL
+    # )
 
     # Create an object
     if data.get("topic") == "nac-events":
@@ -40,6 +40,15 @@ def webhook():
 
             # Print unmanaged fields, if any
             if nac_event.raw_event:
+                print(
+                    Fore.CYAN,
+                    "DEBUG: New type of alert:",
+                )
+                print(
+                    data,
+                    Style.RESET_ALL
+                )
+
                 print(
                     Fore.RED,
                     "Unmanaged fields:",
@@ -62,8 +71,6 @@ NOTE: When running in a container, the host and port are set in the
     Flask app is not run directly.
     This can be uncommented for local testing.
 '''
-webhook()
-
 # if __name__ == "__main__":
 #     app.run(
 #         debug=True,
