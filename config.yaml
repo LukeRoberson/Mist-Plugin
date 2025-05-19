@@ -1,0 +1,62 @@
+nac-events:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+nac-accounting:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+client-sessions:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+client-join:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+client-info:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+device-events:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+alarms:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+audits:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+device-updowns:
+  default:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
