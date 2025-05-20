@@ -39,6 +39,11 @@ nac-events:
     sql: false
     syslog: false
     teams: false
+  NAC_CLIENT_COA_REAUTH:
+    web: false
+    sql: false
+    syslog: false
+    teams: false
   
   NAC_CLIENT_CERT_CHECK_SUCCESS:
     web: false
@@ -263,6 +268,16 @@ device-events:
     sql: false
     syslog: false
     teams: false
+  SW_ALARM_CHASSIS_POE:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  SW_ALARM_CHASSIS_POE_CLEAR:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
   SW_CONFIG_CHANGED_BY_USER:
     web: true
     sql: false
@@ -394,6 +409,26 @@ device-events:
     syslog: false
     teams: false
   SW_ZTP_FINISHED:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  SW_BGP_NEIGHBOR_STATE_CHANGED:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  SW_BGP_NEIGHBOR_DOWN:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  SW_BGP_NEIGHBOR_UP:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  SW_EVPN_BGP_PEER_STATUS_CHANGE:
     web: true
     sql: false
     syslog: false
@@ -554,12 +589,22 @@ alarms:
     sql: false
     syslog: false
     teams: false
+  sw_alarm_chassis_poe:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
   sw_bad_optics:
     web: true
     sql: false
     syslog: false
     teams: false
   vc_master_changed:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  connectivity:
     web: true
     sql: false
     syslog: false
@@ -572,6 +617,26 @@ alarms:
     teams: false
 
 audits:
+  update:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  webshell:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  mist-login:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  accessed-org:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
   default:
     web: true
     sql: false

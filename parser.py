@@ -914,6 +914,39 @@ class DeviceEvents(Events):
         self.reason = self.raw_event.get("reason")
         self.raw_event.pop("reason", None)
 
+        self.ext_ip = self.raw_event.get("ext_ip")
+        self.raw_event.pop("ext_ip", None)
+
+        self.audit_id = self.raw_event.get("audit_id")
+        self.raw_event.pop("audit_id", None)
+
+        self.band = self.raw_event.get("band")
+        self.raw_event.pop("band", None)
+
+        self.bandwidth = self.raw_event.get("bandwidth")
+        self.raw_event.pop("bandwidth", None)
+
+        self.channel = self.raw_event.get("channel")
+        self.raw_event.pop("channel", None)
+
+        self.power = self.raw_event.get("power")
+        self.raw_event.pop("power", None)
+
+        self.pre_bandwidth = self.raw_event.get("pre_bandwidth")
+        self.raw_event.pop("pre_bandwidth", None)
+
+        self.pre_channel = self.raw_event.get("pre_channel")
+        self.raw_event.pop("pre_channel", None)
+
+        self.pre_power = self.raw_event.get("pre_power")
+        self.raw_event.pop("pre_power", None)
+
+        self.pre_usage = self.raw_event.get("pre_usage")
+        self.raw_event.pop("pre_usage", None)
+
+        self.usage = self.raw_event.get("usage")
+        self.raw_event.pop("usage", None)
+
     def _parse(
         self,
         config: dict,
@@ -948,6 +981,30 @@ class DeviceEvents(Events):
         # Need to set a nice message
         if self.text:
             self.parsed_message = self.text
+        elif self.type == 'AP_RESTARTED':
+            self.parsed_message = (
+                f"{self.ap_name} at {self.site_name} has restarted "
+                f"({self.reason})"
+            )
+        elif self.type == 'AP_CONNECTED':
+            self.parsed_message = (
+                f"{self.ap_name} at {self.site_name} has connected "
+            )
+        elif self.type == 'AP_DISCONNECTED':
+            self.parsed_message = (
+                f"{self.ap_name} at {self.site_name} has disconnected "
+            )
+        elif self.type == 'AP_CONFIGURED':
+            self.parsed_message = (
+                f"{self.ap_name} at {self.site_name} has been configured"
+            )
+        elif (
+            self.type == 'AP_CONFIG_CHANGED_BY_RRM' or
+            self.type == 'AP_RRM_ACTION'
+        ):
+            self.parsed_message = (
+                f"{self.ap_name} at {self.site_name} has been tuned by RRM"
+            )
         else:
             self.parsed_message = "No message included"
 
@@ -1090,6 +1147,47 @@ class Alarms(Events):
         self.wlan_ids = self.raw_event.get("wlan_ids")
         self.raw_event.pop("wlan_ids", None)
 
+        self.alert_id = self.raw_event.get("alert_id")
+        self.raw_event.pop("alert_id", None)
+
+        self.category = self.raw_event.get("category")
+        self.raw_event.pop("category", None)
+
+        self.details = self.raw_event.get("details")
+        self.raw_event.pop("details", None)
+
+        self.email_content = self.raw_event.get("email_content")
+        self.raw_event.pop("email_content", None)
+
+        self.impacted_client_count = self.raw_event.get(
+            "impacted_client_count"
+        )
+        self.raw_event.pop("impacted_client_count", None)
+
+        self.impacted_entities = self.raw_event.get("impacted_entities")
+        self.raw_event.pop("impacted_entities", None)
+
+        self.org_name = self.raw_event.get("org_name")
+        self.raw_event.pop("org_name", None)
+
+        self.resolved_time = self.raw_event.get("resolved_time")
+        self.raw_event.pop("resolved_time", None)
+
+        self.root_cause = self.raw_event.get("root_cause")
+        self.raw_event.pop("root_cause", None)
+
+        self.status = self.raw_event.get("status")
+        self.raw_event.pop("status", None)
+
+        self.suggestion = self.raw_event.get("suggestion")
+        self.raw_event.pop("suggestion", None)
+
+        self.port_id = self.raw_event.get("port_id")
+        self.raw_event.pop("port_id", None)
+
+        self.hostname = self.raw_event.get("hostname")
+        self.raw_event.pop("hostname", None)
+
     def _parse(
         self,
         config: dict,
@@ -1100,8 +1198,11 @@ class Alarms(Events):
 
         Event is in the format:
             x.y
-            x = Device type; switch, ap, etc
+            x = Category; wireless, connectivity, etc
             y = Event type; 'type' field
+
+        While listed as 'device' here, this could be more than a single
+            device, such as ane entire WLAN or service such as DHCP.
 
         Where possible the parsed message is taken from the text field.
 
@@ -1109,17 +1210,21 @@ class Alarms(Events):
             config (dict): Event handling configuration.
         """
 
-        # Get the device type
+        # Get the category
         if hasattr(self, 'port_ids'):
             self.parsed_device_type = "switch"
         elif hasattr(self, 'aps'):
-            self.parsed_device_type = "ap"
+            self.parsed_device_type = "wireless"
+        elif hasattr(self, 'category'):
+            self.parsed_device_type = self.category
         else:
             self.parsed_device_type = "unspecified"
 
         # Get the Event
         if self.type:
             self.parsed_event_type = self.type
+        elif self.root_cause:
+            self.parsed_event_type = self.root_cause
         else:
             self.parsed_event_type = "unspecified"
 
@@ -1141,6 +1246,16 @@ class Alarms(Events):
         elif self.type == "infra_arp_success":
             self.parsed_message = (
                 f"ARP success on VLAN {self.vlans} at {self.site_name}"
+            )
+        elif (
+            self.parsed_event_type == "connectivity" and
+            "wlan" in self.root_cause
+        ):
+            self.parsed_message = (
+                f"There has been a WLAN connectivity issue on "
+                f"{self.impacted_entities[0].get('ui_display_field')}. "
+                f"Action: {self.details['action']}. "
+                f"Status: {self.details['status']}."
             )
         else:
             self.parsed_message = "No message included"
@@ -1256,6 +1371,10 @@ class Audits(Events):
             self.parsed_event_type = "update"
         elif "Invoked Webshell" in self.message:
             self.parsed_event_type = "webshell"
+        elif "Login with Role" in self.message:
+            self.parsed_event_type = "mist-login"
+        elif "Accessed Org" in self.message:
+            self.parsed_event_type = "accessed-org"
         else:
             self.parsed_event_type = "unspecified"
 
@@ -1269,6 +1388,14 @@ class Audits(Events):
             self.parsed_message = (
                 f"{self.admin_name} {self.message} "
                 f"from {self.src_ip} at {self.site_name}"
+            )
+        elif (
+            self.parsed_event_type == "mist-login" or
+            self.parsed_event_type == "accessed-org"
+        ):
+            self.parsed_message = (
+                f"{self.admin_name}: {self.message} "
+                f"from {self.src_ip}"
             )
         else:
             self.parsed_message = "No message included"
