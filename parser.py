@@ -75,9 +75,11 @@ class NacEvent:
         self.__collect_fields()
 
         # Parse the event data
-        self.__parse()
+        self.__parse(config)
 
-    def __repr__(self) -> str:
+    def __repr__(
+        self
+    ) -> str:
         """
         Return a string representation of this object.
         This will be the parsed message body.
@@ -347,7 +349,8 @@ class NacEvent:
         self.raw_event.pop("tx_pkts", None)
 
     def __parse(
-        self
+        self,
+        config: dict,
     ) -> None:
         """
         Parse the raw event data.
@@ -384,41 +387,70 @@ class NacEvent:
         if self.type:
             # NAC Accounting events
             if self.type == "NAC_ACCOUNTING_START":
-                self.parsed_message = f"Client session started for {self.username}"
+                self.parsed_message = (
+                    f"Client session started for {self.username}"
+                )
             elif self.type == "NAC_ACCOUNTING_STOP":
-                self.parsed_message = f"Client session ended for {self.username}"
+                self.parsed_message = (
+                    f"Client session ended for {self.username}"
+                )
             elif self.type == "NAC_ACCOUNTING_UPDATE":
-                self.parsed_message = f"Client session updated for {self.username}"
+                self.parsed_message = (
+                    f"Client session updated for {self.username}"
+                )
             elif self.type == "NAC_CLIENT_PERMIT":
-                self.parsed_message = f"Client permit for {self.username}, VLAN {self.vlan}"
+                self.parsed_message = (
+                    f"Client permit for {self.username}, VLAN {self.vlan}"
+                )
             elif self.type == "NAC_SESSION_STARTED":
-                self.parsed_message = f"Client session started for {self.username}"
+                self.parsed_message = (
+                    f"Client session started for {self.username}"
+                )
             elif self.type == "NAC_SESSION_ENDED":
-                self.parsed_message = f"Client session ended for {self.username}"
+                self.parsed_message = (
+                    f"Client session ended for {self.username}"
+                )
 
             # Certificate events
             elif self.type == "NAC_CLIENT_CERT_CHECK_SUCCESS":
-                self.parsed_message = f"Client certificate check succeeded for {self.cert_cn}"
+                self.parsed_message = (
+                    f"Client certificate check succeeded for {self.cert_cn}"
+                )
             elif self.type == "NAC_SERVER_CERT_VALIDATION_SUCCESS":
-                self.parsed_message = f"Server certificate validation succeeded for {self.username}"
+                self.parsed_message = (
+                    f"Server certificate validation succeeded "
+                    f"for {self.username}"
+                )
 
             # MDM events
             elif self.type == "NAC_MDM_LOOKUP_SUCCESS":
-                self.parsed_message = f"MDM lookup succeeded for {self.username}. {self.mdm_manufacturer} {self.mdm_model} is {self.mdm_compliance}"
+                self.parsed_message = (
+                    f"MDM lookup succeeded for {self.username}. "
+                    f"{self.mdm_manufacturer} {self.mdm_model} "
+                    f"is {self.mdm_compliance}"
+                )
             elif self.type == "NAC_MDM_DEVICE_NOT_ENROLLED":
-                self.parsed_message = f"MDM device not enrolled for {self.username}. {self.text}"
+                self.parsed_message = (
+                    f"MDM device not enrolled for {self.username}. {self.text}"
+                )
 
             # IDP events
             elif self.type == "NAC_IDP_GROUPS_LOOKUP_SUCCESS":
-                self.parsed_message = f"IDP groups lookup succeeded for {self.username}"
+                self.parsed_message = (
+                    f"IDP groups lookup succeeded for {self.username}"
+                )
             elif self.type == "NAC_IDP_AUTHC_SUCCESS":
-                self.parsed_message = f"IDP authentication succeeded for {self.username}"
+                self.parsed_message = (
+                    f"IDP authentication succeeded for {self.username}"
+                )
 
             # Other events
             elif self.type == "NAC_CLIENT_IP_ASSIGNED":
-                self.parsed_message = f"Client IP assigned for {self.username}. {self.client_ip}"
+                self.parsed_message = (
+                    f"Client IP assigned for {self.username}. {self.client_ip}"
+                )
 
-            # For cases not explicitly handled, use the text field, or a default message
+            # When not explicitly handled, use 'text', or a default message
             elif self.text:
                 self.parsed_message = self.text
             else:
@@ -439,9 +471,17 @@ class NacEvent:
             "message": self.parsed_message,
         }
 
+        # Display alert if the event type is not in the config
+        if self.parsed_event_type not in config:
+            print(
+                Fore.RED,
+                "DEBUG: New type of NAC Event alert:",
+                self.original_event,
+                Style.RESET_ALL
+            )
+
         # Debug if there's not enough information
         if (
-            self.parsed_client_type == "unspecified" or
             self.parsed_event_type == "unspecified" or
             self.parsed_message == "No message included"
         ):
@@ -493,7 +533,9 @@ class ClientEvent:
         # Parse the event data
         self.__parse(config)
 
-    def __repr__(self) -> str:
+    def __repr__(
+        self
+    ) -> str:
         """
         Return a string representation of this object.
         This will be the parsed message body.
@@ -615,11 +657,8 @@ class ClientEvent:
             z = Event type
         """
 
-        # Get the client type
-        if self.ap:
-            self.parsed_client_type = "wireless"
-        else:
-            self.parsed_client_type = "unspecified"
+        # Client type is always wireless for these events
+        self.parsed_client_type = "wireless"
 
         # Get the Event
         if self.connect and self.disconnect:
@@ -627,13 +666,24 @@ class ClientEvent:
         if self.connect:
             self.parsed_event_type = "connect"
         else:
-            self.parsed_event_type = "unspecified"
+            self.parsed_event_type = "client-info"
 
         # Create a custom message
-        if self.termination_reason:
-            self.parsed_message = f"Client {self.mac} at {self.site_name} has disconnected from {self.ssid}"
-        if self.parsed_event_type == "connect":
-            self.parsed_message = f"Client {self.mac} at {self.site_name} has connected to {self.ssid}"
+        if self.parsed_event_type == "disconnect":
+            self.parsed_message = (
+                f"Client {self.mac} at {self.site_name} "
+                f"has disconnected from {self.ssid}"
+            )
+        elif self.parsed_event_type == "connect":
+            self.parsed_message = (
+                f"Client {self.mac} at {self.site_name} "
+                f"has connected to {self.ssid}"
+            )
+        elif self.parsed_event_type == "client-info":
+            self.parsed_message = (
+                f"Client {self.mac} has IP {self.ip} "
+                f"and is in site {self.site_id}"
+            )
         else:
             self.parsed_message = "No message included"
 
@@ -644,6 +694,15 @@ class ClientEvent:
             "timestamp": self.timestamp,
             "message": self.parsed_message,
         }
+
+        # Display alert if the event type is not in the config
+        if self.parsed_event_type not in config:
+            print(
+                Fore.RED,
+                "DEBUG: New type of Client Event alert:",
+                self.original_event,
+                Style.RESET_ALL
+            )
 
         # Debug if there's not enough information
         if (
@@ -699,7 +758,9 @@ class DeviceEvents:
         # Parse the event data
         self.__parse(config)
 
-    def __repr__(self) -> str:
+    def __repr__(
+        self
+    ) -> str:
         """
         Return a string representation of this object.
         This will be the parsed message body.
@@ -811,6 +872,22 @@ class DeviceEvents:
                 Style.RESET_ALL
             )
 
+        # Debug if there's not enough information
+        if (
+            self.parsed_device_type == "unspecified" or
+            self.parsed_event_type == "unspecified" or
+            self.parsed_message == "No message included"
+        ):
+            print(
+                Fore.RED,
+                "DEBUG: Device event without enough information:\n",
+                f"{self.parsed_device_type}.{self.parsed_event_type}\n",
+                f"Message: {self.parsed_message}\n",
+                Fore.YELLOW,
+                f"Original event: {self.original_event}\n",
+                Style.RESET_ALL
+            )
+
 
 class Alarms:
     """
@@ -819,6 +896,9 @@ class Alarms:
     Methods:
         __init__(self, event: dict): Initializes the Alarms object.
         __repr__(self): Returns a string representation of the Alarms object.
+        __collect_fields(self): Collects fields from the raw event.
+            This is a helper function to collect fields from the raw event.
+        __parse(self): Parses the raw event data.
     """
     def __init__(
         self,
@@ -843,13 +923,23 @@ class Alarms:
         # Collect and store fields from the raw event
         self.__collect_fields()
 
-    def __repr__(self) -> str:
+        # Parse the event data
+        self.__parse(config)
+
+    def __repr__(
+        self
+    ) -> str:
         """
         Return a string representation of this object.
         This will be the parsed message body.
         """
 
-        return f"AlarmEvent: {self.raw_event}"
+        message = f"Alarm Event:\n \
+                {self.parsed_device_type}.{self.parsed_event_type}\n \
+                {self.timestamp}\n \
+                {self.parsed_message}"
+
+        return message
 
     def __collect_fields(
         self
@@ -908,6 +998,120 @@ class Alarms:
         self.type = self.raw_event.get("type")
         self.raw_event.pop("type", None)
 
+        self.aps = self.raw_event.get("aps")
+        self.raw_event.pop("aps", None)
+
+        self.client_count = self.raw_event.get("client_count")
+        self.raw_event.pop("client_count", None)
+
+        self.incident_count = self.raw_event.get("incident_count")
+        self.raw_event.pop("incident_count", None)
+
+        self.macs = self.raw_event.get("macs")
+        self.raw_event.pop("macs", None)
+
+        self.servers = self.raw_event.get("servers")
+        self.raw_event.pop("servers", None)
+
+        self.ssids = self.raw_event.get("ssids")
+        self.raw_event.pop("ssids", None)
+
+        self.start = self.raw_event.get("start")
+        self.raw_event.pop("start", None)
+
+        self.vlans = self.raw_event.get("vlans")
+        self.raw_event.pop("vlans", None)
+
+        self.when = self.raw_event.get("when")
+        self.raw_event.pop("when", None)
+
+        self.wlan_ids = self.raw_event.get("wlan_ids")
+        self.raw_event.pop("wlan_ids", None)
+
+    def __parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
+        Where possible the parsed message is taken from the text field.
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        # Get the device type
+        if hasattr(self, 'port_ids'):
+            self.parsed_device_type = "switch"
+        if hasattr(self, 'aps'):
+            self.parsed_device_type = "ap"
+        else:
+            self.parsed_device_type = "unspecified"
+
+        # Get the Event
+        if self.type:
+            self.parsed_event_type = self.type
+        else:
+            self.parsed_event_type = "unspecified"
+
+        # Set a message
+        if self.reasons:
+            self.parsed_message = (
+                f"Host {self.hostnames} has experienced an alarm: "
+                f"{self.reasons}"
+            )
+        elif self.type == "infra_dhcp_success":
+            self.parsed_message = (
+                f"DHCP success on VLAN {self.vlans} at {self.site_name}"
+            )
+        elif self.type == "infra_dhcp_failure":
+            self.parsed_message = (
+                f"DHCP failure on VLAN {self.vlans} at {self.site_name} "
+                f"on SSID {self.ssids}"
+            )
+        else:
+            self.parsed_message = "No message included"
+
+        # Create webhook body
+        self.parsed_body = {
+            "source": "mist",
+            "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
+            "timestamp": self.timestamp,
+            "message": self.parsed_message,
+        }
+
+        # Display alert if the event type is not in the config
+        if self.parsed_event_type not in config:
+            print(
+                Fore.RED,
+                "DEBUG: New type of Alarm Event alert:",
+                self.original_event,
+                Style.RESET_ALL
+            )
+
+        # Debug if there's not enough information
+        if (
+            self.parsed_device_type == "unspecified" or
+            self.parsed_event_type == "unspecified" or
+            self.parsed_message == "No message included"
+        ):
+            print(
+                Fore.RED,
+                "DEBUG: Alarm event without enough information:\n",
+                f"{self.parsed_device_type}.{self.parsed_event_type}\n",
+                f"Message: {self.parsed_message}\n",
+                Fore.YELLOW,
+                f"Original event: {self.original_event}\n",
+                Style.RESET_ALL
+            )
+
 
 class Audits:
     """
@@ -916,6 +1120,9 @@ class Audits:
     Methods:
         __init__(self, event: dict): Initializes the Audits object.
         __repr__(self): Returns a string representation of the Audits object.
+        __collect_fields(self): Collects fields from the raw event.
+            This is a helper function to collect fields from the raw event.
+        __parse(self): Parses the raw event data.
     """
     def __init__(
         self,
@@ -940,13 +1147,23 @@ class Audits:
         # Collect and store fields from the raw event
         self.__collect_fields()
 
-    def __repr__(self) -> str:
+        # Parse the event data
+        self.__parse(config)
+
+    def __repr__(
+        self
+    ) -> str:
         """
         Return a string representation of this object.
         This will be the parsed message body.
         """
 
-        return f"AuditEvent: {self.raw_event}"
+        message = f"Audit Event:\n \
+                {self.parsed_device_type}.{self.parsed_event_type}\n \
+                {self.timestamp}\n \
+                {self.parsed_message}"
+
+        return message
 
     def __collect_fields(
         self
@@ -984,6 +1201,65 @@ class Audits:
         self.webhook_id = self.raw_event.get("webhook_id")
         self.raw_event.pop("webhook_id", None)
 
+    def __parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        # Get the Event
+        if self.before and self.after:
+            self.parsed_event_type = "update"
+        else:
+            self.parsed_event_type = "unspecified"
+
+        # Set a message
+        if self.parsed_event_type == "update":
+            self.parsed_message = (
+                f"{self.admin_name}: {self.message}\nfrom {self.before} "
+                f"to {self.after}"
+            )
+        else:
+            self.parsed_message = "No message included"
+
+        # Create webhook body
+        self.parsed_body = {
+            "source": "mist",
+            "type": f"admin.{self.parsed_event_type}",
+            "timestamp": self.timestamp,
+            "message": self.parsed_message,
+        }
+
+        # Display alert if the event type is not in the config
+        if self.parsed_event_type not in config:
+            print(
+                Fore.RED,
+                "DEBUG: New type of Audit Event alert:",
+                self.original_event,
+                Style.RESET_ALL
+            )
+
+        # Debug if there's not enough information
+        if (
+            self.parsed_event_type == "unspecified" or
+            self.parsed_message == "No message included"
+        ):
+            print(
+                Fore.RED,
+                "DEBUG: Audit event without enough information:\n",
+                f"{self.parsed_event_type}\n",
+                f"Message: {self.parsed_message}\n",
+                Fore.YELLOW,
+                f"Original event: {self.original_event}\n",
+                Style.RESET_ALL
+            )
+
 
 class DeviceUpdowns:
     """
@@ -992,6 +1268,9 @@ class DeviceUpdowns:
     Methods:
         __init__(self, event: dict): Initializes the DeviceUpdowns object.
         __repr__(self): Returns a string representation of the object.
+        __collect_fields(self): Collects fields from the raw event.
+            This is a helper function to collect fields from the raw event.
+        __parse(self): Parses the raw event data.
     """
     def __init__(
         self,
@@ -1016,13 +1295,23 @@ class DeviceUpdowns:
         # Collect and store fields from the raw event
         self.__collect_fields()
 
-    def __repr__(self) -> str:
+        # Parse the event data
+        self.__parse(config)
+
+    def __repr__(
+        self
+    ) -> str:
         """
         Return a string representation of this object.
         This will be the parsed message body.
         """
 
-        return f"UpDownEvent: {self.raw_event}"
+        message = f"DeviceEvent:\n \
+                {self.parsed_device_type}.{self.parsed_event_type}\n \
+                {self.timestamp}\n \
+                {self.parsed_message}"
+
+        return message
 
     def __collect_fields(
         self
@@ -1068,6 +1357,79 @@ class DeviceUpdowns:
 
         self.type = self.raw_event.get("type")
         self.raw_event.pop("type", None)
+
+    def __parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
+        Where possible the parsed message is taken from the text field.
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        # Get the device type
+        if self.device_type:
+            self.parsed_device_type = self.device_type
+        else:
+            self.parsed_device_type = "unspecified"
+
+        # Get the event type
+        if self.type:
+            self.parsed_event_type = self.type
+        else:
+            self.parsed_event_type = "unspecified"
+
+        # Need to set a nice message
+        if self.type == "AP_RESTARTED":
+            self.parsed_message = (
+                f"AP {self.ap_name} in {self.site_name} has restarted. "
+                f"Reason: {self.reason}"
+            )
+        else:
+            self.parsed_message = "No message included"
+
+        # Create webhook body
+        self.parsed_body = {
+            "source": "mist",
+            "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
+            "timestamp": self.timestamp,
+            "message": self.parsed_message,
+        }
+
+        # Display alert if the event type is not in the config
+        if self.parsed_event_type not in config:
+            print(
+                Fore.RED,
+                "DEBUG: New type of Device Up/Down Event alert:",
+                self.original_event,
+                Style.RESET_ALL
+            )
+
+        # Debug if there's not enough information
+        if (
+            self.parsed_device_type == "unspecified" or
+            self.parsed_event_type == "unspecified" or
+            self.parsed_message == "No message included"
+        ):
+            print(
+                Fore.RED,
+                "DEBUG: Device Updown event without enough information:\n",
+                f"{self.parsed_device_type}.{self.parsed_event_type}\n",
+                f"Message: {self.parsed_message}\n",
+                Fore.YELLOW,
+                f"Original event: {self.original_event}\n",
+                Style.RESET_ALL
+            )
 
 
 if __name__ == "__main__":

@@ -156,11 +156,10 @@ def webhook():
                     Style.RESET_ALL
                 )
 
-            # Print the alert
-            print(
-                Fore.GREEN,
-                event_manager,
-                Style.RESET_ALL
+            # Send the alert to the logging service
+            requests.post(
+                "http://web-interface:5100/api/webhook",
+                json=event_manager.parsed_body,
             )
 
         # Audits (audit logs)
@@ -188,11 +187,10 @@ def webhook():
                     Style.RESET_ALL
                 )
 
-            # Print the alert
-            print(
-                Fore.GREEN,
-                event_manager,
-                Style.RESET_ALL
+            # Send the alert to the logging service
+            requests.post(
+                "http://web-interface:5100/api/webhook",
+                json=event_manager.parsed_body,
             )
 
         # Device updowns (device status changes)
@@ -220,11 +218,10 @@ def webhook():
                     Style.RESET_ALL
                 )
 
-            # Print the alert
-            print(
-                Fore.GREEN,
-                event_manager,
-                Style.RESET_ALL
+            # Send the alert to the logging service
+            requests.post(
+                "http://web-interface:5100/api/webhook",
+                json=event_manager.parsed_body,
             )
 
         # Unknown topic

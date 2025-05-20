@@ -1,16 +1,16 @@
 nac-events:
   NAC_ACCOUNTING_START:
-    - web: true
+    - web: false
     - sql: false
     - syslog: false
     - teams: false
   NAC_ACCOUNTING_STOP:
-    - web: true
+    - web: false
     - sql: false
     - syslog: false
     - teams: false
   NAC_ACCOUNTING_UPDATE:
-    - web: true
+    - web: false
     - sql: false
     - syslog: false
     - teams: false
@@ -25,6 +25,11 @@ nac-events:
     - syslog: false
     - teams: false
   NAC_CLIENT_PERMIT:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_CLIENT_DENY:
     - web: true
     - sql: false
     - syslog: false
@@ -50,6 +55,11 @@ nac-events:
     - syslog: false
     - teams: false
   NAC_IDP_GROUPS_LOOKUP_SUCCESS:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_IDP_GROUPS_LOOKUP_FAILURE:
     - web: true
     - sql: false
     - syslog: false
@@ -86,6 +96,11 @@ client-events:
     - sql: false
     - syslog: false
     - teams: false
+  client-info:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
   default:
     - web: true
     - sql: false
@@ -93,6 +108,82 @@ client-events:
     - teams: false
 
 device-events:
+  GW_ALARM:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_MISTWA_CONFIGURATION_CLASH:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_CONFIGURED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_CONFIG_GENERATED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_CONFIG_FAILED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_OSPF_NEIGHBOR_DOWN:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_OSPF_NEIGHBOR_UP:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_PORT_UP:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_RECONFIGURED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_REJECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_RESTART_BY_USER:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_VPN_PATH_DOWN:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_VPN_PATH_UP:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_VPN_PEER_DOWN:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  GW_VPN_PEER_UP:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
   SW_DOT1XD_USR_AUTHENTICATED:
     - web: true
     - sql: false
@@ -108,6 +199,11 @@ device-events:
     - sql: false
     - syslog: false
     - teams: false
+  SW_DOT1XD_USR_SESSION_HELD:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
   SW_PORT_DOWN:
     - web: true
     - sql: false
@@ -118,11 +214,225 @@ device-events:
     - sql: false
     - syslog: false
     - teams: false
+  SW_MAC_LIMIT_RESET:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_LACP_RX_STALE:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_ALARM_CHASSIS_PSU:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_ALARM_CHASSIS_PEM:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_ALARM_OPTICS_IFACE_RX_LOW:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_ALARM_OPTICS_IFACE_SFP_LOW:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_BOUNCE_PORT:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_ALARM_CHASSIS_PSU:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_CONFIG_CHANGED_BY_USER:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_CONFIG_FAILED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_CONFIG_GENERATED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_CONFIG_ERROR_ADDTL_COMMAND:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_CONFIGURED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_CONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_DDOS_PROTOCOL_VIOLATION_SET:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_DDOS_PROTOCOL_VIOLATION_CLEAR:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_DISCONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_DYNAMIC_PORT_ASSIGNED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_RADIUS_SERVER_UNRESPONSIVE:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_RECONFIGURED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_RECOVERY_SNAPSHOT_REQUESTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_RECOVERY_SNAPSHOT_SUCCEEDED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_REJECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_RESTART_BY_USER:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_RESTARTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_STP_TOPO_CHANGED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_UPGRADE_BY_USER:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_UPGRADE_FAILED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_UPGRADE_PENDING:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_VC_MASTER_CHANGED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_VC_MEMBER_ADDED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_ZTP_FINISHED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  
+  AP_CONFIG_CHANGED_BY_RRM:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_CONFIG_CHANGED_BY_USER:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_CONFIGURED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_CONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_DISCONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_DISCONNECTED_V1:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_RECONFIGURED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_RESTARTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_RRM_ACTION:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
   CONNECTIVITY_TEST:
     - web: true
     - sql: false
     - syslog: false
     - teams: false
+  
+  update:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
   default:
     - web: true
     - sql: false
@@ -130,6 +440,107 @@ device-events:
     - teams: false
 
 alarms:
+  ap_bad_cable:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  device_down:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  device_reconnected:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  device_restarted:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  infra_arp_failure:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  infra_arp_success:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  infra_dhcp_failure:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  infra_dhcp_success:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  infra_dns_failure:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  infra_dns_success:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  missing_vlan:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  rogue_ap:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  rogue_client:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  switch_down:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  switch_reconnected:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  switch_restarted:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  switch_stp_loop:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  sw_alarm_chassis_psu:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  sw_bad_optics:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  vc_master_changed:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
   default:
     - web: true
     - sql: false
@@ -144,6 +555,38 @@ audits:
     - teams: false
 
 device-updowns:
+  SW_DISCONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_CONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_RESTARTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
+  AP_DISCONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_CONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  AP_RESTARTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+
   default:
     - web: true
     - sql: false
