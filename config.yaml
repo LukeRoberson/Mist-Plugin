@@ -1,32 +1,91 @@
 nac-events:
+  NAC_ACCOUNTING_START:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_ACCOUNTING_STOP:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_ACCOUNTING_UPDATE:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_SESSION_STARTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_SESSION_ENDED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_CLIENT_PERMIT:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_CLIENT_IP_ASSIGNED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_CLIENT_CERT_CHECK_SUCCESS:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_CLIENT_CERT_CHECK_SUCCESS:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_SERVER_CERT_VALIDATION_SUCCESS:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_IDP_GROUPS_LOOKUP_SUCCESS:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_IDP_AUTHC_SUCCESS:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_MDM_LOOKUP_SUCCESS:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  NAC_MDM_DEVICE_NOT_ENROLLED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
   default:
     - web: true
     - sql: false
     - syslog: false
     - teams: false
 
-nac-accounting:
-  default:
+client-events:
+  connect:
     - web: true
     - sql: false
     - syslog: false
     - teams: false
-
-client-sessions:
-  default:
+  disconnect:
     - web: true
     - sql: false
     - syslog: false
     - teams: false
-
-client-join:
-  default:
-    - web: true
-    - sql: false
-    - syslog: false
-    - teams: false
-
-client-info:
   default:
     - web: true
     - sql: false
@@ -34,6 +93,36 @@ client-info:
     - teams: false
 
 device-events:
+  SW_DOT1XD_USR_AUTHENTICATED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_DOT1XD_USR_ON_SRVR_REJECT_VLAN:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_DOT1XD_USR_SESSION_DISCONNECTED:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_PORT_DOWN:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  SW_PORT_UP:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
+  CONNECTIVITY_TEST:
+    - web: true
+    - sql: false
+    - syslog: false
+    - teams: false
   default:
     - web: true
     - sql: false

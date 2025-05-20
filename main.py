@@ -7,8 +7,16 @@ Receives and processes webhooks from the Mist plugin.
 from flask import Flask, request
 from colorama import Fore, Style
 import yaml
+import requests
 
-from parser import NacEvent
+from parser import (
+    NacEvent,
+    ClientEvent,
+    DeviceEvents,
+    Alarms,
+    Audits,
+    DeviceUpdowns
+)
 
 
 app = Flask(__name__)
@@ -24,25 +32,22 @@ def webhook():
     # Parse the incoming webhook request
     data = request.get_json()
 
-    # Debug - print the alert
-    # print(
-    #     Fore.YELLOW,
-    #     "DEBUG: Parsed alert:",
-    #     data,
-    #     Style.RESET_ALL
-    # )
-
-    # Create an object
-    if data.get("topic") == "nac-events":
-        for event in data.get("events"):
+    # Create an object to represent the alert
+    topic = data.get("topic")
+    for event in data.get("events"):
+        # NAC events
+        if (
+            topic == "nac-events" or
+            topic == "nac-accounting"
+        ):
             # Create a NacEvent object
-            nac_event = NacEvent(event)
+            event_manager = NacEvent(event, config_data['nac-events'])
 
             # Print unmanaged fields, if any
-            if nac_event.raw_event:
+            if event_manager.raw_event:
                 print(
                     Fore.CYAN,
-                    "DEBUG: New type of alert:",
+                    "DEBUG: New type of NAC Event alert:",
                 )
                 print(
                     data,
@@ -52,15 +57,184 @@ def webhook():
                 print(
                     Fore.RED,
                     "Unmanaged fields:",
-                    nac_event.raw_event,
+                    event_manager.raw_event,
                     Style.RESET_ALL
                 )
 
-    # Send the alert to the logging service
-    # response = requests.post(
-    #     "http://web-interface:5100/api/webhook",
-    #     json=alert
-    # )
+            # Send the alert to the logging service
+            requests.post(
+                "http://web-interface:5100/api/webhook",
+                json=event_manager.parsed_body,
+            )
+
+        # Client events (wireless, wired)
+        elif (
+            topic == "client-sessions" or
+            topic == "client-join" or
+            topic == "client-info"
+        ):
+            # Create a ClientSessions object
+            event_manager = ClientEvent(event, config_data['client-events'])
+
+            # Print unmanaged fields, if any
+            if event_manager.raw_event:
+                print(
+                    Fore.CYAN,
+                    "DEBUG: New type of Client Session alert:",
+                )
+                print(
+                    data,
+                    Style.RESET_ALL
+                )
+
+                print(
+                    Fore.RED,
+                    "Unmanaged fields:",
+                    event_manager.raw_event,
+                    Style.RESET_ALL
+                )
+
+            # Send the alert to the logging service
+            requests.post(
+                "http://web-interface:5100/api/webhook",
+                json=event_manager.parsed_body,
+            )
+
+        # Device events (switches, APs, etc.)
+        elif (
+            topic == "device-events"
+        ):
+            # Create a DeviceEvents object
+            event_manager = DeviceEvents(event, config_data['device-events'])
+
+            # Print unmanaged fields, if any
+            if event_manager.raw_event:
+                print(
+                    Fore.CYAN,
+                    "DEBUG: New type of Device Event alert:",
+                )
+                print(
+                    data,
+                    Style.RESET_ALL
+                )
+
+                print(
+                    Fore.RED,
+                    "Unmanaged fields:",
+                    event_manager.raw_event,
+                    Style.RESET_ALL
+                )
+
+            # Send the alert to the logging service
+            requests.post(
+                "http://web-interface:5100/api/webhook",
+                json=event_manager.parsed_body,
+            )
+
+        # Alarms (alerts)
+        elif (
+            topic == "alarms"
+        ):
+            # Create an Alarms object
+            event_manager = Alarms(event, config_data['alarms'])
+
+            # Print unmanaged fields, if any
+            if event_manager.raw_event:
+                print(
+                    Fore.CYAN,
+                    "DEBUG: New type of Alarm alert:",
+                )
+                print(
+                    data,
+                    Style.RESET_ALL
+                )
+
+                print(
+                    Fore.RED,
+                    "Unmanaged fields:",
+                    event_manager.raw_event,
+                    Style.RESET_ALL
+                )
+
+            # Print the alert
+            print(
+                Fore.GREEN,
+                event_manager,
+                Style.RESET_ALL
+            )
+
+        # Audits (audit logs)
+        elif (
+            topic == "audits"
+        ):
+            # Create an Audits object
+            event_manager = Audits(event, config_data['audits'])
+
+            # Print unmanaged fields, if any
+            if event_manager.raw_event:
+                print(
+                    Fore.CYAN,
+                    "DEBUG: New type of Audit alert:",
+                )
+                print(
+                    data,
+                    Style.RESET_ALL
+                )
+
+                print(
+                    Fore.RED,
+                    "Unmanaged fields:",
+                    event_manager.raw_event,
+                    Style.RESET_ALL
+                )
+
+            # Print the alert
+            print(
+                Fore.GREEN,
+                event_manager,
+                Style.RESET_ALL
+            )
+
+        # Device updowns (device status changes)
+        elif (
+            topic == "device-updowns"
+        ):
+            # Create a DeviceUpdowns object
+            event_manager = DeviceUpdowns(event, config_data['device-updowns'])
+
+            # Print unmanaged fields, if any
+            if event_manager.raw_event:
+                print(
+                    Fore.CYAN,
+                    "DEBUG: New type of Device Up/Down alert:",
+                )
+                print(
+                    data,
+                    Style.RESET_ALL
+                )
+
+                print(
+                    Fore.RED,
+                    "Unmanaged fields:",
+                    event_manager.raw_event,
+                    Style.RESET_ALL
+                )
+
+            # Print the alert
+            print(
+                Fore.GREEN,
+                event_manager,
+                Style.RESET_ALL
+            )
+
+        # Unknown topic
+        else:
+            print(
+                Fore.RED,
+                f"ERROR: Unknown topic: {topic}",
+                Style.RESET_ALL
+            )
+            continue
 
     return "Received", 200
 
