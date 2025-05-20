@@ -7,7 +7,6 @@ Receives and processes webhooks from the Mist plugin.
 from flask import Flask, request
 from colorama import Fore, Style
 import yaml
-import requests
 
 from parser import (
     NacEvent,
@@ -61,12 +60,6 @@ def webhook():
                     Style.RESET_ALL
                 )
 
-            # Send the alert to the logging service
-            requests.post(
-                "http://web-interface:5100/api/webhook",
-                json=event_manager.parsed_body,
-            )
-
         # Client events (wireless, wired)
         elif (
             topic == "client-sessions" or
@@ -94,12 +87,6 @@ def webhook():
                     Style.RESET_ALL
                 )
 
-            # Send the alert to the logging service
-            requests.post(
-                "http://web-interface:5100/api/webhook",
-                json=event_manager.parsed_body,
-            )
-
         # Device events (switches, APs, etc.)
         elif (
             topic == "device-events"
@@ -124,12 +111,6 @@ def webhook():
                     event_manager.raw_event,
                     Style.RESET_ALL
                 )
-
-            # Send the alert to the logging service
-            requests.post(
-                "http://web-interface:5100/api/webhook",
-                json=event_manager.parsed_body,
-            )
 
         # Alarms (alerts)
         elif (
@@ -156,12 +137,6 @@ def webhook():
                     Style.RESET_ALL
                 )
 
-            # Send the alert to the logging service
-            requests.post(
-                "http://web-interface:5100/api/webhook",
-                json=event_manager.parsed_body,
-            )
-
         # Audits (audit logs)
         elif (
             topic == "audits"
@@ -187,12 +162,6 @@ def webhook():
                     Style.RESET_ALL
                 )
 
-            # Send the alert to the logging service
-            requests.post(
-                "http://web-interface:5100/api/webhook",
-                json=event_manager.parsed_body,
-            )
-
         # Device updowns (device status changes)
         elif (
             topic == "device-updowns"
@@ -217,12 +186,6 @@ def webhook():
                     event_manager.raw_event,
                     Style.RESET_ALL
                 )
-
-            # Send the alert to the logging service
-            requests.post(
-                "http://web-interface:5100/api/webhook",
-                json=event_manager.parsed_body,
-            )
 
         # Unknown topic
         else:

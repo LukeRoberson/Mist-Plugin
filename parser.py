@@ -1,7 +1,14 @@
 """
 Webhook Parser
 
-Classes to represent and parse webhooks from the Mist plugin.
+This module provides classes to represent and parse webhooks from
+    the Mist plugin.
+Each class corresponds to a specific event type
+    (e.g., NAC events, client sessions, device events).
+Subclasses of Events extract relevant fields, parse event data,
+    and perform configured actions.
+
+Classes:
     - NacEvent: Represents a NAC event object.
     - ClientEvent: Represents a client session object.
     - DeviceEvents: Represents a device event object.
@@ -14,9 +21,155 @@ Classes to represent and parse webhooks from the Mist plugin.
 from datetime import datetime
 from colorama import Fore, Style
 import copy
+import requests
 
 
-class NacEvent:
+class Events:
+    """
+    Base class for all event types.
+
+    This class provides the interface and common logic for parsing
+        and handling webhook events.
+    Subclasses should override the _collect_fields and _parse methods
+        to extract and process event-specific data.
+    """
+
+    def __init__(
+        self,
+        event: dict,
+        config: dict,
+    ) -> None:
+        """
+        Initialize the Events object and process the event.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Side Effects:
+            Calls _collect_fields, _parse, and _action in sequence.
+        """
+
+        # Time the webhook was received
+        #   This may be different from the event time
+        self.received = datetime.now()
+
+        # This is the original event data from the webhook
+        #   Events are removed from the raw_event dictionary.
+        #   This is so we can see if there are any fields left over
+        self.raw_event = event
+
+        # Copy the original event for later use
+        self.original_event = copy.deepcopy(event)
+
+        # Remove some fields that are not needed
+        self.raw_event.pop("org_id", None)
+
+        # Collect and store fields from the raw event
+        self._collect_fields()
+
+        # Parse the event data
+        self._parse(config)
+
+        # Perform an action based on the event type
+        self._action(config)
+
+    def __repr__(
+        self
+    ) -> str:
+        """
+        Return a string representation of this object.
+        This will be the parsed message body.
+        """
+
+        message = f"Event:\n \
+                {self.parsed_client_type}.{self.parsed_event_type}\n \
+                {self.timestamp}\n \
+                {self.parsed_message}"
+
+        return message
+
+    def _collect_fields(
+        self
+    ) -> None:
+        """
+        Extract and assign relevant fields from the raw event.
+
+        This method should be overridden by subclasses to extract
+            event-specific fields.
+        from self.raw_event and assign them as attributes. Fields are removed
+            from self.raw_event as they are processed.
+
+        Returns:
+            None
+        """
+        pass
+
+    def _parse(
+        self,
+        config: dict,
+    ) -> None:
+        pass
+
+    def _action(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Perform configured actions for this event.
+
+        Depending on the configuration, this may:
+        - Send an alert to the web interface
+        - Log to an SQL server
+        - Log to a syslog server
+        - Send a message to Teams
+
+        Args:
+            config (dict): Event handling configuration specifying which
+                actions to perform.
+
+        Returns:
+            None
+
+        Side Effects:
+            May send HTTP requests or log to external systems.
+        """
+
+        # Get the actions to perform
+        if self.parsed_event_type in config:
+            actions = config[self.parsed_event_type]
+        else:
+            actions = config["default"]
+
+        # Log to web-interface
+        try:
+            if actions["web"]:
+                requests.post(
+                    "http://web-interface:5100/api/webhook",
+                    json=self.parsed_body,
+                )
+        except requests.RequestException as e:
+            print(
+                Fore.RED,
+                "DEBUG: Failed to send webhook to web interface:",
+                e,
+                Style.RESET_ALL
+            )
+
+        # Log to SQL server
+        if actions["sql"]:
+            pass
+
+        # Message on teams
+        if actions["teams"]:
+            pass
+
+        # Log to syslog server
+        if actions["syslog"]:
+            pass
+
+
+class NacEvent(Events):
     """
     Represents a NacEvent object.
         One single NAC event is logged here.
@@ -40,8 +193,8 @@ class NacEvent:
         __init__(self, event: dict): Initializes the NacEvent object.
         __repr__(self): Returns a string representation of the NacEvent object.
         __collect_fields(self): Collects fields from the raw event.
-            This is a helper function to collect fields from the raw event.
         __parse(self): Parses the raw event data.
+        __action(self, config: dict): Performs an action based on the event.
     """
 
     def __init__(
@@ -49,56 +202,20 @@ class NacEvent:
         event: dict,
         config: dict,
     ) -> None:
-        """
-        Initialize the NacEvent object.
+        super().__init__(event, config)
 
-        Args:
-            event (dict): The event data from the webhook.
-            config (dict): Event handling configuration.
-        """
-
-        # Set up some empty fields
-        #   These will be filled in as the event is processed
-        self.received = datetime.now()
-
-        # The event data from the webhook; Remove entries as they are processed
-        self.raw_event = event
-        self.original_event = copy.deepcopy(event)
-
-        # Remove some fields that are not needed
-        self.raw_event.pop("crc", None)
-        self.raw_event.pop("org_id", None)
-        self.raw_event.pop("tls_states", None)
-        self.raw_event.pop("cert_template", None)
-
-        # Collect and store fields from the raw event
-        self.__collect_fields()
-
-        # Parse the event data
-        self.__parse(config)
-
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Return a string representation of this object.
-        This will be the parsed message body.
-        """
-
-        message = f"NACEvent:\n \
-                {self.parsed_client_type}.{self.parsed_event_type}\n \
-                {self.timestamp}\n \
-                {self.parsed_message}"
-
-        return message
-
-    def __collect_fields(
+    def _collect_fields(
         self
     ) -> None:
         """
         Collect fields from the raw event.
         This is a helper function to collect fields from the raw event.
         """
+
+        # Remove some fields that are not needed
+        self.raw_event.pop("crc", None)
+        self.raw_event.pop("tls_states", None)
+        self.raw_event.pop("cert_template", None)
 
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.raw_event.get("timestamp")
@@ -348,7 +465,7 @@ class NacEvent:
         self.tx_pkts = self.raw_event.get("tx_pkts")
         self.raw_event.pop("tx_pkts", None)
 
-    def __parse(
+    def _parse(
         self,
         config: dict,
     ) -> None:
@@ -495,8 +612,46 @@ class NacEvent:
                 Style.RESET_ALL
             )
 
+    def _action(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Perform an action based on the event type.
+        This includes:
+            - Sending an alert to the web interface
+            - Logging to SQL server
+            - Logging to syslog server
+            - Messaging on teams
+        """
 
-class ClientEvent:
+        # Get the actions to perform
+        if self.parsed_event_type in config:
+            actions = config[self.parsed_event_type]
+        else:
+            actions = config["default"]
+
+        # Log to web-interface
+        if actions["web"]:
+            requests.post(
+                "http://web-interface:5100/api/webhook",
+                json=self.parsed_body,
+            )
+
+        # Log to SQL server
+        if actions["sql"]:
+            pass
+
+        # Message on teams
+        if actions["teams"]:
+            pass
+
+        # Log to syslog server
+        if actions["syslog"]:
+            pass
+
+
+class ClientEvent(Events):
     """
     Represents a Client Session object.
 
@@ -504,57 +659,31 @@ class ClientEvent:
         __init__(self, event: dict): Initializes the ClientSessions object.
         __repr__(self): Returns a string representation of the object.
         __collect_fields(self): Collects fields from the raw event.
-            This is a helper function to collect fields from the raw event.
         __parse(self): Parses the raw event data.
+        __action(self, config: dict): Performs an action based on the event.
     """
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
-        """
-        Initialize the ClientSessions object.
+        super().__init__(event, config)
 
-        Args:
-            event (dict): The event data from the webhook.
-            config (dict): Event handling configuration.
-        """
-
-        # The event data from the webhook; Remove entries as they are processed
-        self.raw_event = event
-        self.original_event = copy.deepcopy(event)
-
-        # Remove some fields that are not needed
-        self.raw_event.pop("org_id", None)
-
-        # Collect and store fields from the raw event
-        self.__collect_fields()
-
-        # Parse the event data
-        self.__parse(config)
-
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Return a string representation of this object.
-        This will be the parsed message body.
-        """
-
-        message = f"Client Event:\n \
-                {self.parsed_client_type}.{self.parsed_event_type}\n \
-                {self.timestamp}\n \
-                {self.parsed_message}"
-
-        return message
-
-    def __collect_fields(
+    def _collect_fields(
         self
     ) -> None:
         """
         Collect fields from the raw event.
         This is a helper function to collect fields from the raw event.
         """
+
+        # Get the timestamp (epoch) that the event occurred
+        self.timestamp = self.raw_event.get("timestamp")
+        self.raw_event.pop("timestamp", None)
+
+        # If no timestamp is provided, use the current time
+        if not self.timestamp:
+            self.timestamp = datetime.now()
 
         # Event Fields
         self.ap = self.raw_event.get("ap")
@@ -620,11 +749,6 @@ class ClientEvent:
         self.termination_reason = self.raw_event.get("termination_reason")
         self.raw_event.pop("termination_reason", None)
 
-        self.timestamp = self.raw_event.get("timestamp")
-        self.raw_event.pop("timestamp", None)
-        if not self.timestamp:
-            self.timestame = datetime.now()
-
         self.version = self.raw_event.get("version")
         self.raw_event.pop("version", None)
 
@@ -643,7 +767,7 @@ class ClientEvent:
         self.ip = self.raw_event.get("ip")
         self.raw_event.pop("ip", None)
 
-    def __parse(
+    def _parse(
         self,
         config: dict,
     ) -> None:
@@ -663,7 +787,7 @@ class ClientEvent:
         # Get the Event
         if self.connect and self.disconnect:
             self.parsed_event_type = "disconnect"
-        if self.connect:
+        elif self.connect:
             self.parsed_event_type = "connect"
         else:
             self.parsed_event_type = "client-info"
@@ -721,7 +845,7 @@ class ClientEvent:
             )
 
 
-class DeviceEvents:
+class DeviceEvents(Events):
     """
     Represents a Device Event object.
 
@@ -729,51 +853,17 @@ class DeviceEvents:
         __init__(self, event: dict): Initializes the DeviceEvents object.
         __repr__(self): Returns a string representation of the object.
         __collect_fields(self): Collects fields from the raw event.
-            This is a helper function to collect fields from the raw event.
         __parse(self): Parses the raw event data.
+        __action(self, config: dict): Performs an action based on the event.
     """
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
-        """
-        Initialize the DeviceEvents object.
+        super().__init__(event, config)
 
-        Args:
-            event (dict): The event data from the webhook.
-            config (dict): Event handling configuration.
-        """
-
-        # The event data from the webhook; Remove entries as they are processed
-        self.raw_event = event
-        self.original_event = copy.deepcopy(event)
-
-        # Collect and store fields from the raw event
-        self.__collect_fields()
-
-        # Remove some fields that are not needed
-        self.raw_event.pop("org_id", None)
-
-        # Parse the event data
-        self.__parse(config)
-
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Return a string representation of this object.
-        This will be the parsed message body.
-        """
-
-        message = f"DeviceEvent:\n \
-                {self.parsed_device_type}.{self.parsed_event_type}\n \
-                {self.timestamp}\n \
-                {self.parsed_message}"
-
-        return message
-
-    def __collect_fields(
+    def _collect_fields(
         self
     ) -> None:
         """
@@ -818,7 +908,13 @@ class DeviceEvents:
         self.ap_name = self.raw_event.get("ap_name")
         self.raw_event.pop("ap_name", None)
 
-    def __parse(
+        self.ev_type = self.raw_event.get("ev_type")
+        self.raw_event.pop("ev_type", None)
+
+        self.reason = self.raw_event.get("reason")
+        self.raw_event.pop("reason", None)
+
+    def _parse(
         self,
         config: dict,
     ) -> None:
@@ -889,7 +985,7 @@ class DeviceEvents:
             )
 
 
-class Alarms:
+class Alarms(Events):
     """
     Represents an Alarm object.
 
@@ -897,51 +993,17 @@ class Alarms:
         __init__(self, event: dict): Initializes the Alarms object.
         __repr__(self): Returns a string representation of the Alarms object.
         __collect_fields(self): Collects fields from the raw event.
-            This is a helper function to collect fields from the raw event.
         __parse(self): Parses the raw event data.
+        __action(self, config: dict): Performs an action based on the event.
     """
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
-        """
-        Initialize the Alarms object.
+        super().__init__(event, config)
 
-        Args:
-            event (dict): The event data from the webhook.
-            config (dict): Event handling configuration.
-        """
-
-        # The event data from the webhook; Remove entries as they are processed
-        self.raw_event = event
-        self.original_event = copy.deepcopy(event)
-
-        # Remove some fields that are not needed
-        self.raw_event.pop("org_id", None)
-
-        # Collect and store fields from the raw event
-        self.__collect_fields()
-
-        # Parse the event data
-        self.__parse(config)
-
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Return a string representation of this object.
-        This will be the parsed message body.
-        """
-
-        message = f"Alarm Event:\n \
-                {self.parsed_device_type}.{self.parsed_event_type}\n \
-                {self.timestamp}\n \
-                {self.parsed_message}"
-
-        return message
-
-    def __collect_fields(
+    def _collect_fields(
         self
     ) -> None:
         """
@@ -1028,7 +1090,7 @@ class Alarms:
         self.wlan_ids = self.raw_event.get("wlan_ids")
         self.raw_event.pop("wlan_ids", None)
 
-    def __parse(
+    def _parse(
         self,
         config: dict,
     ) -> None:
@@ -1050,7 +1112,7 @@ class Alarms:
         # Get the device type
         if hasattr(self, 'port_ids'):
             self.parsed_device_type = "switch"
-        if hasattr(self, 'aps'):
+        elif hasattr(self, 'aps'):
             self.parsed_device_type = "ap"
         else:
             self.parsed_device_type = "unspecified"
@@ -1075,6 +1137,10 @@ class Alarms:
             self.parsed_message = (
                 f"DHCP failure on VLAN {self.vlans} at {self.site_name} "
                 f"on SSID {self.ssids}"
+            )
+        elif self.type == "infra_arp_success":
+            self.parsed_message = (
+                f"ARP success on VLAN {self.vlans} at {self.site_name}"
             )
         else:
             self.parsed_message = "No message included"
@@ -1113,7 +1179,7 @@ class Alarms:
             )
 
 
-class Audits:
+class Audits(Events):
     """
     Represents an Audit object.
 
@@ -1121,51 +1187,17 @@ class Audits:
         __init__(self, event: dict): Initializes the Audits object.
         __repr__(self): Returns a string representation of the Audits object.
         __collect_fields(self): Collects fields from the raw event.
-            This is a helper function to collect fields from the raw event.
         __parse(self): Parses the raw event data.
+        __action(self, config: dict): Performs an action based on the event.
     """
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
-        """
-        Initialize the Audits object.
+        super().__init__(event, config)
 
-        Args:
-            event (dict): The event data from the webhook.
-            config (dict): Event handling configuration.
-        """
-
-        # The event data from the webhook; Remove entries as they are processed
-        self.raw_event = event
-        self.original_event = copy.deepcopy(event)
-
-        # Remove some fields that are not needed
-        self.raw_event.pop("org_id", None)
-
-        # Collect and store fields from the raw event
-        self.__collect_fields()
-
-        # Parse the event data
-        self.__parse(config)
-
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Return a string representation of this object.
-        This will be the parsed message body.
-        """
-
-        message = f"Audit Event:\n \
-                {self.parsed_device_type}.{self.parsed_event_type}\n \
-                {self.timestamp}\n \
-                {self.parsed_message}"
-
-        return message
-
-    def __collect_fields(
+    def _collect_fields(
         self
     ) -> None:
         """
@@ -1201,7 +1233,13 @@ class Audits:
         self.webhook_id = self.raw_event.get("webhook_id")
         self.raw_event.pop("webhook_id", None)
 
-    def __parse(
+        self.site_id = self.raw_event.get("site_id")
+        self.raw_event.pop("site_id", None)
+
+        self.site_name = self.raw_event.get("site_name")
+        self.raw_event.pop("site_name", None)
+
+    def _parse(
         self,
         config: dict,
     ) -> None:
@@ -1216,6 +1254,8 @@ class Audits:
         # Get the Event
         if self.before and self.after:
             self.parsed_event_type = "update"
+        elif "Invoked Webshell" in self.message:
+            self.parsed_event_type = "webshell"
         else:
             self.parsed_event_type = "unspecified"
 
@@ -1224,6 +1264,11 @@ class Audits:
             self.parsed_message = (
                 f"{self.admin_name}: {self.message}\nfrom {self.before} "
                 f"to {self.after}"
+            )
+        elif self.parsed_event_type == "webshell":
+            self.parsed_message = (
+                f"{self.admin_name} {self.message} "
+                f"from {self.src_ip} at {self.site_name}"
             )
         else:
             self.parsed_message = "No message included"
@@ -1261,7 +1306,7 @@ class Audits:
             )
 
 
-class DeviceUpdowns:
+class DeviceUpdowns(Events):
     """
     Represents a Device Up or Down object.
 
@@ -1269,51 +1314,17 @@ class DeviceUpdowns:
         __init__(self, event: dict): Initializes the DeviceUpdowns object.
         __repr__(self): Returns a string representation of the object.
         __collect_fields(self): Collects fields from the raw event.
-            This is a helper function to collect fields from the raw event.
         __parse(self): Parses the raw event data.
+        __action(self, config: dict): Performs an action based on the event.
     """
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
-        """
-        Initialize the DeviceUpdowns object.
+        super().__init__(event, config)
 
-        Args:
-            event (dict): The event data from the webhook.
-            config (dict): Event handling configuration.
-        """
-
-        # The event data from the webhook; Remove entries as they are processed
-        self.raw_event = event
-        self.original_event = copy.deepcopy(event)
-
-        # Remove some fields that are not needed
-        self.raw_event.pop("org_id", None)
-
-        # Collect and store fields from the raw event
-        self.__collect_fields()
-
-        # Parse the event data
-        self.__parse(config)
-
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Return a string representation of this object.
-        This will be the parsed message body.
-        """
-
-        message = f"DeviceEvent:\n \
-                {self.parsed_device_type}.{self.parsed_event_type}\n \
-                {self.timestamp}\n \
-                {self.parsed_message}"
-
-        return message
-
-    def __collect_fields(
+    def _collect_fields(
         self
     ) -> None:
         """
@@ -1358,7 +1369,7 @@ class DeviceUpdowns:
         self.type = self.raw_event.get("type")
         self.raw_event.pop("type", None)
 
-    def __parse(
+    def _parse(
         self,
         config: dict,
     ) -> None:
