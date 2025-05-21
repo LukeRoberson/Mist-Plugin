@@ -33,7 +33,15 @@ def webhook():
 
     # Create an object to represent the alert
     topic = data.get("topic")
-    for event in data.get("events"):
+    event_list = data.get("events")
+    if len(event_list) > 1:
+        print(
+            Fore.GREEN,
+            f"DEBUG: More than one event for {topic}",
+            Style.RESET_ALL
+        )
+
+    for event in event_list:
         # NAC events
         if (
             topic == "nac-events" or

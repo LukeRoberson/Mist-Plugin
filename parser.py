@@ -1196,6 +1196,9 @@ class Alarms(Events):
         self.message = self.raw_event.get("message")
         self.raw_event.pop("message", None)
 
+        self.admin_name = self.raw_event.get("admin_name")
+        self.raw_event.pop("admin_name", None)
+
     def _parse(
         self,
         config: dict,
@@ -1219,13 +1222,15 @@ class Alarms(Events):
         """
 
         # Get the category
-        if hasattr(self, 'aps'):
-            self.parsed_device_type = "wireless"
-        elif hasattr(self, 'port_ids'):
+        if 'switch' in self.type:
             self.parsed_device_type = "switch"
-        elif hasattr(self, 'category'):
+        elif self.aps:
+            self.parsed_device_type = "wireless"
+        elif self.port_ids:
+            self.parsed_device_type = "switch"
+        elif self.category:
             self.parsed_device_type = self.category
-        elif hasattr(self, 'admin_name'):
+        elif self.admin_name:
             self.parsed_device_type = "admin-action"
         else:
             self.parsed_device_type = "unspecified"
@@ -1233,8 +1238,8 @@ class Alarms(Events):
         # Get the Event
         if self.type:
             self.parsed_event_type = self.type
-        elif self.root_cause:
-            self.parsed_event_type = self.root_cause
+        elif self.group == "marvis":
+            self.parsed_event_type = "marvis"
         elif "restarted" in self.message:
             self.parsed_device_type = "restart"
         else:
@@ -1265,19 +1270,32 @@ class Alarms(Events):
                 f"on VLAN {self.vlans}. "
                 f"Affecting {self.client_count} clients."
             )
-        elif (
-            self.parsed_event_type == "connectivity" and
-            "wlan" in self.root_cause
-        ):
-            self.parsed_message = (
-                f"There has been a WLAN connectivity issue on "
-                f"{self.impacted_entities[0].get('ui_display_field')}. "
-                f"Action: {self.details['action']}. "
-                f"Status: {self.details['status']}."
-            )
-        elif "manually restarted" in self.message:
+        elif self.message and "manually restarted" in self.message:
             self.parsed_message = (
                 f"{self.message} by {self.admin_name} at {self.site_name}"
+            )
+        elif (
+            self.parsed_event_type == "device_down" or
+            self.parsed_event_type == "switch_down"
+        ):
+            self.parsed_message = (
+                f"Device {self.hostname} at {self.site_name} "
+                f"has gone down"
+            )
+        elif (
+            self.parsed_event_type == "device_reconnected" or
+            self.parsed_event_type == "switch_reconnected"
+        ):
+            self.parsed_message = (
+                f"Device {self.hostname} at {self.site_name} "
+                f"has reconnected"
+            )
+        elif self.parsed_event_type == "marvis":
+            self.parsed_message = (
+                f"Marvis has detected an issue with {self.category}. "
+                f"{self.impacted_client_count} clients affected "
+                f"on {self.impacted_entities['entity_name']} "
+                f"at {self.site_name}"
             )
         else:
             self.parsed_message = "No message included"
@@ -1397,6 +1415,8 @@ class Audits(Events):
             self.parsed_event_type = "mist-login"
         elif "Accessed Org" in self.message:
             self.parsed_event_type = "accessed-org"
+        elif "manually restarted" in self.message:
+            self.parsed_event_type = "restart"
         else:
             self.parsed_event_type = "unspecified"
 
@@ -1418,6 +1438,11 @@ class Audits(Events):
             self.parsed_message = (
                 f"{self.admin_name}: {self.message} "
                 f"from {self.src_ip}"
+            )
+        elif self.parsed_event_type == "restart":
+            self.parsed_message = (
+                f"{self.admin_name} has restarted the device "
+                f"from {self.src_ip} at {self.site_name}"
             )
         else:
             self.parsed_message = "No message included"
@@ -1518,6 +1543,12 @@ class DeviceUpdowns(Events):
         self.type = self.raw_event.get("type")
         self.raw_event.pop("type", None)
 
+        self.ext_ip = self.raw_event.get("ext_ip")
+        self.raw_event.pop("ext_ip", None)
+
+        self.model = self.raw_event.get("model")
+        self.raw_event.pop("model", None)
+
     def _parse(
         self,
         config: dict,
@@ -1550,10 +1581,18 @@ class DeviceUpdowns(Events):
             self.parsed_event_type = "unspecified"
 
         # Need to set a nice message
-        if self.type == "AP_RESTARTED":
+        if self.type == "AP_RESTARTED" or self.type == "SW_RESTARTED":
             self.parsed_message = (
-                f"AP {self.ap_name} in {self.site_name} has restarted. "
+                f"{self.device_name} in {self.site_name} has restarted. "
                 f"Reason: {self.reason}"
+            )
+        if self.type == "AP_DISCONNECTED" or self.type == "SW_DISCONNECTED":
+            self.parsed_message = (
+                f"{self.device_name} in {self.site_name} has disconnected."
+            )
+        if self.type == "AP_CONNECTED" or self.type == "SW_CONNECTED":
+            self.parsed_message = (
+                f"{self.device_name} in {self.site_name} has connected."
             )
         else:
             self.parsed_message = "No message included"

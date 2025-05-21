@@ -647,6 +647,11 @@ audits:
     sql: false
     syslog: false
     teams: false
+  restart:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
   default:
     web: true
     sql: false
