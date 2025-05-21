@@ -55,6 +55,11 @@ nac-events:
     sql: false
     syslog: false
     teams: false
+  NAC_CLIENT_CERT_CHECK_FAILURE:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
   NAC_SERVER_CERT_VALIDATION_SUCCESS:
     web: false
     sql: false
@@ -605,6 +610,11 @@ alarms:
     syslog: false
     teams: false
   connectivity:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  admin-action:
     web: true
     sql: false
     syslog: false

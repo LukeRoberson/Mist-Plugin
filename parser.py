@@ -986,6 +986,11 @@ class DeviceEvents(Events):
                 f"{self.ap_name} at {self.site_name} has restarted "
                 f"({self.reason})"
             )
+        elif self.type == 'AP_RESTART_BY_USER':
+            self.parsed_message = (
+                f"{self.ap_name} at {self.site_name} has been restarted "
+                f"by an administrator"
+            )
         elif self.type == 'AP_CONNECTED':
             self.parsed_message = (
                 f"{self.ap_name} at {self.site_name} has connected "
@@ -1188,6 +1193,9 @@ class Alarms(Events):
         self.hostname = self.raw_event.get("hostname")
         self.raw_event.pop("hostname", None)
 
+        self.message = self.raw_event.get("message")
+        self.raw_event.pop("message", None)
+
     def _parse(
         self,
         config: dict,
@@ -1217,6 +1225,8 @@ class Alarms(Events):
             self.parsed_device_type = "switch"
         elif hasattr(self, 'category'):
             self.parsed_device_type = self.category
+        elif hasattr(self, 'admin_name'):
+            self.parsed_device_type = "admin-action"
         else:
             self.parsed_device_type = "unspecified"
 
@@ -1225,6 +1235,8 @@ class Alarms(Events):
             self.parsed_event_type = self.type
         elif self.root_cause:
             self.parsed_event_type = self.root_cause
+        elif "restarted" in self.message:
+            self.parsed_device_type = "restart"
         else:
             self.parsed_event_type = "unspecified"
 
@@ -1262,6 +1274,10 @@ class Alarms(Events):
                 f"{self.impacted_entities[0].get('ui_display_field')}. "
                 f"Action: {self.details['action']}. "
                 f"Status: {self.details['status']}."
+            )
+        elif "manually restarted" in self.message:
+            self.parsed_message = (
+                f"{self.message} by {self.admin_name} at {self.site_name}"
             )
         else:
             self.parsed_message = "No message included"
