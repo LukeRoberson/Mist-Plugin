@@ -1211,10 +1211,10 @@ class Alarms(Events):
         """
 
         # Get the category
-        if hasattr(self, 'port_ids'):
-            self.parsed_device_type = "switch"
-        elif hasattr(self, 'aps'):
+        if hasattr(self, 'aps'):
             self.parsed_device_type = "wireless"
+        elif hasattr(self, 'port_ids'):
+            self.parsed_device_type = "switch"
         elif hasattr(self, 'category'):
             self.parsed_device_type = self.category
         else:
@@ -1246,6 +1246,12 @@ class Alarms(Events):
         elif self.type == "infra_arp_success":
             self.parsed_message = (
                 f"ARP success on VLAN {self.vlans} at {self.site_name}"
+            )
+        elif self.type == "infra_dns_failure":
+            self.parsed_message = (
+                f"DNS failure on SSID {self.ssids} at {self.site_name} "
+                f"on VLAN {self.vlans}. "
+                f"Affecting {self.client_count} clients."
             )
         elif (
             self.parsed_event_type == "connectivity" and
