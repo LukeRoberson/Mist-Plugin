@@ -1222,16 +1222,24 @@ class Alarms(Events):
         """
 
         # Get the category
-        if 'switch' in self.type:
+        if (
+            ('switch' in self.type) or
+            (self.type and self.type.startswith('sw_')) or
+            (self.port_ids) or
+            (self.port_id)
+        ):
             self.parsed_device_type = "switch"
-        elif self.aps:
+        elif (
+            self.type and self.type.startswith('ap_') or
+            self.aps
+        ):
             self.parsed_device_type = "wireless"
-        elif self.port_ids:
-            self.parsed_device_type = "switch"
         elif self.category:
             self.parsed_device_type = self.category
         elif self.admin_name:
             self.parsed_device_type = "admin-action"
+        elif self.severity == "info":
+            self.parsed_device_type = "info"
         else:
             self.parsed_device_type = "unspecified"
 
@@ -1263,6 +1271,10 @@ class Alarms(Events):
         elif self.type == "infra_arp_success":
             self.parsed_message = (
                 f"ARP success on VLAN {self.vlans} at {self.site_name}"
+            )
+        elif self.type == "infra_arp_failure":
+            self.parsed_message = (
+                f"ARP failure on VLAN {self.vlans} at {self.site_name}"
             )
         elif self.type == "infra_dns_failure":
             self.parsed_message = (
@@ -1408,7 +1420,7 @@ class Audits(Events):
 
         # Get the Event
         if self.before and self.after:
-            self.parsed_event_type = "update"
+            self.parsed_event_type = "configuration"
         elif "Invoked Webshell" in self.message:
             self.parsed_event_type = "webshell"
         elif "Login with Role" in self.message:
@@ -1417,11 +1429,13 @@ class Audits(Events):
             self.parsed_event_type = "accessed-org"
         elif "manually restarted" in self.message:
             self.parsed_event_type = "restart"
+        elif "firmware upgrade" in self.message:
+            self.parsed_event_type = "firmware"
         else:
             self.parsed_event_type = "unspecified"
 
         # Set a message
-        if self.parsed_event_type == "update":
+        if self.parsed_event_type == "configuration":
             self.parsed_message = (
                 f"{self.admin_name}: {self.message}\nfrom {self.before} "
                 f"to {self.after}"
@@ -1443,6 +1457,15 @@ class Audits(Events):
             self.parsed_message = (
                 f"{self.admin_name} has restarted the device "
                 f"from {self.src_ip} at {self.site_name}"
+            )
+        elif (
+            self.parsed_event_type == "firmware" and
+            "scheduled" in self.message
+        ):
+            self.parsed_message = (
+                f"{self.admin_name} has scheduled a firmware upgrade "
+                f"from {self.src_ip} at {self.site_name}:\n"
+                f"{self.message}"
             )
         else:
             self.parsed_message = "No message included"
@@ -1581,16 +1604,25 @@ class DeviceUpdowns(Events):
             self.parsed_event_type = "unspecified"
 
         # Need to set a nice message
-        if self.type == "AP_RESTARTED" or self.type == "SW_RESTARTED":
+        if (
+            self.type == "AP_RESTARTED" or
+            self.type == "SW_RESTARTED"
+        ):
             self.parsed_message = (
                 f"{self.device_name} in {self.site_name} has restarted. "
                 f"Reason: {self.reason}"
             )
-        if self.type == "AP_DISCONNECTED" or self.type == "SW_DISCONNECTED":
+        elif (
+            self.type == "AP_DISCONNECTED" or
+            self.type == "SW_DISCONNECTED"
+        ):
             self.parsed_message = (
                 f"{self.device_name} in {self.site_name} has disconnected."
             )
-        if self.type == "AP_CONNECTED" or self.type == "SW_CONNECTED":
+        elif (
+            self.type == "AP_CONNECTED" or
+            self.type == "SW_CONNECTED"
+        ):
             self.parsed_message = (
                 f"{self.device_name} in {self.site_name} has connected."
             )
