@@ -619,6 +619,16 @@ alarms:
     sql: false
     syslog: false
     teams: false
+  firmware:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  configuration:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
 
   default:
     web: true
