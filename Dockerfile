@@ -1,6 +1,7 @@
 # Use the official Python image from the Docker Hub
 FROM python:3.12.10-alpine
-LABEL maintainer="Luke Robertson <lrobertson@lakemac.nsw.gov.au>"
+LABEL description="A Mist plugin for the AI assistant. Receives webhooks from Mist, then filters, parses, and logs them."
+LABEL version="1.0.0"
 
 # Create non-root user with no password
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
