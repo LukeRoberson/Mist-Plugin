@@ -56,8 +56,8 @@ def webhook():
 
             # Print unmanaged fields, if any
             if event_manager.raw_event:
-                logging.debug("New type of NAC event alert:", data)
-                logging.debug("Unmanaged fields:", event_manager.raw_event)
+                logging.info("New type of NAC event alert: %s", data)
+                logging.info("Unmanaged fields: %s", event_manager.raw_event)
 
         # Client events (wireless, wired)
         elif (
@@ -70,8 +70,8 @@ def webhook():
 
             # Print unmanaged fields, if any
             if event_manager.raw_event:
-                logging.debug("New type of Client Session alert:", data)
-                logging.debug("Unmanaged fields:", event_manager.raw_event)
+                logging.info("New type of Client Session alert: %s", data)
+                logging.info("Unmanaged fields: %s", event_manager.raw_event)
 
         # Device events (switches, APs, etc.)
         elif (
@@ -82,8 +82,8 @@ def webhook():
 
             # Print unmanaged fields, if any
             if event_manager.raw_event:
-                logging.debug("New type of Device alert:", data)
-                logging.debug("Unmanaged fields:", event_manager.raw_event)
+                logging.info("New type of Device alert: %s", data)
+                logging.info("Unmanaged fields: %s", event_manager.raw_event)
 
         # Alarms (alerts)
         elif (
@@ -94,8 +94,8 @@ def webhook():
 
             # Print unmanaged fields, if any
             if event_manager.raw_event:
-                logging.debug("New type of Alarm alert:", data)
-                logging.debug("Unmanaged fields:", event_manager.raw_event)
+                logging.info("New type of Alarm alert: %s", data)
+                logging.info("Unmanaged fields: %s", event_manager.raw_event)
 
         # Audits (audit logs)
         elif (
@@ -106,8 +106,8 @@ def webhook():
 
             # Print unmanaged fields, if any
             if event_manager.raw_event:
-                logging.debug("New type of Audit alert:", data)
-                logging.debug("Unmanaged fields:", event_manager.raw_event)
+                logging.info("New type of Audit alert: %s", data)
+                logging.info("Unmanaged fields: %s", event_manager.raw_event)
 
         # Device updowns (device status changes)
         elif (
@@ -118,8 +118,8 @@ def webhook():
 
             # Print unmanaged fields, if any
             if event_manager.raw_event:
-                logging.debug("New type of Device Up/Down alert:", data)
-                logging.debug("Unmanaged fields:", event_manager.raw_event)
+                logging.info("New type of Device Up/Down alert: %s", data)
+                logging.info("Unmanaged fields: %s", event_manager.raw_event)
 
         # Unknown topic
         else:

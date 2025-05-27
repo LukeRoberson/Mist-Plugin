@@ -525,6 +525,11 @@ class NacEvent(Events):
                 self.parsed_message = (
                     f"Client session ended for {self.username}"
                 )
+            elif self.type == "NAC_CLIENT_DENY":
+                self.parsed_message = (
+                    f"Client deny for {self.username}. "
+                    f"{self.text}"
+                )
 
             # Certificate events
             elif self.type == "NAC_CLIENT_CERT_CHECK_SUCCESS":
@@ -590,7 +595,10 @@ class NacEvent(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            logging.debug("New type of NAC Event alert:", self.original_event)
+            logging.info(
+                "New type of NAC Event alert: %s",
+                self.original_event
+            )
 
         # Debug if there's not enough information
         if (
@@ -777,8 +785,8 @@ class ClientEvent(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            logging.debug(
-                "New type of Client Event alert:",
+            logging.info(
+                "New type of Client Event alert: %s",
                 self.original_event
             )
 
@@ -976,8 +984,8 @@ class DeviceEvents(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            logging.debug(
-                "New type of Device Event alert:",
+            logging.info(
+                "New type of Device Event alert: %s",
                 self.original_event
             )
 
@@ -1279,8 +1287,8 @@ class Alarms(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            logging.debug(
-                "New type of Alarm Event alert:",
+            logging.info(
+                "New type of Alarm Event alert: %s",
                 self.original_event
             )
 
@@ -1437,7 +1445,10 @@ class Audits(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            logging.debug("New type of Audit alert:", self.original_event)
+            logging.info(
+                "New type of Audit alert: %s",
+                self.original_event
+            )
 
         # Debug if there's not enough information
         if (
@@ -1590,8 +1601,8 @@ class DeviceUpdowns(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            logging.debug(
-                "New type of Device Up/Down Event alert:",
+            logging.info(
+                "New type of Device Up/Down Event alert: %s",
                 self.original_event
             )
 
