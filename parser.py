@@ -1244,7 +1244,9 @@ class Alarms(Events):
             self.parsed_device_type = "unspecified"
 
         # Get the Event
-        if self.type:
+        if self.group == "marvis" and self.type:
+            self.parsed_event_type = f"marvis-{self.type}"
+        elif self.type:
             self.parsed_event_type = self.type
         elif self.group == "marvis":
             self.parsed_event_type = "marvis"
@@ -1282,6 +1284,11 @@ class Alarms(Events):
                 f"on VLAN {self.vlans}. "
                 f"Affecting {self.client_count} clients."
             )
+        elif self.type == "infra_dns_success":
+            self.parsed_message = (
+                f"DNS success at {self.site_name} "
+                f"on VLAN {self.vlans}"
+            )
         elif self.message and "manually restarted" in self.message:
             self.parsed_message = (
                 f"{self.message} by {self.admin_name} at {self.site_name}"
@@ -1302,7 +1309,7 @@ class Alarms(Events):
                 f"Device {self.hostname} at {self.site_name} "
                 f"has reconnected"
             )
-        elif self.parsed_event_type == "marvis":
+        elif "marvis" in self.parsed_event_type:
             self.parsed_message = (
                 f"Marvis has detected an issue with {self.category}. "
                 f"{self.impacted_client_count} clients affected "
@@ -1405,6 +1412,9 @@ class Audits(Events):
 
         self.site_name = self.raw_event.get("site_name")
         self.raw_event.pop("site_name", None)
+
+        self.device_id = self.raw_event.get("device_id")
+        self.raw_event.pop("device_id", None)
 
     def _parse(
         self,
