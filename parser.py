@@ -141,13 +141,29 @@ class Events:
         else:
             actions = config["default"]
 
-        # Log to web-interface
+        # Convert this to a list of actions, add to the parsed body
+        action_list = []
+        action_list = [
+            k for k in ("web", "teams", "syslog", "sql") if actions.get(k)
+        ]
+        self.parsed_body["destination"] = action_list
+
+        # If no actions are specified, do nothing
+        if not action_list:
+            print(
+                Fore.YELLOW,
+                "DEBUG: No actions specified for this event type",
+                Style.RESET_ALL
+            )
+            return
+
+        # Log to logging service
         try:
-            if actions["web"]:
-                requests.post(
-                    "http://web-interface:5100/api/webhook",
-                    json=self.parsed_body,
-                )
+            requests.post(
+                "http://logging:5100/api/log",
+                json=self.parsed_body,
+            )
+
         except requests.RequestException as e:
             print(
                 Fore.RED,
@@ -155,18 +171,6 @@ class Events:
                 e,
                 Style.RESET_ALL
             )
-
-        # Log to SQL server
-        if actions["sql"]:
-            pass
-
-        # Message on teams
-        if actions["teams"]:
-            pass
-
-        # Log to syslog server
-        if actions["syslog"]:
-            pass
 
 
 class NacEvent(Events):
@@ -583,9 +587,11 @@ class NacEvent(Events):
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
-            "type": f"{self.parsed_client_type}.{self.parsed_event_type}",
-            "timestamp": self.timestamp,
-            "message": self.parsed_message,
+            "log": {
+                "type": f"{self.parsed_client_type}.{self.parsed_event_type}",
+                "timestamp": self.timestamp,
+                "message": self.parsed_message,
+            }
         }
 
         # Display alert if the event type is not in the config
@@ -611,44 +617,6 @@ class NacEvent(Events):
                 f"Original event: {self.original_event}\n",
                 Style.RESET_ALL
             )
-
-    def _action(
-        self,
-        config: dict,
-    ) -> None:
-        """
-        Perform an action based on the event type.
-        This includes:
-            - Sending an alert to the web interface
-            - Logging to SQL server
-            - Logging to syslog server
-            - Messaging on teams
-        """
-
-        # Get the actions to perform
-        if self.parsed_event_type in config:
-            actions = config[self.parsed_event_type]
-        else:
-            actions = config["default"]
-
-        # Log to web-interface
-        if actions["web"]:
-            requests.post(
-                "http://web-interface:5100/api/webhook",
-                json=self.parsed_body,
-            )
-
-        # Log to SQL server
-        if actions["sql"]:
-            pass
-
-        # Message on teams
-        if actions["teams"]:
-            pass
-
-        # Log to syslog server
-        if actions["syslog"]:
-            pass
 
 
 class ClientEvent(Events):
@@ -814,9 +782,11 @@ class ClientEvent(Events):
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
-            "type": f"{self.parsed_client_type}.{self.parsed_event_type}",
-            "timestamp": self.timestamp,
-            "message": self.parsed_message,
+            "log": {
+                "type": f"{self.parsed_client_type}.{self.parsed_event_type}",
+                "timestamp": self.timestamp,
+                "message": self.parsed_message,
+            }
         }
 
         # Display alert if the event type is not in the config
@@ -1016,9 +986,11 @@ class DeviceEvents(Events):
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
-            "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
-            "timestamp": self.timestamp,
-            "message": self.parsed_message,
+            "log": {
+                "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
+                "timestamp": self.timestamp,
+                "message": self.parsed_message,
+            }
         }
 
         # Display alert if the event type is not in the config
@@ -1322,9 +1294,11 @@ class Alarms(Events):
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
-            "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
-            "timestamp": self.timestamp,
-            "message": self.parsed_message,
+            "log": {
+                "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
+                "timestamp": self.timestamp,
+                "message": self.parsed_message
+            }
         }
 
         # Display alert if the event type is not in the config
@@ -1483,9 +1457,11 @@ class Audits(Events):
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
-            "type": f"admin.{self.parsed_event_type}",
-            "timestamp": self.timestamp,
-            "message": self.parsed_message,
+            "log": {
+                "type": f"admin.{self.parsed_event_type}",
+                "timestamp": self.timestamp,
+                "message": self.parsed_message
+            }
         }
 
         # Display alert if the event type is not in the config
@@ -1642,9 +1618,11 @@ class DeviceUpdowns(Events):
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
-            "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
-            "timestamp": self.timestamp,
-            "message": self.parsed_message,
+            "log": {
+                "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
+                "timestamp": self.timestamp,
+                "message": self.parsed_message
+            }
         }
 
         # Display alert if the event type is not in the config

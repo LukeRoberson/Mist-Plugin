@@ -12,9 +12,6 @@ WORKDIR /app
 # Install uWSGI
 RUN apk add --no-cache uwsgi-python3
 
-# Copy the rest of the application code
-COPY . .
-
 # Change ownership of the application code to the non-root user
 RUN chown -R appuser:appgroup /app
 
@@ -26,4 +23,8 @@ COPY requirements.txt requirements.txt
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+# Copy the rest of the application code
+COPY . .
+
+# Entry point
 CMD ["uwsgi", "--ini", "uwsgi.ini"]
