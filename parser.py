@@ -19,9 +19,13 @@ Classes:
 
 
 from datetime import datetime
-from colorama import Fore, Style
 import copy
 import requests
+import logging
+
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
 
 
 class Events:
@@ -150,11 +154,6 @@ class Events:
 
         # If no actions are specified, do nothing
         if not action_list:
-            print(
-                Fore.YELLOW,
-                "DEBUG: No actions specified for this event type",
-                Style.RESET_ALL
-            )
             return
 
         # Log to logging service
@@ -165,12 +164,7 @@ class Events:
             )
 
         except requests.RequestException as e:
-            print(
-                Fore.RED,
-                "DEBUG: Failed to send webhook to web interface:",
-                e,
-                Style.RESET_ALL
-            )
+            logging.error("Failed to send webhook to web interface:", e)
 
 
 class NacEvent(Events):
@@ -596,26 +590,18 @@ class NacEvent(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            print(
-                Fore.RED,
-                "DEBUG: New type of NAC Event alert:",
-                self.original_event,
-                Style.RESET_ALL
-            )
+            logging.debug("New type of NAC Event alert:", self.original_event)
 
         # Debug if there's not enough information
         if (
             self.parsed_event_type == "unspecified" or
             self.parsed_message == "No message included"
         ):
-            print(
-                Fore.RED,
-                "DEBUG: NAC event without enough information:\n",
+            logging.error(
+                "NAC event without enough information:\n",
                 f"{self.parsed_client_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                Fore.YELLOW,
                 f"Original event: {self.original_event}\n",
-                Style.RESET_ALL
             )
 
 
@@ -791,11 +777,9 @@ class ClientEvent(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            print(
-                Fore.RED,
-                "DEBUG: New type of Client Event alert:",
-                self.original_event,
-                Style.RESET_ALL
+            logging.debug(
+                "New type of Client Event alert:",
+                self.original_event
             )
 
         # Debug if there's not enough information
@@ -804,14 +788,11 @@ class ClientEvent(Events):
             self.parsed_event_type == "unspecified" or
             self.parsed_message == "No message included"
         ):
-            print(
-                Fore.RED,
-                "DEBUG: Client event without enough information:\n",
+            logging.error(
+                "Client event without enough information:\n",
                 f"{self.parsed_client_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                Fore.YELLOW,
-                f"Original event: {self.original_event}\n",
-                Style.RESET_ALL
+                f"Original event: {self.original_event}\n"
             )
 
 
@@ -995,11 +976,9 @@ class DeviceEvents(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            print(
-                Fore.RED,
-                "DEBUG: New type of Device Event alert:",
-                self.original_event,
-                Style.RESET_ALL
+            logging.debug(
+                "New type of Device Event alert:",
+                self.original_event
             )
 
         # Debug if there's not enough information
@@ -1008,14 +987,11 @@ class DeviceEvents(Events):
             self.parsed_event_type == "unspecified" or
             self.parsed_message == "No message included"
         ):
-            print(
-                Fore.RED,
-                "DEBUG: Device event without enough information:\n",
+            logging.error(
+                "Device event without enough information:\n",
                 f"{self.parsed_device_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                Fore.YELLOW,
-                f"Original event: {self.original_event}\n",
-                Style.RESET_ALL
+                f"Original event: {self.original_event}\n"
             )
 
 
@@ -1303,11 +1279,9 @@ class Alarms(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            print(
-                Fore.RED,
-                "DEBUG: New type of Alarm Event alert:",
-                self.original_event,
-                Style.RESET_ALL
+            logging.debug(
+                "New type of Alarm Event alert:",
+                self.original_event
             )
 
         # Debug if there's not enough information
@@ -1316,14 +1290,11 @@ class Alarms(Events):
             self.parsed_event_type == "unspecified" or
             self.parsed_message == "No message included"
         ):
-            print(
-                Fore.RED,
-                "DEBUG: Alarm event without enough information:\n",
+            logging.error(
+                "Alarm event without enough information:\n",
                 f"{self.parsed_device_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                Fore.YELLOW,
-                f"Original event: {self.original_event}\n",
-                Style.RESET_ALL
+                f"Original event: {self.original_event}\n"
             )
 
 
@@ -1466,26 +1437,18 @@ class Audits(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            print(
-                Fore.RED,
-                "DEBUG: New type of Audit Event alert:",
-                self.original_event,
-                Style.RESET_ALL
-            )
+            logging.debug("New type of Audit alert:", self.original_event)
 
         # Debug if there's not enough information
         if (
             self.parsed_event_type == "unspecified" or
             self.parsed_message == "No message included"
         ):
-            print(
-                Fore.RED,
-                "DEBUG: Audit event without enough information:\n",
+            logging.error(
+                "Audit event without enough information:\n",
                 f"{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                Fore.YELLOW,
-                f"Original event: {self.original_event}\n",
-                Style.RESET_ALL
+                f"Original event: {self.original_event}\n"
             )
 
 
@@ -1627,11 +1590,9 @@ class DeviceUpdowns(Events):
 
         # Display alert if the event type is not in the config
         if self.parsed_event_type not in config:
-            print(
-                Fore.RED,
-                "DEBUG: New type of Device Up/Down Event alert:",
-                self.original_event,
-                Style.RESET_ALL
+            logging.debug(
+                "New type of Device Up/Down Event alert:",
+                self.original_event
             )
 
         # Debug if there's not enough information
@@ -1640,14 +1601,11 @@ class DeviceUpdowns(Events):
             self.parsed_event_type == "unspecified" or
             self.parsed_message == "No message included"
         ):
-            print(
-                Fore.RED,
-                "DEBUG: Device Updown event without enough information:\n",
+            logging.error(
+                "Device Updown event without enough information:\n",
                 f"{self.parsed_device_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                Fore.YELLOW,
-                f"Original event: {self.original_event}\n",
-                Style.RESET_ALL
+                f"Original event: {self.original_event}\n"
             )
 
 
