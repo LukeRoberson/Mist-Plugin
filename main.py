@@ -42,26 +42,40 @@ app = Flask(__name__)
 
 def send_log(
     message: str,
+    url: str = "http://logging:5100/api/log",
     source: str = "mist",
     destination: list = ["web"],
-    event_type: str = "service.info",
+    group: str = "plugin",
+    category: str = "mist",
+    alert: str = "event",
+    severity: str = "info",
 ) -> None:
     """
     Send a message to the logging service.
 
     Args:
         message (str): The message to send.
+        url (str): The URL of the logging service API.
+        source (str): The source of the log message.
+        destination (list): The destinations for the log message.
+        group (str): The group to which the log message belongs.
+        category (str): The category of the log message.
+        alert (str): The alert type for the log message.
+        severity (str): The severity level of the log message.
     """
 
     # Send a log as a webhook to the logging service
     try:
         requests.post(
-            "http://logging:5100/api/log",
+            url,
             json={
                 "source": source,
                 "destination": destination,
                 "log": {
-                    "type": event_type,
+                    "group": group,
+                    "category": category,
+                    "alert": alert,
+                    "severity": severity,
                     "timestamp": str(datetime.now()),
                     "message": message
                 }
@@ -70,7 +84,7 @@ def send_log(
         )
     except Exception as e:
         logging.warning(
-            "Failed to send startup webhook to logging service. %s",
+            "Failed to send log to logging service. %s",
             e
         )
 

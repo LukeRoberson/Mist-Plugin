@@ -8,6 +8,10 @@ Each class corresponds to a specific event type
 Subclasses of Events extract relevant fields, parse event data,
     and perform configured actions.
 
+Functions:
+    - send_log: Sends a log message to the logging service.
+        This is used to log events and errors.
+
 Classes:
     - NacEvent: Represents a NAC event object.
     - ClientEvent: Represents a client session object.
@@ -21,6 +25,55 @@ Classes:
 from datetime import datetime
 import requests
 import logging
+
+
+def send_log(
+    message: str,
+    url: str = "http://logging:5100/api/log",
+    source: str = "mist",
+    destination: list = ["web"],
+    group: str = "plugin",
+    category: str = "mist",
+    alert: str = "event",
+    severity: str = "info",
+) -> None:
+    """
+    Send a message to the logging service.
+
+    Args:
+        message (str): The message to send.
+        url (str): The URL of the logging service API.
+        source (str): The source of the log message.
+        destination (list): The destinations for the log message.
+        group (str): The group to which the log message belongs.
+        category (str): The category of the log message.
+        alert (str): The alert type for the log message.
+        severity (str): The severity level of the log message.
+    """
+
+    # Send a log as a webhook to the logging service
+    try:
+        requests.post(
+            url,
+            json={
+                "source": source,
+                "destination": destination,
+                "log": {
+                    "group": group,
+                    "category": category,
+                    "alert": alert,
+                    "severity": severity,
+                    "timestamp": str(datetime.now()),
+                    "message": message
+                }
+            },
+            timeout=3
+        )
+    except Exception as e:
+        logging.warning(
+            "Failed to send log to logging service. %s",
+            e
+        )
 
 
 # Set up logging
@@ -78,9 +131,9 @@ class Events:
         """
 
         message = f"Event:\n \
-                {self.parsed_client_type}.{self.parsed_event_type}\n \
+                {self.group}.{self.category}.{self.alert}\n \
                 {self.timestamp}\n \
-                {self.parsed_message}"
+                {self.message}"
 
         return message
 
@@ -143,8 +196,8 @@ class Events:
             return
 
         # Get the actions to perform
-        if self.parsed_event_type in config:
-            actions = config[self.parsed_event_type]
+        if self.alert in config:
+            actions = config[self.alert]
         else:
             actions = config["default"]
 
@@ -160,14 +213,14 @@ class Events:
             return
 
         # Log to logging service
-        try:
-            requests.post(
-                "http://logging:5100/api/log",
-                json=self.parsed_body,
-            )
-
-        except requests.RequestException as e:
-            logging.error("Failed to send webhook to web interface:", e)
+        send_log(
+            message=self.event_message,
+            destination=action_list,
+            group=self.group,
+            category=self.category,
+            alert=self.alert,
+            severity=self.severity,
+        )
 
 
 class NacEvent(Events):
@@ -329,119 +382,129 @@ class NacEvent(Events):
             z = Event type
         """
 
-        # Get the client type
+        # Set the group
+        self.group = "nac"
+
+        # Get the category
         if self.client_type and self.client_type == "wireless":
-            self.parsed_client_type = "wireless"
+            self.category = "wireless"
         elif self.client_type and self.client_type == "wired":
-            self.parsed_client_type = "wired"
+            self.category = "wired"
         elif self.port_id:
-            self.parsed_client_type = "wired"
+            self.category = "wired"
         else:
-            self.parsed_client_type = "unspecified"
+            self.category = "unspecified"
 
         # Get the Event
         if self.type:
-            self.parsed_event_type = self.type
+            self.alert = self.type
         else:
-            self.parsed_event_type = "unspecified"
+            self.alert = "unspecified"
+
+        # Get the severity
+        self.severity = "info"
 
         # Create a custom message where appropriate
         if self.type:
             # NAC Accounting events
             if self.type == "NAC_ACCOUNTING_START":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client session started for {self.username}"
                 )
             elif self.type == "NAC_ACCOUNTING_STOP":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client session ended for {self.username}"
                 )
             elif self.type == "NAC_ACCOUNTING_UPDATE":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client session updated for {self.username}"
                 )
             elif self.type == "NAC_CLIENT_PERMIT":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client permit for {self.username}, VLAN {self.vlan}"
                 )
             elif self.type == "NAC_SESSION_STARTED":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client session started for {self.username}"
                 )
             elif self.type == "NAC_SESSION_ENDED":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client session ended for {self.username}"
                 )
             elif self.type == "NAC_CLIENT_DENY":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client deny for {self.username}. "
                     f"{self.text}"
                 )
 
             # Certificate events
             elif self.type == "NAC_CLIENT_CERT_CHECK_SUCCESS":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client certificate check succeeded for {self.cert_cn}"
                 )
             elif self.type == "NAC_SERVER_CERT_VALIDATION_SUCCESS":
-                self.parsed_message = (
+                self.event_message = (
                     f"Server certificate validation succeeded "
                     f"for {self.username}"
                 )
 
             # MDM events
             elif self.type == "NAC_MDM_LOOKUP_SUCCESS":
-                self.parsed_message = (
+                self.event_message = (
                     f"MDM lookup succeeded for {self.username}. "
                     f"{self.mdm_manufacturer} {self.mdm_model} "
                     f"is {self.mdm_compliance}"
                 )
             elif self.type == "NAC_MDM_DEVICE_NOT_ENROLLED":
-                self.parsed_message = (
+                self.event_message = (
                     f"MDM device not enrolled for {self.username}. {self.text}"
                 )
 
             # IDP events
             elif self.type == "NAC_IDP_GROUPS_LOOKUP_SUCCESS":
-                self.parsed_message = (
+                self.event_message = (
                     f"IDP groups lookup succeeded for {self.username}"
                 )
             elif self.type == "NAC_IDP_AUTHC_SUCCESS":
-                self.parsed_message = (
+                self.event_message = (
                     f"IDP authentication succeeded for {self.username}"
                 )
 
             # Other events
             elif self.type == "NAC_CLIENT_IP_ASSIGNED":
-                self.parsed_message = (
+                self.event_message = (
                     f"Client IP assigned for {self.username}. {self.client_ip}"
                 )
 
             # When not explicitly handled, use 'text', or a default message
             elif self.text:
-                self.parsed_message = self.text
+                self.event_message = self.text
             else:
-                self.parsed_message = "No message included"
+                self.event_message = "No message included"
 
         # If no custom message, use the text field where available
         elif self.text:
-            self.parsed_message = self.text
+            self.event_message = self.text
 
         else:
-            self.parsed_message = "No message included"
+            self.event_message = "No message included"
 
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
+            "destination": ["web"],
             "log": {
-                "type": f"{self.parsed_client_type}.{self.parsed_event_type}",
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
                 "timestamp": self.timestamp,
-                "message": self.parsed_message,
+                "message": self.event_message,
             }
         }
 
         # Display alert if the event type is not in the config
-        if self.parsed_event_type not in config:
+        if self.alert not in config:
             logging.info(
                 "New type of NAC Event alert: %s",
                 self.event
@@ -449,13 +512,13 @@ class NacEvent(Events):
 
         # Debug if there's not enough information
         if (
-            self.parsed_event_type == "unspecified" or
-            self.parsed_message == "No message included"
+            self.alert == "unspecified" or
+            self.event_message == "No message included"
         ):
             logging.error(
                 "NAC event without enough information:\n",
-                f"{self.parsed_client_type}.{self.parsed_event_type}\n",
-                f"Message: {self.parsed_message}\n",
+                f"{self.group}.{self.category}{self.alert}\n",
+                f"Message: {self.event_message}\n",
                 f"Original event: {self.event}\n",
             )
 
@@ -542,48 +605,58 @@ class ClientEvent(Events):
             z = Event type
         """
 
-        # Client type is always wireless for these events
-        self.parsed_client_type = "wireless"
+        # Set the group
+        self.group = "client"
+
+        # Get the category
+        self.category = "wireless"
 
         # Get the Event
         if self.connect and self.disconnect:
-            self.parsed_event_type = "disconnect"
+            self.alert = "disconnect"
         elif self.connect:
-            self.parsed_event_type = "connect"
+            self.alert = "connect"
         else:
-            self.parsed_event_type = "client-info"
+            self.alert = "client-info"
 
         # Create a custom message
-        if self.parsed_event_type == "disconnect":
-            self.parsed_message = (
+        if self.alert == "disconnect":
+            self.event_message = (
                 f"Client {self.mac} at {self.site_name} "
                 f"has disconnected from {self.ssid}"
             )
-        elif self.parsed_event_type == "connect":
-            self.parsed_message = (
+        elif self.alert == "connect":
+            self.event_message = (
                 f"Client {self.mac} at {self.site_name} "
                 f"has connected to {self.ssid}"
             )
-        elif self.parsed_event_type == "client-info":
-            self.parsed_message = (
+        elif self.alert == "client-info":
+            self.event_message = (
                 f"Client {self.mac} has IP {self.ip} "
                 f"and is in site {self.site_id}"
             )
         else:
-            self.parsed_message = "No message included"
+            self.event_message = "No message included"
+
+        # Set the severity
+        self.severity = "info"
 
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
+            "destination": ["web"],
             "log": {
-                "type": f"{self.parsed_client_type}.{self.parsed_event_type}",
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
                 "timestamp": self.timestamp,
-                "message": self.parsed_message,
+                "message": self.event_message,
             }
         }
 
         # Display alert if the event type is not in the config
-        if self.parsed_event_type not in config:
+        if self.alert not in config:
             logging.info(
                 "New type of Client Event alert: %s",
                 self.event
@@ -591,14 +664,13 @@ class ClientEvent(Events):
 
         # Debug if there's not enough information
         if (
-            self.parsed_client_type == "unspecified" or
-            self.parsed_event_type == "unspecified" or
-            self.parsed_message == "No message included"
+            self.alert == "unspecified" or
+            self.event_message == "No message included"
         ):
             logging.error(
                 "Client event without enough information:\n",
-                f"{self.parsed_client_type}.{self.parsed_event_type}\n",
-                f"Message: {self.parsed_message}\n",
+                f"{self.group}.{self.category}.{self.alert}\n",
+                f"Message: {self.event_message}\n",
                 f"Original event: {self.event}\n"
             )
 
@@ -681,65 +753,75 @@ class DeviceEvents(Events):
             config (dict): Event handling configuration.
         """
 
-        # Get the device type
+        # Set the group
+        self.group = "device"
+
+        # Get the category
         if self.device_type:
-            self.parsed_device_type = self.device_type
+            self.category = self.device_type
         else:
-            self.parsed_device_type = "unspecified"
+            self.category = "unspecified"
 
         # Get the event type
         if self.type:
-            self.parsed_event_type = self.type
+            self.alert = self.type
         else:
-            self.parsed_event_type = "unspecified"
+            self.alert = "unspecified"
 
         # Need to set a nice message
         if self.text:
-            self.parsed_message = self.text
+            self.event_message = self.text
         elif self.type == 'AP_RESTARTED':
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.ap_name} at {self.site_name} has restarted "
                 f"({self.reason})"
             )
         elif self.type == 'AP_RESTART_BY_USER':
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.ap_name} at {self.site_name} has been restarted "
                 f"by an administrator"
             )
         elif self.type == 'AP_CONNECTED':
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.ap_name} at {self.site_name} has connected "
             )
         elif self.type == 'AP_DISCONNECTED':
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.ap_name} at {self.site_name} has disconnected "
             )
         elif self.type == 'AP_CONFIGURED':
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.ap_name} at {self.site_name} has been configured"
             )
         elif (
             self.type == 'AP_CONFIG_CHANGED_BY_RRM' or
             self.type == 'AP_RRM_ACTION'
         ):
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.ap_name} at {self.site_name} has been tuned by RRM"
             )
         else:
-            self.parsed_message = "No message included"
+            self.event_message = "No message included"
+
+        # Set the severity
+        self.severity = "info"
 
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
+            "destination": ["web"],
             "log": {
-                "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
                 "timestamp": self.timestamp,
-                "message": self.parsed_message,
+                "message": self.event_message,
             }
         }
 
         # Display alert if the event type is not in the config
-        if self.parsed_event_type not in config:
+        if self.alert not in config:
             logging.info(
                 "New type of Device Event alert: %s",
                 self.event
@@ -747,14 +829,14 @@ class DeviceEvents(Events):
 
         # Debug if there's not enough information
         if (
-            self.parsed_device_type == "unspecified" or
-            self.parsed_event_type == "unspecified" or
-            self.parsed_message == "No message included"
+            self.category == "unspecified" or
+            self.alert == "unspecified" or
+            self.event_message == "No message included"
         ):
             logging.error(
                 "Device event without enough information:\n",
-                f"{self.parsed_device_type}.{self.parsed_event_type}\n",
-                f"Message: {self.parsed_message}\n",
+                f"{self.group}.{self.category}.{self.alert}\n",
+                f"Message: {self.event_message}\n",
                 f"Original event: {self.event}\n"
             )
 
@@ -859,116 +941,121 @@ class Alarms(Events):
             config (dict): Event handling configuration.
         """
 
+        # Set the group
+        if not self.group:
+            self.group = "alarm"
+
         # Get the category
-        if (
+        if self.category:
+            self.category = self.category
+        elif (
             ('switch' in self.type) or
             (self.type and self.type.startswith('sw_')) or
             (self.port_ids) or
             (self.port_id)
         ):
-            self.parsed_device_type = "switch"
+            self.category = "switch"
         elif (
             self.type and self.type.startswith('ap_') or
             self.aps
         ):
-            self.parsed_device_type = "wireless"
-        elif self.category:
-            self.parsed_device_type = self.category
+            self.category = "wireless"
         elif self.admin_name:
-            self.parsed_device_type = "admin-action"
+            self.category = "admin-action"
         elif self.severity == "info":
-            self.parsed_device_type = "info"
+            self.category = "info"
         else:
-            self.parsed_device_type = "unspecified"
+            self.category = "unspecified"
 
         # Get the Event
         if self.group == "marvis" and self.type:
-            self.parsed_event_type = f"marvis-{self.type}"
+            self.alert = f"marvis-{self.type}"
         elif self.type:
-            self.parsed_event_type = self.type
+            self.alert = self.type
         elif self.group == "marvis":
-            self.parsed_event_type = "marvis"
+            self.alert = "marvis"
         elif "restarted" in self.message:
-            self.parsed_device_type = "restart"
+            self.alert = "restart"
         else:
-            self.parsed_event_type = "unspecified"
+            self.alert = "unspecified"
 
         # Set a message
         if self.reasons:
-            self.parsed_message = (
+            self.event_message = (
                 f"Host {self.hostnames} has experienced an alarm: "
                 f"{self.reasons}"
             )
         elif self.type == "infra_dhcp_success":
-            self.parsed_message = (
+            self.event_message = (
                 f"DHCP success on VLAN {self.vlans} at {self.site_name}"
             )
         elif self.type == "infra_dhcp_failure":
-            self.parsed_message = (
+            self.event_message = (
                 f"DHCP failure on VLAN {self.vlans} at {self.site_name} "
                 f"on SSID {self.ssids}"
             )
         elif self.type == "infra_arp_success":
-            self.parsed_message = (
+            self.event_message = (
                 f"ARP success on VLAN {self.vlans} at {self.site_name}"
             )
         elif self.type == "infra_arp_failure":
-            self.parsed_message = (
+            self.event_message = (
                 f"ARP failure on VLAN {self.vlans} at {self.site_name}"
             )
         elif self.type == "infra_dns_failure":
-            self.parsed_message = (
+            self.event_message = (
                 f"DNS failure on SSID {self.ssids} at {self.site_name} "
                 f"on VLAN {self.vlans}. "
                 f"Affecting {self.client_count} clients."
             )
         elif self.type == "infra_dns_success":
-            self.parsed_message = (
+            self.event_message = (
                 f"DNS success at {self.site_name} "
                 f"on VLAN {self.vlans}"
             )
         elif self.message and "manually restarted" in self.message:
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.message} by {self.admin_name} at {self.site_name}"
             )
         elif (
-            self.parsed_event_type == "device_down" or
-            self.parsed_event_type == "switch_down"
+            self.alert == "device_down" or
+            self.alert == "switch_down"
         ):
-            self.parsed_message = (
+            self.event_message = (
                 f"Device {self.hostname} at {self.site_name} "
                 f"has gone down"
             )
         elif (
-            self.parsed_event_type == "device_reconnected" or
-            self.parsed_event_type == "switch_reconnected"
+            self.alert == "device_reconnected" or
+            self.alert == "switch_reconnected"
         ):
-            self.parsed_message = (
+            self.event_message = (
                 f"Device {self.hostname} at {self.site_name} "
                 f"has reconnected"
             )
-        elif "marvis" in self.parsed_event_type:
-            self.parsed_message = (
+        elif "marvis" in self.alert:
+            self.event_message = (
                 f"Marvis has detected an issue with {self.category}. "
                 f"{self.impacted_client_count} clients affected "
                 f"on {self.impacted_entities['entity_name']} "
                 f"at {self.site_name}"
             )
         else:
-            self.parsed_message = "No message included"
+            self.event_message = "No message included"
 
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
+            "destination": ["web"],
             "log": {
-                "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
+                "type": f"{self.group}.{self.category}.{self.alert}",
                 "timestamp": self.timestamp,
-                "message": self.parsed_message
+                "message": self.event_message
             }
         }
 
         # Display alert if the event type is not in the config
-        if self.parsed_event_type not in config:
+        if self.alert not in config:
             logging.info(
                 "New type of Alarm Event alert: %s",
                 self.event
@@ -976,14 +1063,14 @@ class Alarms(Events):
 
         # Debug if there's not enough information
         if (
-            self.parsed_device_type == "unspecified" or
-            self.parsed_event_type == "unspecified" or
-            self.parsed_message == "No message included"
+            self.category == "unspecified" or
+            self.alert == "unspecified" or
+            self.event_message == "No message included"
         ):
             logging.error(
                 "Alarm event without enough information:\n",
-                f"{self.parsed_device_type}.{self.parsed_event_type}\n",
-                f"Message: {self.parsed_message}\n",
+                f"{self.group}.{self.category}.{self.alert}\n",
+                f"Message: {self.event_message}\n",
                 f"Original event: {self.event}\n"
             )
 
@@ -1048,70 +1135,83 @@ class Audits(Events):
             config (dict): Event handling configuration.
         """
 
+        # Set the group
+        self.group = "audit"
+
+        # Get the category
+        self.category = "audit"
+
         # Get the Event
         if self.before and self.after:
-            self.parsed_event_type = "configuration"
+            self.alert = "configuration"
         elif "Invoked Webshell" in self.message:
-            self.parsed_event_type = "webshell"
+            self.alert = "webshell"
         elif "Login with Role" in self.message:
-            self.parsed_event_type = "mist-login"
+            self.alert = "mist-login"
         elif "Accessed Org" in self.message:
-            self.parsed_event_type = "accessed-org"
+            self.alert = "accessed-org"
         elif "manually restarted" in self.message:
-            self.parsed_event_type = "restart"
+            self.alert = "restart"
         elif "firmware upgrade" in self.message:
-            self.parsed_event_type = "firmware"
+            self.alert = "firmware"
         else:
-            self.parsed_event_type = "unspecified"
+            self.alert = "unspecified"
 
         # Set a message
-        if self.parsed_event_type == "configuration":
-            self.parsed_message = (
+        if self.alert == "configuration":
+            self.event_message = (
                 f"{self.admin_name}: {self.message}\nfrom {self.before} "
                 f"to {self.after}"
             )
-        elif self.parsed_event_type == "webshell":
-            self.parsed_message = (
+        elif self.alert == "webshell":
+            self.event_message = (
                 f"{self.admin_name} {self.message} "
                 f"from {self.src_ip} at {self.site_name}"
             )
         elif (
-            self.parsed_event_type == "mist-login" or
-            self.parsed_event_type == "accessed-org"
+            self.alert == "mist-login" or
+            self.alert == "accessed-org"
         ):
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.admin_name}: {self.message} "
                 f"from {self.src_ip}"
             )
-        elif self.parsed_event_type == "restart":
-            self.parsed_message = (
+        elif self.alert == "restart":
+            self.event_message = (
                 f"{self.admin_name} has restarted the device "
                 f"from {self.src_ip} at {self.site_name}"
             )
         elif (
-            self.parsed_event_type == "firmware" and
+            self.alert == "firmware" and
             "scheduled" in self.message
         ):
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.admin_name} has scheduled a firmware upgrade "
                 f"from {self.src_ip} at {self.site_name}:\n"
                 f"{self.message}"
             )
         else:
-            self.parsed_message = "No message included"
+            self.event_message = "No message included"
+
+        # Set the severity
+        self.severity = "info"
 
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
+            "destination": ["web"],
             "log": {
-                "type": f"admin.{self.parsed_event_type}",
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
                 "timestamp": self.timestamp,
-                "message": self.parsed_message
+                "message": self.event_message
             }
         }
 
         # Display alert if the event type is not in the config
-        if self.parsed_event_type not in config:
+        if self.alert not in config:
             logging.info(
                 "New type of Audit alert: %s",
                 self.event
@@ -1119,13 +1219,13 @@ class Audits(Events):
 
         # Debug if there's not enough information
         if (
-            self.parsed_event_type == "unspecified" or
-            self.parsed_message == "No message included"
+            self.alert == "unspecified" or
+            self.event_message == "No message included"
         ):
             logging.error(
                 "Audit event without enough information:\n",
-                f"{self.parsed_event_type}\n",
-                f"Message: {self.parsed_message}\n",
+                f"{self.alert}\n",
+                f"Message: {self.event_message}\n",
                 f"Original event: {self.event}\n"
             )
 
@@ -1195,24 +1295,27 @@ class DeviceUpdowns(Events):
             config (dict): Event handling configuration.
         """
 
-        # Get the device type
-        if self.device_type:
-            self.parsed_device_type = self.device_type
-        else:
-            self.parsed_device_type = "unspecified"
+        # Set the group
+        self.group = "device-updown"
 
-        # Get the event type
-        if self.type:
-            self.parsed_event_type = self.type
+        # Get the category
+        if self.device_type:
+            self.category = self.device_type
         else:
-            self.parsed_event_type = "unspecified"
+            self.category = "unspecified"
+
+        # Get the alert type
+        if self.type:
+            self.alert = self.type
+        else:
+            self.alert = "unspecified"
 
         # Need to set a nice message
         if (
             self.type == "AP_RESTARTED" or
             self.type == "SW_RESTARTED"
         ):
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.device_name} in {self.site_name} has restarted. "
                 f"Reason: {self.reason}"
             )
@@ -1220,31 +1323,38 @@ class DeviceUpdowns(Events):
             self.type == "AP_DISCONNECTED" or
             self.type == "SW_DISCONNECTED"
         ):
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.device_name} in {self.site_name} has disconnected."
             )
         elif (
             self.type == "AP_CONNECTED" or
             self.type == "SW_CONNECTED"
         ):
-            self.parsed_message = (
+            self.event_message = (
                 f"{self.device_name} in {self.site_name} has connected."
             )
         else:
-            self.parsed_message = "No message included"
+            self.event_message = "No message included"
+
+        # Set the severity
+        self.severity = "info"
 
         # Create webhook body
         self.parsed_body = {
             "source": "mist",
+            "destination": ["web"],
             "log": {
-                "type": f"{self.parsed_device_type}.{self.parsed_event_type}",
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
                 "timestamp": self.timestamp,
-                "message": self.parsed_message
+                "message": self.event_message
             }
         }
 
         # Display alert if the event type is not in the config
-        if self.parsed_event_type not in config:
+        if self.alert not in config:
             logging.info(
                 "New type of Device Up/Down Event alert: %s",
                 self.event
@@ -1252,14 +1362,14 @@ class DeviceUpdowns(Events):
 
         # Debug if there's not enough information
         if (
-            self.parsed_device_type == "unspecified" or
-            self.parsed_event_type == "unspecified" or
-            self.parsed_message == "No message included"
+            self.category == "unspecified" or
+            self.alert == "unspecified" or
+            self.event_message == "No message included"
         ):
             logging.error(
                 "Device Updown event without enough information:\n",
-                f"{self.parsed_device_type}.{self.parsed_event_type}\n",
-                f"Message: {self.parsed_message}\n",
+                f"{self.group}.{self.category}.{self.alert}\n",
+                f"Message: {self.event_message}\n",
                 f"Original event: {self.event}\n"
             )
 
