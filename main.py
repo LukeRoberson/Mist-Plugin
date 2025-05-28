@@ -16,7 +16,6 @@ Routes:
 """
 
 from flask import Flask, request, jsonify
-from colorama import Fore, Style
 import yaml
 import logging
 import requests
@@ -33,8 +32,27 @@ from parser import (
 )
 
 
+# Get global config
+global_config = None
+try:
+    response = requests.get("http://web-interface:5100/api/config", timeout=3)
+    response.raise_for_status()  # Raise an error for bad responses
+    global_config = response.json()
+
+except Exception as e:
+    logging.critical(
+        "Failed to fetch global config from web interface."
+        f" Error: {e}"
+    )
+
+if global_config is None:
+    raise RuntimeError("Could not load global config from web interface")
+
 # Set up logging
-logging.basicConfig(level=logging.INFO)
+log_level_str = global_config['config']['web']['logging-level'].upper()
+log_level = getattr(logging, log_level_str, logging.INFO)
+logging.basicConfig(level=log_level)
+logging.info("Logging level set to: %s", log_level_str)
 
 # Initialize the Flask application
 app = Flask(__name__)
@@ -233,10 +251,9 @@ def webhook():
         }), 400
 
     if len(event_list) > 1:
-        print(
-            Fore.GREEN,
-            f"DEBUG: More than one event for {topic}",
-            Style.RESET_ALL
+        logging.warning(
+            "Received webhook with multiple events for topic: %s",
+            topic
         )
 
     for event in event_list:
