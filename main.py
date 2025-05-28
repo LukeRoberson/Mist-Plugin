@@ -20,7 +20,6 @@ import yaml
 import logging
 import requests
 from typing import Optional
-from datetime import datetime
 
 from parser import (
     NacEvent,
@@ -30,6 +29,7 @@ from parser import (
     Audits,
     DeviceUpdowns
 )
+from systemlog import system_log
 
 
 # Get global config
@@ -44,8 +44,17 @@ except Exception as e:
         "Failed to fetch global config from web interface."
         f" Error: {e}"
     )
+    system_log.send_log(
+        "Failed to fetch global config from web interface."
+        f" Error: {e}",
+        severity="critical"
+    )
 
 if global_config is None:
+    system_log.send_log(
+        "Could not load global config from web interface",
+        severity="critical"
+    )
     raise RuntimeError("Could not load global config from web interface")
 
 # Set up logging
@@ -56,55 +65,6 @@ logging.info("Logging level set to: %s", log_level_str)
 
 # Initialize the Flask application
 app = Flask(__name__)
-
-
-def send_log(
-    message: str,
-    url: str = "http://logging:5100/api/log",
-    source: str = "mist",
-    destination: list = ["web"],
-    group: str = "plugin",
-    category: str = "mist",
-    alert: str = "event",
-    severity: str = "info",
-) -> None:
-    """
-    Send a message to the logging service.
-
-    Args:
-        message (str): The message to send.
-        url (str): The URL of the logging service API.
-        source (str): The source of the log message.
-        destination (list): The destinations for the log message.
-        group (str): The group to which the log message belongs.
-        category (str): The category of the log message.
-        alert (str): The alert type for the log message.
-        severity (str): The severity level of the log message.
-    """
-
-    # Send a log as a webhook to the logging service
-    try:
-        requests.post(
-            url,
-            json={
-                "source": source,
-                "destination": destination,
-                "log": {
-                    "group": group,
-                    "category": category,
-                    "alert": alert,
-                    "severity": severity,
-                    "timestamp": str(datetime.now()),
-                    "message": message
-                }
-            },
-            timeout=3
-        )
-    except Exception as e:
-        logging.warning(
-            "Failed to send log to logging service. %s",
-            e
-        )
 
 
 # Load the configuration file
@@ -172,7 +132,7 @@ def webhook():
         logging.error(
             "No signature found in the message. Message will not be validated."
         )
-        send_log(
+        system_log.log(
             "Received webhook without signature."
         )
 
@@ -192,7 +152,7 @@ def webhook():
                 "Failed to request plugin secret from web interface:",
                 e
             )
-            send_log(
+            system_log.log(
                 "Failed to retrieve plugin secret from web interface."
             )
             return jsonify({
@@ -229,7 +189,7 @@ def webhook():
             "Security validation failed: %s",
             result_json.get('result')
         )
-        send_log(
+        system_log.log(
             "Received webhook with invalid signature."
         )
         return jsonify(
