@@ -120,13 +120,27 @@ class Events:
         Args:
             config (dict): Event handling configuration specifying which
                 actions to perform.
-
-        Returns:
-            None
-
-        Side Effects:
-            May send HTTP requests or log to external systems.
         """
+
+        # Log if the event does not have a timestamp
+        if not self.timestamp:
+            logging.error(
+                "Event without a timestamp.",
+                self.event
+            )
+
+        # Convert timestamp to seconds if it's in milliseconds
+        if self.timestamp > 10000000000:
+            self.timestamp = self.timestamp / 1000
+
+        # If the event is older than 5 minutes, do not process it
+        current_time = datetime.now().timestamp()
+        if (current_time - self.timestamp) > 300:
+            logging.warning(
+                "Event is older than 5 minutes, not processing: %s",
+                self.event
+            )
+            return
 
         # Get the actions to perform
         if self.parsed_event_type in config:

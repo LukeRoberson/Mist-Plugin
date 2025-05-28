@@ -5,6 +5,8 @@ The Mist plugin
     Event manager classes are imported from the parser module.
 
 Functions:
+    - send_log:
+        Sends a log message to the logging service.
     - get_event_manager:
         Returns the event manager class based on the topic of the event.
 
@@ -19,6 +21,7 @@ import yaml
 import logging
 import requests
 from typing import Optional
+from datetime import datetime
 
 from parser import (
     NacEvent,
@@ -35,6 +38,42 @@ logging.basicConfig(level=logging.INFO)
 
 # Initialize the Flask application
 app = Flask(__name__)
+
+
+def send_log(
+    message: str,
+    source: str = "mist",
+    destination: list = ["web"],
+    event_type: str = "service.info",
+) -> None:
+    """
+    Send a message to the logging service.
+
+    Args:
+        message (str): The message to send.
+    """
+
+    # Send a log as a webhook to the logging service
+    try:
+        requests.post(
+            "http://logging:5100/api/log",
+            json={
+                "source": source,
+                "destination": destination,
+                "log": {
+                    "type": event_type,
+                    "timestamp": str(datetime.now()),
+                    "message": message
+                }
+            },
+            timeout=3
+        )
+    except Exception as e:
+        logging.warning(
+            "Failed to send startup webhook to logging service. %s",
+            e
+        )
+
 
 # Load the configuration file
 with open('config.yaml', 'r') as f:
@@ -101,6 +140,9 @@ def webhook():
         logging.error(
             "No signature found in the message. Message will not be validated."
         )
+        send_log(
+            "Received webhook without signature."
+        )
 
     # If the signature is present, validate it
     else:
@@ -117,6 +159,9 @@ def webhook():
             logging.error(
                 "Failed to request plugin secret from web interface:",
                 e
+            )
+            send_log(
+                "Failed to retrieve plugin secret from web interface."
             )
             return jsonify({
                 'result': 'error',
@@ -151,6 +196,9 @@ def webhook():
         logging.error(
             "Security validation failed: %s",
             result_json.get('result')
+        )
+        send_log(
+            "Received webhook with invalid signature."
         )
         return jsonify(
             {
