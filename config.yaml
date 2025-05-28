@@ -1,3 +1,5 @@
+name: "mist"
+
 nac-events:
   NAC_ACCOUNTING_START:
     web: false
@@ -658,6 +660,11 @@ audits:
     syslog: false
     teams: false
   restart:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  configuration:
     web: true
     sql: false
     syslog: false

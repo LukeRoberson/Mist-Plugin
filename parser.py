@@ -19,7 +19,6 @@ Classes:
 
 
 from datetime import datetime
-import copy
 import requests
 import logging
 
@@ -59,15 +58,7 @@ class Events:
         self.received = datetime.now()
 
         # This is the original event data from the webhook
-        #   Events are removed from the raw_event dictionary.
-        #   This is so we can see if there are any fields left over
-        self.raw_event = event
-
-        # Copy the original event for later use
-        self.original_event = copy.deepcopy(event)
-
-        # Remove some fields that are not needed
-        self.raw_event.pop("org_id", None)
+        self.event = event
 
         # Collect and store fields from the raw event
         self._collect_fields()
@@ -101,8 +92,6 @@ class Events:
 
         This method should be overridden by subclasses to extract
             event-specific fields.
-        from self.raw_event and assign them as attributes. Fields are removed
-            from self.raw_event as they are processed.
 
         Returns:
             None
@@ -183,10 +172,6 @@ class NacEvent(Events):
         - WiFi device roaming
         - Client session started or ended
 
-    As fields are processed, they are removed from the raw_event dictionary.
-        This is so we can see if there are any fields left over
-            that we weren't expecting.
-
     Methods:
         __init__(self, event: dict): Initializes the NacEvent object.
         __repr__(self): Returns a string representation of the NacEvent object.
@@ -210,258 +195,106 @@ class NacEvent(Events):
         This is a helper function to collect fields from the raw event.
         """
 
-        # Remove some fields that are not needed
-        self.raw_event.pop("crc", None)
-        self.raw_event.pop("tls_states", None)
-        self.raw_event.pop("cert_template", None)
-
         # The timestamp (epoch) that the event occurred
-        self.timestamp = self.raw_event.get("timestamp")
-        self.raw_event.pop("timestamp", None)
+        self.timestamp = self.event.get("timestamp")
 
         # Certificate information
-        self.cert_cn = self.raw_event.get("cert_cn")
-        self.raw_event.pop("cert_cn", None)
-
-        self.cert_expiry = self.raw_event.get("cert_expiry")
-        self.raw_event.pop("cert_expiry", None)
-
-        self.cert_issuer = self.raw_event.get("cert_issuer")
-        self.raw_event.pop("cert_issuer", None)
-
-        self.cert_san_dns = self.raw_event.get("cert_san_dns")
-        self.raw_event.pop("cert_san_dns", None)
-
-        self.cert_serial = self.raw_event.get("cert_serial")
-        self.raw_event.pop("cert_serial", None)
-
-        self.cert_subject = self.raw_event.get("cert_subject")
-        self.raw_event.pop("cert_subject", None)
-
-        self.cert_template = self.raw_event.get("cert_template")
-        self.raw_event.pop("cert_template", None)
-
-        self.cert_san_upn = self.raw_event.get("cert_san_upn")
-        self.raw_event.pop("cert_san_upn", None)
-
-        self.cert_san_email = self.raw_event.get("cert_san_email")
-        self.raw_event.pop("cert_san_email", None)
+        self.cert_cn = self.event.get("cert_cn")
+        self.cert_expiry = self.event.get("cert_expiry")
+        self.cert_issuer = self.event.get("cert_issuer")
+        self.cert_san_dns = self.event.get("cert_san_dns")
+        self.cert_serial = self.event.get("cert_serial")
+        self.cert_subject = self.event.get("cert_subject")
+        self.cert_template = self.event.get("cert_template")
+        self.cert_san_upn = self.event.get("cert_san_upn")
+        self.cert_san_email = self.event.get("cert_san_email")
 
         # TLS information
-        self.tls_cipher_suite = self.raw_event.get("tls_cipher_suite")
-        self.raw_event.pop("tls_cipher_suite", None)
-
-        self.tls_client_preferred_version = self.raw_event.get(
+        self.tls_cipher_suite = self.event.get("tls_cipher_suite")
+        self.tls_client_preferred_version = self.event.get(
             "tls_client_preferred_version"
         )
-        self.raw_event.pop("tls_client_preferred_version", None)
-
-        self.tls_version = self.raw_event.get("tls_version")
-        self.raw_event.pop("tls_version", None)
+        self.tls_version = self.event.get("tls_version")
 
         # IDP information
-        self.idp_id = self.raw_event.get("idp_id")
-        self.raw_event.pop("idp_id", None)
+        self.idp_id = self.event.get("idp_id")
+        self.idp_lookup_source = self.event.get("idp_lookup_source")
+        self.idp_role = self.event.get("idp_role")
+        self.idp_username = self.event.get("idp_username")
+        self.lookup_time_taken = self.event.get("lookup_time_taken")
 
-        self.idp_lookup_source = self.raw_event.get("idp_lookup_source")
-        self.raw_event.pop("idp_lookup_source", None)
+        # 802.1x authentication components
+        self.auth_type = self.event.get("auth_type")
+        self.username = self.event.get("username")
+        self.nas_ip = self.event.get("nas_ip")
+        self.nas_vendor = self.event.get("nas_vendor")
+        self.resp_attrs = self.event.get("resp_attrs")
 
-        self.idp_role = self.raw_event.get("idp_role")
-        self.raw_event.pop("idp_role", None)
+        # NAC Rules
+        self.nacrule_id = self.event.get("nacrule_id")
+        self.nacrule_matched = self.event.get("nacrule_matched")
+        self.nacrule_name = self.event.get("nacrule_name")
 
-        self.idp_username = self.raw_event.get("idp_username")
-        self.raw_event.pop("idp_username", None)
+        # NAC Actions
+        self.usermac_labels = self.event.get("usermac_labels")
+        self.vlan = self.event.get("vlan")
+        self.egress_vlan_names = self.event.get("egress_vlan_names")
+        self.vlan_source = self.event.get("vlan_source")
+        self.device_macs = self.event.get("device_macs")
 
-        self.lookup_time_taken = self.raw_event.get("lookup_time_taken")
-        self.raw_event.pop("lookup_time_taken", None)
+        # Client information
+        self.client_type = self.event.get("client_type")
+        self.device_mac = self.event.get("device_mac")
+        self.mac = self.event.get("mac")
+        self.random_mac = self.event.get("random_mac")
+        self.port_id = self.event.get("port_id")
+        self.client_ip = self.event.get("client_ip")
+        self.client_ips = self.event.get("client_ips")
 
-        # Type of 802.1x authentication (eg, PEAP, EAP-TLS, etc)
-        self.auth_type = self.raw_event.get("auth_type")
-        self.raw_event.pop("auth_type", None)
-
-        # The user or machine name trying to authenticate
-        self.username = self.raw_event.get("username")
-        self.raw_event.pop("username", None)
-
-        # ID of the NAC rule that was applied
-        self.nacrule_id = self.raw_event.get("nacrule_id")
-        self.raw_event.pop("nacrule_id", None)
-
-        # RADIUS response attributes
-        self.resp_attrs = self.raw_event.get("resp_attrs")
-        self.raw_event.pop("resp_attrs", None)
-
-        # NAS IP (switch or AP)
-        self.nas_ip = self.raw_event.get("nas_ip")
-        self.raw_event.pop("nas_ip", None)
-
-        # NAS vendor (eg, Juniper-Mist)
-        self.nas_vendor = self.raw_event.get("nas_vendor")
-        self.raw_event.pop("nas_vendor", None)
-
-        # Whether a NAC rule was matched (true or false)
-        self.nacrule_matched = self.raw_event.get("nacrule_matched")
-        self.raw_event.pop("nacrule_matched", None)
-
-        # The name of the NAC rule that was applied
-        self.nacrule_name = self.raw_event.get("nacrule_name")
-        self.raw_event.pop("nacrule_name", None)
-
-        # Labels associated with the NAC result
-        self.usermac_labels = self.raw_event.get("usermac_labels")
-        self.raw_event.pop("usermac_labels", None)
-
-        # The VLAN assigned to the client
-        self.vlan = self.raw_event.get("vlan")
-        self.raw_event.pop("vlan", None)
-
-        # The VLAN source (eg, 'nactag')
-        self.vlan_source = self.raw_event.get("vlan_source")
-        self.raw_event.pop("vlan_source", None)
-
-        # A list of VLANs assigned to the client
-        self.egress_vlan_names = self.raw_event.get("egress_vlan_names")
-        self.raw_event.pop("egress_vlan_names", None)
-
-        # Extra MAC addresses?
-        self.device_macs = self.raw_event.get("device_macs")
-        self.raw_event.pop("device_macs", None)
-
-        # Client type, eg 'wireless'
-        self.client_type = self.raw_event.get("client_type")
-        self.raw_event.pop("client_type", None)
-
-        # The SSID of the wireless network
-        self.ssid = self.raw_event.get("ssid")
-        self.raw_event.pop("ssid", None)
-
-        # Mist ID of the access point
-        self.ap = self.raw_event.get("ap")
-        self.raw_event.pop("ap", None)
-
-        # BSSID of the access point
-        self.bssid = self.raw_event.get("bssid")
-        self.raw_event.pop("bssid", None)
-
-        # MAC address of the client
-        self.mac = self.raw_event.get("mac")
-        self.raw_event.pop("mac", None)
-
-        # Whether MAC is random or not
-        self.random_mac = self.raw_event.get("random_mac")
-        self.raw_event.pop("random_mac", None)
-
-        # MAC - Wired
-        self.device_mac = self.raw_event.get("device_mac")
-        self.raw_event.pop("device_mac", None)
-
-        # Port ID - Wired
-        self.port_id = self.raw_event.get("port_id")
-        self.raw_event.pop("port_id", None)
-
-        # Site ID
-        self.site_id = self.raw_event.get("site_id")
-        self.raw_event.pop("site_id", None)
-
-        # The event type
-        self.type = self.raw_event.get("type")
-        self.raw_event.pop("type", None)
-
-        # Friendly event message
-        self.text = self.raw_event.get("text")
-        self.raw_event.pop("text", None)
+        # Network information
+        self.ssid = self.event.get("ssid")
+        self.ap = self.event.get("ap")
+        self.bssid = self.event.get("bssid")
+        self.aps = self.event.get("aps")
+        self.bssids = self.event.get("bssids")
 
         # MDM information
-        self.mdm_account_id = self.raw_event.get("mdm_account_id")
-        self.raw_event.pop("mdm_account_id", None)
+        self.mdm_account_id = self.event.get("mdm_account_id")
+        self.mdm_client_id = self.event.get("mdm_client_id")
+        self.mdm_compliance = self.event.get("mdm_compliance")
+        self.mdm_last_checked = self.event.get("mdm_last_checked")
+        self.mdm_manufacturer = self.event.get("mdm_manufacturer")
+        self.mdm_model = self.event.get("mdm_model")
+        self.mdm_operating_system = self.event.get("mdm_operating_system")
+        self.mdm_os_version = self.event.get("mdm_os_version")
+        self.mdm_provider = self.event.get("mdm_provider")
+        self.coa_source = self.event.get("coa_source")
+        self.pre_mdm_compliance = self.event.get("pre_mdm_compliance")
 
-        self.mdm_client_id = self.raw_event.get("mdm_client_id")
-        self.raw_event.pop("mdm_client_id", None)
-
-        self.mdm_compliance = self.raw_event.get("mdm_compliance")
-        self.raw_event.pop("mdm_compliance", None)
-
-        self.mdm_last_checked = self.raw_event.get("mdm_last_checked")
-        self.raw_event.pop("mdm_last_checked", None)
-
-        self.mdm_manufacturer = self.raw_event.get("mdm_manufacturer")
-        self.raw_event.pop("mdm_manufacturer", None)
-
-        self.mdm_model = self.raw_event.get("mdm_model")
-        self.raw_event.pop("mdm_model", None)
-
-        self.mdm_operating_system = self.raw_event.get("mdm_operating_system")
-        self.raw_event.pop("mdm_operating_system", None)
-
-        self.mdm_os_version = self.raw_event.get("mdm_os_version")
-        self.raw_event.pop("mdm_os_version", None)
-
-        self.mdm_provider = self.raw_event.get("mdm_provider")
-        self.raw_event.pop("mdm_provider", None)
-
-        self.coa_source = self.raw_event.get("coa_source")
-        self.raw_event.pop("coa_source", None)
-
-        self.pre_mdm_compliance = self.raw_event.get("pre_mdm_compliance")
-        self.raw_event.pop("pre_mdm_compliance", None)
-
-        # AP/BSSID that has seen the client (list)
-        self.aps = self.raw_event.get("aps")
-        self.raw_event.pop("aps", None)
-
-        self.bssids = self.raw_event.get("bssids")
-        self.raw_event.pop("bssids", None)
-
-        # The client IP address
-        self.client_ip = self.raw_event.get("client_ip")
-        self.raw_event.pop("client_ip", None)
-
-        self.client_ips = self.raw_event.get("client_ips")
-        self.raw_event.pop("client_ips", None)
-
-        # Session times
-        self.session_duration_in_mins = self.raw_event.get(
+        # Session information
+        self.session_duration_in_mins = self.event.get(
             "session_duration_in_mins"
         )
-        self.raw_event.pop("session_duration_in_mins", None)
-
-        self.session_ended_at = self.raw_event.get("session_ended_at")
-        self.raw_event.pop("session_ended_at", None)
-
-        self.session_last_updated_at = self.raw_event.get(
+        self.session_ended_at = self.event.get("session_ended_at")
+        self.session_last_updated_at = self.event.get(
             "session_last_updated_at"
         )
-        self.raw_event.pop("session_last_updated_at", None)
-
-        self.session_started_at = self.raw_event.get("session_started_at")
-        self.raw_event.pop("session_started_at", None)
-
-        # Session bytes and packets
-        self.total_bytes_received = self.raw_event.get("total_bytes_received")
-        self.raw_event.pop("total_bytes_received", None)
-
-        self.total_bytes_sent = self.raw_event.get("total_bytes_sent")
-        self.raw_event.pop("total_bytes_sent", None)
-
-        self.total_packets_received = self.raw_event.get(
+        self.session_started_at = self.event.get("session_started_at")
+        self.total_bytes_received = self.event.get("total_bytes_received")
+        self.total_bytes_sent = self.event.get("total_bytes_sent")
+        self.total_packets_received = self.event.get(
             "total_packets_received"
         )
-        self.raw_event.pop("total_packets_received", None)
+        self.total_packets_sent = self.event.get("total_packets_sent")
+        self.rx_bytes = self.event.get("rx_bytes")
+        self.rx_pkts = self.event.get("rx_pkts")
+        self.tx_bytes = self.event.get("tx_bytes")
+        self.tx_pkts = self.event.get("tx_pkts")
 
-        self.total_packets_sent = self.raw_event.get("total_packets_sent")
-        self.raw_event.pop("total_packets_sent", None)
-
-        self.rx_bytes = self.raw_event.get("rx_bytes")
-        self.raw_event.pop("rx_bytes", None)
-
-        self.rx_pkts = self.raw_event.get("rx_pkts")
-        self.raw_event.pop("rx_pkts", None)
-
-        self.tx_bytes = self.raw_event.get("tx_bytes")
-        self.raw_event.pop("tx_bytes", None)
-
-        self.tx_pkts = self.raw_event.get("tx_pkts")
-        self.raw_event.pop("tx_pkts", None)
+        # Other useful fields
+        self.site_id = self.event.get("site_id")
+        self.type = self.event.get("type")
+        self.text = self.event.get("text")
 
     def _parse(
         self,
@@ -597,7 +430,7 @@ class NacEvent(Events):
         if self.parsed_event_type not in config:
             logging.info(
                 "New type of NAC Event alert: %s",
-                self.original_event
+                self.event
             )
 
         # Debug if there's not enough information
@@ -609,7 +442,7 @@ class NacEvent(Events):
                 "NAC event without enough information:\n",
                 f"{self.parsed_client_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                f"Original event: {self.original_event}\n",
+                f"Original event: {self.event}\n",
             )
 
 
@@ -640,94 +473,46 @@ class ClientEvent(Events):
         """
 
         # Get the timestamp (epoch) that the event occurred
-        self.timestamp = self.raw_event.get("timestamp")
-        self.raw_event.pop("timestamp", None)
+        self.timestamp = self.event.get("timestamp")
 
         # If no timestamp is provided, use the current time
         if not self.timestamp:
             self.timestamp = datetime.now()
 
-        # Event Fields
-        self.ap = self.raw_event.get("ap")
-        self.raw_event.pop("ap", None)
+        # Client Details
+        self.client_family = self.event.get("client_family")
+        self.client_manufacture = self.event.get("client_manufacture")
+        self.client_model = self.event.get("client_model")
+        self.client_os = self.event.get("client_os")
+        self.mac = self.event.get("mac")
+        self.random_mac = self.event.get("random_mac")
+        self.client_hostname = self.event.get("client_hostname")
+        self.client_username = self.event.get("client_username")
+        self.client_ip = self.event.get("client_ip")
 
-        self.ap_name = self.raw_event.get("ap_name")
-        self.raw_event.pop("ap_name", None)
+        # Network Details
+        self.ap = self.event.get("ap")
+        self.ap_name = self.event.get("ap_name")
+        self.next_ap = self.event.get("next_ap")
+        self.band = self.event.get("band")
+        self.wlan_id = self.event.get("wlan_id")
+        self.ssid = self.event.get("ssid")
+        self.bssid = self.event.get("bssid")
+        self.rssi = self.event.get("rssi")
+        self.ip = self.event.get("ip")
 
-        self.band = self.raw_event.get("band")
-        self.raw_event.pop("band", None)
+        # Connect/Disconnect Details
+        self.connect = self.event.get("connect")
+        self.connect_float = self.event.get("connect_float")
+        self.disconnect = self.event.get("disconnect")
+        self.disconnect_float = self.event.get("disconnect_float")
+        self.duration = self.event.get("duration")
+        self.termination_reason = self.event.get("termination_reason")
 
-        self.bssid = self.raw_event.get("bssid")
-        self.raw_event.pop("bssid", None)
-
-        self.client_family = self.raw_event.get("client_family")
-        self.raw_event.pop("client_family", None)
-
-        self.client_manufacture = self.raw_event.get("client_manufacture")
-        self.raw_event.pop("client_manufacture", None)
-
-        self.client_model = self.raw_event.get("client_model")
-        self.raw_event.pop("client_model", None)
-
-        self.client_os = self.raw_event.get("client_os")
-        self.raw_event.pop("client_os", None)
-
-        self.connect = self.raw_event.get("connect")
-        self.raw_event.pop("connect", None)
-
-        self.connect_float = self.raw_event.get("connect_float")
-        self.raw_event.pop("connect_float", None)
-
-        self.disconnect = self.raw_event.get("disconnect")
-        self.raw_event.pop("disconnect", None)
-
-        self.disconnect_float = self.raw_event.get("disconnect_float")
-        self.raw_event.pop("disconnect_float", None)
-
-        self.duration = self.raw_event.get("duration")
-        self.raw_event.pop("duration", None)
-
-        self.mac = self.raw_event.get("mac")
-        self.raw_event.pop("mac", None)
-
-        self.next_ap = self.raw_event.get("next_ap")
-        self.raw_event.pop("next_ap", None)
-
-        self.random_mac = self.raw_event.get("random_mac")
-        self.raw_event.pop("random_mac", None)
-
-        self.rssi = self.raw_event.get("rssi")
-        self.raw_event.pop("rssi", None)
-
-        self.site_id = self.raw_event.get("site_id")
-        self.raw_event.pop("site_id", None)
-
-        self.site_name = self.raw_event.get("site_name")
-        self.raw_event.pop("site_name", None)
-
-        self.ssid = self.raw_event.get("ssid")
-        self.raw_event.pop("ssid", None)
-
-        self.termination_reason = self.raw_event.get("termination_reason")
-        self.raw_event.pop("termination_reason", None)
-
-        self.version = self.raw_event.get("version")
-        self.raw_event.pop("version", None)
-
-        self.wlan_id = self.raw_event.get("wlan_id")
-        self.raw_event.pop("wlan_id", None)
-
-        self.client_hostname = self.raw_event.get("client_hostname")
-        self.raw_event.pop("client_hostname", None)
-
-        self.client_ip = self.raw_event.get("client_ip")
-        self.raw_event.pop("client_ip", None)
-
-        self.client_username = self.raw_event.get("client_username")
-        self.raw_event.pop("client_username", None)
-
-        self.ip = self.raw_event.get("ip")
-        self.raw_event.pop("ip", None)
+        # Other useful fields
+        self.site_id = self.event.get("site_id")
+        self.site_name = self.event.get("site_name")
+        self.version = self.event.get("version")
 
     def _parse(
         self,
@@ -787,7 +572,7 @@ class ClientEvent(Events):
         if self.parsed_event_type not in config:
             logging.info(
                 "New type of Client Event alert: %s",
-                self.original_event
+                self.event
             )
 
         # Debug if there's not enough information
@@ -800,7 +585,7 @@ class ClientEvent(Events):
                 "Client event without enough information:\n",
                 f"{self.parsed_client_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                f"Original event: {self.original_event}\n"
+                f"Original event: {self.event}\n"
             )
 
 
@@ -830,81 +615,38 @@ class DeviceEvents(Events):
         This is a helper function to collect fields from the raw event.
         """
 
-        # Event Fields
-        self.device_name = self.raw_event.get("device_name")
-        self.raw_event.pop("device_name", None)
+        # The timestamp (epoch) that the event occurred
+        self.timestamp = self.event.get("timestamp")
 
-        self.device_type = self.raw_event.get("device_type")
-        self.raw_event.pop("device_type", None)
+        # Device Details
+        self.device_name = self.event.get("device_name")
+        self.device_type = self.event.get("device_type")
+        self.type = self.event.get("type")
+        self.mac = self.event.get("mac")
+        self.model = self.event.get("model")
+        self.port_id = self.event.get("port_id")
 
-        self.mac = self.raw_event.get("mac")
-        self.raw_event.pop("mac", None)
+        # WiFi device Details
+        self.ap = self.event.get("ap")
+        self.ap_name = self.event.get("ap_name")
+        self.band = self.event.get("band")
+        self.bandwidth = self.event.get("bandwidth")
+        self.channel = self.event.get("channel")
+        self.power = self.event.get("power")
+        self.pre_bandwidth = self.event.get("pre_bandwidth")
+        self.pre_channel = self.event.get("pre_channel")
+        self.pre_power = self.event.get("pre_power")
+        self.pre_usage = self.event.get("pre_usage")
+        self.usage = self.event.get("usage")
 
-        self.model = self.raw_event.get("model")
-        self.raw_event.pop("model", None)
-
-        self.port_id = self.raw_event.get("port_id")
-        self.raw_event.pop("port_id", None)
-
-        self.site_id = self.raw_event.get("site_id")
-        self.raw_event.pop("site_id", None)
-
-        self.site_name = self.raw_event.get("site_name")
-        self.raw_event.pop("site_name", None)
-
-        self.text = self.raw_event.get("text")
-        self.raw_event.pop("text", None)
-
-        self.timestamp = self.raw_event.get("timestamp")
-        self.raw_event.pop("timestamp", None)
-
-        self.type = self.raw_event.get("type")
-        self.raw_event.pop("type", None)
-
-        self.ap = self.raw_event.get("ap")
-        self.raw_event.pop("ap", None)
-
-        self.ap_name = self.raw_event.get("ap_name")
-        self.raw_event.pop("ap_name", None)
-
-        self.ev_type = self.raw_event.get("ev_type")
-        self.raw_event.pop("ev_type", None)
-
-        self.reason = self.raw_event.get("reason")
-        self.raw_event.pop("reason", None)
-
-        self.ext_ip = self.raw_event.get("ext_ip")
-        self.raw_event.pop("ext_ip", None)
-
-        self.audit_id = self.raw_event.get("audit_id")
-        self.raw_event.pop("audit_id", None)
-
-        self.band = self.raw_event.get("band")
-        self.raw_event.pop("band", None)
-
-        self.bandwidth = self.raw_event.get("bandwidth")
-        self.raw_event.pop("bandwidth", None)
-
-        self.channel = self.raw_event.get("channel")
-        self.raw_event.pop("channel", None)
-
-        self.power = self.raw_event.get("power")
-        self.raw_event.pop("power", None)
-
-        self.pre_bandwidth = self.raw_event.get("pre_bandwidth")
-        self.raw_event.pop("pre_bandwidth", None)
-
-        self.pre_channel = self.raw_event.get("pre_channel")
-        self.raw_event.pop("pre_channel", None)
-
-        self.pre_power = self.raw_event.get("pre_power")
-        self.raw_event.pop("pre_power", None)
-
-        self.pre_usage = self.raw_event.get("pre_usage")
-        self.raw_event.pop("pre_usage", None)
-
-        self.usage = self.raw_event.get("usage")
-        self.raw_event.pop("usage", None)
+        # Other useful fields
+        self.site_id = self.event.get("site_id")
+        self.site_name = self.event.get("site_name")
+        self.text = self.event.get("text")
+        self.ev_type = self.event.get("ev_type")
+        self.reason = self.event.get("reason")
+        self.ext_ip = self.event.get("ext_ip")
+        self.audit_id = self.event.get("audit_id")
 
     def _parse(
         self,
@@ -986,7 +728,7 @@ class DeviceEvents(Events):
         if self.parsed_event_type not in config:
             logging.info(
                 "New type of Device Event alert: %s",
-                self.original_event
+                self.event
             )
 
         # Debug if there's not enough information
@@ -999,7 +741,7 @@ class DeviceEvents(Events):
                 "Device event without enough information:\n",
                 f"{self.parsed_device_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                f"Original event: {self.original_event}\n"
+                f"Original event: {self.event}\n"
             )
 
 
@@ -1029,131 +771,57 @@ class Alarms(Events):
         This is a helper function to collect fields from the raw event.
         """
 
-        # Event Fields
-        self.count = self.raw_event.get("count")
-        self.raw_event.pop("count", None)
+        # The timestamp (epoch) that the event occurred
+        self.timestamp = self.event.get("timestamp")
 
-        self.group = self.raw_event.get("group")
-        self.raw_event.pop("group", None)
+        # Alert Details
+        self.severity = self.event.get("severity")
+        self.reasons = self.event.get("reasons")
+        self.start = self.event.get("start")
+        self.when = self.event.get("when")
+        self.alert_id = self.event.get("alert_id")
+        self.category = self.event.get("category")
+        self.details = self.event.get("details")
+        self.email_content = self.event.get("email_content")
+        self.resolved_time = self.event.get("resolved_time")
+        self.root_cause = self.event.get("root_cause")
+        self.status = self.event.get("status")
+        self.suggestion = self.event.get("suggestion")
+        self.message = self.event.get("message")
+        self.last_seen = self.event.get("last_seen")
 
-        self.fw_version = self.raw_event.get("fw_version")
-        self.raw_event.pop("fw_version", None)
+        # Device/Client Information
+        self.type = self.event.get("type")
+        self.model = self.event.get("model")
+        self.fw_version = self.event.get("fw_version")
+        self.hostnames = self.event.get("hostnames")
+        self.id = self.event.get("id")
+        self.port_ids = self.event.get("port_ids")
+        self.vlans = self.event.get("vlans")
+        self.macs = self.event.get("macs")
+        self.hostname = self.event.get("hostname")
 
-        self.hostnames = self.raw_event.get("hostnames")
-        self.raw_event.pop("hostnames", None)
+        # Network Information
+        self.aps = self.event.get("aps")
+        self.ssids = self.event.get("ssids")
+        self.switches = self.event.get("switches")
+        self.wlan_ids = self.event.get("wlan_ids")
+        self.port_id = self.event.get("port_id")
 
-        self.id = self.raw_event.get("id")
-        self.raw_event.pop("id", None)
-
-        self.last_seen = self.raw_event.get("last_seen")
-        self.raw_event.pop("last_seen", None)
-
-        self.model = self.raw_event.get("model")
-        self.raw_event.pop("model", None)
-
-        self.peer = self.raw_event.get("peer")
-        self.raw_event.pop("peer", None)
-
-        self.port_ids = self.raw_event.get("port_ids")
-        self.raw_event.pop("port_ids", None)
-
-        self.reasons = self.raw_event.get("reasons")
-        self.raw_event.pop("reasons", None)
-
-        self.severity = self.raw_event.get("severity")
-        self.raw_event.pop("severity", None)
-
-        self.site_id = self.raw_event.get("site_id")
-        self.raw_event.pop("site_id", None)
-
-        self.site_name = self.raw_event.get("site_name")
-        self.raw_event.pop("site_name", None)
-
-        self.switches = self.raw_event.get("switches")
-        self.raw_event.pop("switches", None)
-
-        self.timestamp = self.raw_event.get("timestamp")
-        self.raw_event.pop("timestamp", None)
-
-        self.type = self.raw_event.get("type")
-        self.raw_event.pop("type", None)
-
-        self.aps = self.raw_event.get("aps")
-        self.raw_event.pop("aps", None)
-
-        self.client_count = self.raw_event.get("client_count")
-        self.raw_event.pop("client_count", None)
-
-        self.incident_count = self.raw_event.get("incident_count")
-        self.raw_event.pop("incident_count", None)
-
-        self.macs = self.raw_event.get("macs")
-        self.raw_event.pop("macs", None)
-
-        self.servers = self.raw_event.get("servers")
-        self.raw_event.pop("servers", None)
-
-        self.ssids = self.raw_event.get("ssids")
-        self.raw_event.pop("ssids", None)
-
-        self.start = self.raw_event.get("start")
-        self.raw_event.pop("start", None)
-
-        self.vlans = self.raw_event.get("vlans")
-        self.raw_event.pop("vlans", None)
-
-        self.when = self.raw_event.get("when")
-        self.raw_event.pop("when", None)
-
-        self.wlan_ids = self.raw_event.get("wlan_ids")
-        self.raw_event.pop("wlan_ids", None)
-
-        self.alert_id = self.raw_event.get("alert_id")
-        self.raw_event.pop("alert_id", None)
-
-        self.category = self.raw_event.get("category")
-        self.raw_event.pop("category", None)
-
-        self.details = self.raw_event.get("details")
-        self.raw_event.pop("details", None)
-
-        self.email_content = self.raw_event.get("email_content")
-        self.raw_event.pop("email_content", None)
-
-        self.impacted_client_count = self.raw_event.get(
+        # Other useful fields
+        self.count = self.event.get("count")
+        self.group = self.event.get("group")
+        self.peer = self.event.get("peer")
+        self.site_id = self.event.get("site_id")
+        self.site_name = self.event.get("site_name")
+        self.client_count = self.event.get("client_count")
+        self.incident_count = self.event.get("incident_count")
+        self.servers = self.event.get("servers")
+        self.impacted_client_count = self.event.get(
             "impacted_client_count"
         )
-        self.raw_event.pop("impacted_client_count", None)
-
-        self.impacted_entities = self.raw_event.get("impacted_entities")
-        self.raw_event.pop("impacted_entities", None)
-
-        self.org_name = self.raw_event.get("org_name")
-        self.raw_event.pop("org_name", None)
-
-        self.resolved_time = self.raw_event.get("resolved_time")
-        self.raw_event.pop("resolved_time", None)
-
-        self.root_cause = self.raw_event.get("root_cause")
-        self.raw_event.pop("root_cause", None)
-
-        self.status = self.raw_event.get("status")
-        self.raw_event.pop("status", None)
-
-        self.suggestion = self.raw_event.get("suggestion")
-        self.raw_event.pop("suggestion", None)
-
-        self.port_id = self.raw_event.get("port_id")
-        self.raw_event.pop("port_id", None)
-
-        self.hostname = self.raw_event.get("hostname")
-        self.raw_event.pop("hostname", None)
-
-        self.message = self.raw_event.get("message")
-        self.raw_event.pop("message", None)
-
-        self.admin_name = self.raw_event.get("admin_name")
-        self.raw_event.pop("admin_name", None)
+        self.impacted_entities = self.event.get("impacted_entities")
+        self.admin_name = self.event.get("admin_name")
 
     def _parse(
         self,
@@ -1289,7 +957,7 @@ class Alarms(Events):
         if self.parsed_event_type not in config:
             logging.info(
                 "New type of Alarm Event alert: %s",
-                self.original_event
+                self.event
             )
 
         # Debug if there's not enough information
@@ -1302,7 +970,7 @@ class Alarms(Events):
                 "Alarm event without enough information:\n",
                 f"{self.parsed_device_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                f"Original event: {self.original_event}\n"
+                f"Original event: {self.event}\n"
             )
 
 
@@ -1332,42 +1000,27 @@ class Audits(Events):
         This is a helper function to collect fields from the raw event.
         """
 
-        # Event Fields
-        self.admin_name = self.raw_event.get("admin_name")
-        self.raw_event.pop("admin_name", None)
+        # The timestamp (epoch) that the event occurred
+        self.timestamp = self.event.get("timestamp")
 
-        self.after = self.raw_event.get("after")
-        self.raw_event.pop("after", None)
+        # Admin Details
+        self.admin_name = self.event.get("admin_name")
+        self.src_ip = self.event.get("src_ip")
+        self.user_agent = self.event.get("user_agent")
 
-        self.before = self.raw_event.get("before")
-        self.raw_event.pop("before", None)
+        # Device Details
+        self.device_id = self.event.get("device_id")
+        self.site_id = self.event.get("site_id")
+        self.site_name = self.event.get("site_name")
 
-        self.id = self.raw_event.get("id")
-        self.raw_event.pop("id", None)
+        # Config changes
+        self.after = self.event.get("after")
+        self.before = self.event.get("before")
 
-        self.message = self.raw_event.get("message")
-        self.raw_event.pop("message", None)
-
-        self.src_ip = self.raw_event.get("src_ip")
-        self.raw_event.pop("src_ip", None)
-
-        self.timestamp = self.raw_event.get("timestamp")
-        self.raw_event.pop("timestamp", None)
-
-        self.user_agent = self.raw_event.get("user_agent")
-        self.raw_event.pop("user_agent", None)
-
-        self.webhook_id = self.raw_event.get("webhook_id")
-        self.raw_event.pop("webhook_id", None)
-
-        self.site_id = self.raw_event.get("site_id")
-        self.raw_event.pop("site_id", None)
-
-        self.site_name = self.raw_event.get("site_name")
-        self.raw_event.pop("site_name", None)
-
-        self.device_id = self.raw_event.get("device_id")
-        self.raw_event.pop("device_id", None)
+        # Other useful fields
+        self.id = self.event.get("id")
+        self.message = self.event.get("message")
+        self.webhook_id = self.event.get("webhook_id")
 
     def _parse(
         self,
@@ -1447,7 +1100,7 @@ class Audits(Events):
         if self.parsed_event_type not in config:
             logging.info(
                 "New type of Audit alert: %s",
-                self.original_event
+                self.event
             )
 
         # Debug if there's not enough information
@@ -1459,7 +1112,7 @@ class Audits(Events):
                 "Audit event without enough information:\n",
                 f"{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                f"Original event: {self.original_event}\n"
+                f"Original event: {self.event}\n"
             )
 
 
@@ -1489,48 +1142,25 @@ class DeviceUpdowns(Events):
         This is a helper function to collect fields from the raw event.
         """
 
-        # Event Fields
-        self.ap = self.raw_event.get("ap")
-        self.raw_event.pop("ap", None)
+        # The timestamp (epoch) that the event occurred
+        self.timestamp = self.event.get("timestamp")
 
-        self.ap_name = self.raw_event.get("ap_name")
-        self.raw_event.pop("ap_name", None)
+        # Device Details
+        self.device_type = self.event.get("device_type")
+        self.device_name = self.event.get("device_name")
+        self.ap = self.event.get("ap")
+        self.ap_name = self.event.get("ap_name")
+        self.mac = self.event.get("mac")
+        self.model = self.event.get("model")
 
-        self.audit_id = self.raw_event.get("audit_id")
-        self.raw_event.pop("audit_id", None)
-
-        self.device_name = self.raw_event.get("device_name")
-        self.raw_event.pop("device_name", None)
-
-        self.device_type = self.raw_event.get("device_type")
-        self.raw_event.pop("device_type", None)
-
-        self.ev_type = self.raw_event.get("ev_type")
-        self.raw_event.pop("ev_type", None)
-
-        self.mac = self.raw_event.get("mac")
-        self.raw_event.pop("mac", None)
-
-        self.reason = self.raw_event.get("reason")
-        self.raw_event.pop("reason", None)
-
-        self.site_id = self.raw_event.get("site_id")
-        self.raw_event.pop("site_id", None)
-
-        self.site_name = self.raw_event.get("site_name")
-        self.raw_event.pop("site_name", None)
-
-        self.timestamp = self.raw_event.get("timestamp")
-        self.raw_event.pop("timestamp", None)
-
-        self.type = self.raw_event.get("type")
-        self.raw_event.pop("type", None)
-
-        self.ext_ip = self.raw_event.get("ext_ip")
-        self.raw_event.pop("ext_ip", None)
-
-        self.model = self.raw_event.get("model")
-        self.raw_event.pop("model", None)
+        # Other useful fields
+        self.audit_id = self.event.get("audit_id")
+        self.ev_type = self.event.get("ev_type")
+        self.reason = self.event.get("reason")
+        self.site_id = self.event.get("site_id")
+        self.site_name = self.event.get("site_name")
+        self.type = self.event.get("type")
+        self.ext_ip = self.event.get("ext_ip")
 
     def _parse(
         self,
@@ -1603,7 +1233,7 @@ class DeviceUpdowns(Events):
         if self.parsed_event_type not in config:
             logging.info(
                 "New type of Device Up/Down Event alert: %s",
-                self.original_event
+                self.event
             )
 
         # Debug if there's not enough information
@@ -1616,7 +1246,7 @@ class DeviceUpdowns(Events):
                 "Device Updown event without enough information:\n",
                 f"{self.parsed_device_type}.{self.parsed_event_type}\n",
                 f"Message: {self.parsed_message}\n",
-                f"Original event: {self.original_event}\n"
+                f"Original event: {self.event}\n"
             )
 
 
