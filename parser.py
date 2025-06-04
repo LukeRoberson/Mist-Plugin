@@ -8,10 +8,6 @@ Each class corresponds to a specific event type
 Subclasses of Events extract relevant fields, parse event data,
     and perform configured actions.
 
-Functions:
-    - send_log: Sends a log message to the logging service.
-        This is used to log events and errors.
-
 Classes:
     - NacEvent: Represents a NAC event object.
     - ClientEvent: Represents a client session object.
@@ -24,8 +20,7 @@ Classes:
 
 from datetime import datetime
 import logging
-
-from systemlog import system_log
+from flask import current_app
 
 
 # Set up logging
@@ -40,6 +35,10 @@ class Events:
         and handling webhook events.
     Subclasses should override the _collect_fields and _parse methods
         to extract and process event-specific data.
+
+    Args:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
     """
 
     def __init__(
@@ -165,6 +164,7 @@ class Events:
             return
 
         # Log to logging service
+        system_log = current_app.config['SYSTEM_LOG']
         system_log.log(
             message=self.event_message,
             destination=action_list,

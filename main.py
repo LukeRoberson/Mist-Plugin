@@ -16,10 +16,13 @@ Routes:
 """
 
 from flask import Flask, request, jsonify
+
 import yaml
 import logging
 import requests
 from typing import Optional
+import os
+from flask_session import Session
 
 from parser import (
     NacEvent,
@@ -29,7 +32,7 @@ from parser import (
     Audits,
     DeviceUpdowns
 )
-from systemlog import system_log
+from systemlog import SystemLog
 
 
 # Get global config
@@ -44,18 +47,13 @@ except Exception as e:
         "Failed to fetch global config from web interface."
         f" Error: {e}"
     )
-    system_log.send_log(
-        "Failed to fetch global config from web interface."
-        f" Error: {e}",
-        severity="critical"
-    )
 
 if global_config is None:
-    system_log.send_log(
-        "Could not load global config from web interface",
-        severity="critical"
-    )
     raise RuntimeError("Could not load global config from web interface")
+
+# Load the plugin configuration file
+with open('config.yaml', 'r') as f:
+    config_data = yaml.safe_load(f)
 
 # Set up logging
 log_level_str = global_config['config']['web']['logging-level'].upper()
@@ -63,13 +61,25 @@ log_level = getattr(logging, log_level_str, logging.INFO)
 logging.basicConfig(level=log_level)
 logging.info("Logging level set to: %s", log_level_str)
 
+# Initialize the SystemLog with default values
+#   Values can be overridden when sending a log
+system_log = SystemLog(
+    logging_url="http://logging:5100/api/log",
+    source="mist-plugin",
+    destination=["web"],
+    group="plugin",
+    category="mist",
+    alert="system",
+    severity="info",
+    teams_chat_id=config_data.get('chat-id', None)
+)
+
 # Initialize the Flask application
 app = Flask(__name__)
-
-
-# Load the configuration file
-with open('config.yaml', 'r') as f:
-    config_data = yaml.safe_load(f)
+app.config['SECRET_KEY'] = os.getenv('api_master_pw')
+app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SYSTEM_LOG'] = system_log
+Session(app)
 
 
 def get_event_manager(

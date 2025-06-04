@@ -16,10 +16,6 @@ class SystemLog:
     '''
     Class to manage system logs.
     Gets logs, and sends them to the logging service.
-
-    Methods:
-        __init__: Initialise the SystemLog class with default values.
-        log: Send a log message to the logging service.
     '''
 
     def __init__(
@@ -31,6 +27,7 @@ class SystemLog:
         category: str,
         alert: str,
         severity: str,
+        teams_chat_id: str = None,
     ) -> None:
         '''
         Initialise the SystemLog class.
@@ -58,6 +55,9 @@ class SystemLog:
         self.category = category
         self.alert = alert
         self.severity = severity
+
+        # Optional: Teams chat ID for sending messages to Teams
+        self.teams_chat_id = teams_chat_id
 
     def log(
         self,
@@ -109,6 +109,10 @@ class SystemLog:
                         "severity": severity,
                         "timestamp": str(datetime.now()),
                         "message": message
+                    },
+                    "teams": {
+                        "destination": self.teams_chat_id,
+                        "message": message
                     }
                 },
                 timeout=3
@@ -140,15 +144,3 @@ class SystemLog:
             return False
 
         return True
-
-
-# Initialize the SystemLog with default values
-system_log = SystemLog(
-    logging_url="http://logging:5100/api/log",
-    source="mist-plugin",
-    destination=["web"],
-    group="plugin",
-    category="mist",
-    alert="system",
-    severity="info"
-)

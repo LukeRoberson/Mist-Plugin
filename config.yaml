@@ -1,5 +1,7 @@
 name: "mist"
 
+chat-id: "19:1c9b05f9-199e-40ce-9c7b-b7614b7ea7d8_1f53061b-8d51-49ac-9c8a-bbf1cebd5ab6@unq.gbl.spaces"
+
 nac-events:
   NAC_ACCOUNTING_START:
     web: false
