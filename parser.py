@@ -1,14 +1,17 @@
 """
-Webhook Parser
+Module: parser.py
 
-This module provides classes to represent and parse webhooks from
-    the Mist plugin.
-Each class corresponds to a specific event type
-    (e.g., NAC events, client sessions, device events).
-Subclasses of Events extract relevant fields, parse event data,
-    and perform configured actions.
+Parses and handles webhook events from the Mist plugin, preparing them for
+    logging to a web interface, syslog, SQL database, or Teams.
+
+Parsing involves extracting relevant fields from the raw event data, which is
+    different for each topic and event type. There is a class to represent
+    each topic.
+An event handler, configured as a YAML file, contains the logic for
+    parsing the event data and formatting the message body for each event type.
 
 Classes:
+    - Events: Base class for all event types.
     - NacEvent: Represents a NAC event object.
     - ClientEvent: Represents a client session object.
     - DeviceEvents: Represents a device event object.
@@ -21,10 +24,15 @@ Classes:
 from datetime import datetime
 import logging
 from flask import current_app
+import yaml
 
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
+
+# Get the event handler config
+with open("device_events.yaml", "r") as file:
+    DEVICE_EVENTS = yaml.safe_load(file)
 
 
 class Events:
@@ -172,6 +180,7 @@ class Events:
             category=self.category,
             alert=self.alert,
             severity=self.severity,
+            teams_msg=self.teams_msg,
         )
 
 
@@ -699,11 +708,13 @@ class DeviceEvents(Events):
             x = Device type; switch, ap, etc
             y = Event type; 'type' field
 
-        Where possible the parsed message is taken from the text field.
-
         Arguments:
             config (dict): Event handling configuration.
         """
+
+        # Set defaults
+        self.teams_msg = None
+        self.severity = "info"
 
         # Set the group
         self.group = "device"
@@ -720,45 +731,46 @@ class DeviceEvents(Events):
         else:
             self.alert = "unspecified"
 
-        # Need to set a nice message
-        if self.text:
+        # Check if a handler exists for this event type
+        handler = DEVICE_EVENTS.get(self.type)
+        if handler:
+            try:
+                # Get the regular message
+                self.event_message = handler.get(
+                    "message",
+                    "No message included"
+                ).format(self=self)
+
+                # If there is a teams message (optional), get it too
+                self.teams_msg = handler.get("teams", None)
+                if self.teams_msg:
+                    self.teams_msg = self.teams_msg.format(self=self)
+
+                # Get the severity from the handler, default to "info"
+                self.severity = handler.get("severity", "info")
+
+            # Fallback to default message if formatting fails
+            except Exception as e:
+                logging.error(
+                    f"Error formatting event message for {self.type}: {e}"
+                )
+                self.event_message = "No message included"
+                self.teams_msg = str(self.event)
+                self.severity = "warning"
+
+        # Handle events that weren't in the event handler
+        elif self.text:
             self.event_message = self.text
-        elif self.type == 'AP_RESTARTED':
-            self.event_message = (
-                f"{self.ap_name} at {self.site_name} has restarted "
-                f"({self.reason})"
-            )
-        elif self.type == 'AP_RESTART_BY_USER':
-            self.event_message = (
-                f"{self.ap_name} at {self.site_name} has been restarted "
-                f"by an administrator"
-            )
-        elif self.type == 'AP_CONNECTED':
-            self.event_message = (
-                f"{self.ap_name} at {self.site_name} has connected "
-            )
-        elif self.type == 'AP_DISCONNECTED':
-            self.event_message = (
-                f"{self.ap_name} at {self.site_name} has disconnected "
-            )
-        elif self.type == 'AP_CONFIGURED':
-            self.event_message = (
-                f"{self.ap_name} at {self.site_name} has been configured"
-            )
-        elif (
-            self.type == 'AP_CONFIG_CHANGED_BY_RRM' or
-            self.type == 'AP_RRM_ACTION'
-        ):
-            self.event_message = (
-                f"{self.ap_name} at {self.site_name} has been tuned by RRM"
-            )
+            self.teams_msg = str(f"Unhandled event: {self.event}")
         else:
             self.event_message = "No message included"
+            self.teams_msg = str(f"Unhandled event: {self.event}")
 
-        # Set the severity
-        self.severity = "info"
+        # If a teams message is not set, default to the event message
+        if self.teams_msg is None:
+            self.teams_msg = self.event_message
 
-        # Create webhook body
+        # Collect all the information we need into a single dictionary
         self.parsed_body = {
             "source": "mist",
             "destination": ["web"],

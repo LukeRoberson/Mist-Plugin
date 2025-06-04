@@ -1,0 +1,66 @@
+JSON body format for device webhooks
+
+
+--------
+Switches
+--------
+Unless specified, they all follow the format below.
+The 'type' will be "SW_PORT_DOWN" or similar.
+
+{
+    "device_name": "Switch name",
+    "device_type": "switch",
+    "mac": "50c709xxxxxx",
+    "model": "EX3400-48P",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "port_id": "ge-0/0/31",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Site Name",
+    "text": "A Mist generated summary",
+    "timestamp": 1749073244,
+    "type": "SW_PORT_DOWN"
+}
+
+
+Sample text fields
+------------------
+SW_PORT_DOWN
+    "ifIndex 546, ifAdminStatus up(1), ifOperStatus down(2), ifName ge-0/0/31 Port Description: Management"
+SW_PORT_UP
+    "ifIndex 519, ifAdminStatus up(1), ifOperStatus up(1), ifName ge-0/0/4"
+SW_DOT1XD_USR_AUTHENTICATED
+    "Custom_log Dot1x User gmrichardson@lakemac.nsw.gov.au logged in MacAddress c4:d6:d3:7b:37:26 interface ge-0/0/32.0 vlan Workstations"
+SW_DOT1XD_USR_SESSION_DISCONNECTED
+    "Dot1x User ac91a1xxxxxx session with MacAddress ac:91:a1:xx:xx:xx interface ge-0/0/2.0 vlan (null) disconnected"
+SW_DOT1XD_USR_SESSION_HELD
+    "Dot1x User host/host.example.com session with MacAddress 6c:2b:59:xx:xx:xx interface ge-0/0/5.0 vlan (null) is held"
+SW_DOT1XD_USR_ON_SRVR_REJECT_VLAN
+    "MAC-RADIUS User ac91a1xxxxxx logged in MacAddress ac:91:a1:xx:xx:xx interface ge-0/0/2.0 authenticated on server reject vlan Public_Internet"
+SW_ALARM_OPTICS_IFACE_SFP_LOW
+    "xe-0/0/0: LaserBiasCurrent of optical interface is low (131.07 mA) < (131.07 mA); xe-0/0/0: TX power of optical interface is low (8.16 dBm) < (8.16 dBm); xe-0/0/0: ModuleVoltage of optical interface is low (6.55 V) < (6.55 V); xe-0/0/0: ModuleTemperature of optical interface is low (0.00 C/F) < (-0.00 C/F); xe-0/0/0: RX power of optical interface is low (8.16 dBm) < (8.16 dBm)"
+SW_LACP_RX_STALE
+    "LACP RX of interface ae340 xe-0/0/30 is no longer increasing"
+SW_MAC_LIMIT_RESET
+    "Resumed adding MAC addresses learned by ge-0/0/6.0; current count is 0"
+
+
+
+------
+MARVIS
+------
+
+CONNECTIVITY_TEST (Access Point)
+{
+    "ap": "d4dc09xxxxxx",
+    "ap_name": "AP Name",
+    "device_name": "Device Name",
+    "device_type": "ap",
+    "mac": "d4dc09xxxxxx",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Site Name",
+    "text": "A connectivity test was triggered automatically.",
+    "timestamp": 1749073097,
+    "type": "CONNECTIVITY_TEST"
+}
+

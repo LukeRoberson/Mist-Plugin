@@ -1,6 +1,8 @@
 """
-Classes to manage system logs.
-This sends logs to the logging service to manage.
+Module: systemlog.py
+
+Manage system and event logs from the plugin. The plugin will parse webhooks
+    and send logs to the logging service.
 
 Classes:
     SystemLog: Class to manage system logs.
@@ -12,10 +14,31 @@ import requests
 from datetime import datetime
 
 
+# Default values for logging
+DEFAULT_LOGGING_URL = "http://logging:5100/api/log"
+DEFAULT_SOURCE = "mist-plugin"
+DEFAULT_DESTINATION = ["web"]
+DEFAULT_GROUP = "plugin"
+DEFAULT_CATEGORY = "mist"
+DEFAULT_ALERT = "system"
+DEFAULT_SEVERITY = "info"
+
+
 class SystemLog:
     '''
     Class to manage system logs.
     Gets logs, and sends them to the logging service.
+
+    Attributes:
+        logging_url (str): The URL of the logging service API.
+        source (str): The source of the log message.
+        destination (list): The destinations for the log message.
+        group (str): The group to which the log message belongs.
+        category (str): The category of the log message.
+        alert (str): The alert type for the log message.
+        severity (str): The severity level of the log message.
+        teams_chat_id (str): Optional Teams chat ID for sending
+            messages to Teams.
     '''
 
     def __init__(
@@ -68,6 +91,7 @@ class SystemLog:
         category: str = None,
         alert: str = None,
         severity: str = None,
+        teams_msg: str = None
     ) -> bool:
         """
         Send a log message to the logging service.
@@ -95,6 +119,10 @@ class SystemLog:
         alert = alert or self.alert
         severity = severity or self.severity
 
+        # If no Teams message is provided, use the log message
+        if teams_msg is None:
+            teams_msg = message
+
         # Send a log as a webhook to the logging service
         try:
             result = requests.post(
@@ -112,7 +140,7 @@ class SystemLog:
                     },
                     "teams": {
                         "destination": self.teams_chat_id,
-                        "message": message
+                        "message": teams_msg
                     }
                 },
                 timeout=3

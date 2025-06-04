@@ -1,0 +1,92 @@
+# Definitions to parse device events from Mist webhooks
+# A list of device events that can be parsed from Mist webhooks.
+# Definitions below contain:
+# - description: A short description of the event. This is used for documentation purposes.
+# - message: A message template that will be used to format the event message.
+# - teams: Optional message template for Microsoft Teams notifications. If not provided, the other message will be used.
+# - severity: The severity of the event, which can be "debug", "info" "warning", "error", or "critical".
+
+
+# Switch Events
+SW_PORT_DOWN:
+  description: "Switch port down event"
+  message: "Switch port {self.port_id} on {self.device_name} at {self.site_name} has gone down"
+  severity: "info"
+
+SW_PORT_UP:
+  description: "Switch port up event"
+  message: "Switch port {self.port_id} on {self.device_name} at {self.site_name} has come up"
+  severity: "debug"
+
+SW_DOT1XD_USR_AUTHENTICATED:
+  description: "A dot1x user has been authenticated"
+  message: "Dot1x user on switch {self.device_name}, port {self.port_id} at {self.site_name} has been authenticated"
+  severity: "debug"
+
+SW_DOT1XD_USR_SESSION_DISCONNECTED:
+  description: "A dot1x user session has been disconnected"
+  message: "Dot1x user on switch {self.device_name}, port {self.port_id} at {self.site_name} has disconnected"
+  severity: "debug"
+
+SW_DOT1XD_USR_ON_SRVR_REJECT_VLAN:
+  description: "A user failed to authenticated, and was places on the server reject VLAN"
+  message: "Dot1x user on switch {self.device_name}, port {self.port_id} at {self.site_name} has been placed on the server reject VLAN"
+  severity: "warning"
+
+SW_DOT1XD_USR_SESSION_HELD:
+  description: ""
+  message: "{self.text}\n Switch {self.device_name}, site {self.site_name}"
+  severity: "warning"
+
+SW_ALARM_OPTICS_IFACE_SFP_LOW:
+  description: "A switch has detected a low optical signal on an SFP interface"
+  message: "{self.device_name} at {self.site_name}: {self.text}"
+  teams: "{self.device_name} at {self.site_name} is reporting low SFP power on {self.port_id}"
+  severity: "warning"
+
+SW_LACP_RX_STALE:
+  description: "LACP messages have not been received from a switch port recently"
+  message: "{self.device_name} at {self.site_name} has reported an LACP issue.\n {self.text}"
+  severity: "warning"
+
+SW_MAC_LIMIT_RESET:
+  description: ""
+  message: "{self.device_name} at {self.site_name} has {self.text}"
+  severity: "warning"
+
+
+# Access Point Events
+AP_RESTARTED:
+  description: "An access point has restarted (update, failure, etc.)"
+  message: "{self.ap_name} at {self.site_name} has restarted: ({self.reason})"
+  severity: "warning"
+
+AP_RESTART_BY_USER:
+  description: "An access point has been restarted by an admin"
+  message: "{self.ap_name} at {self.site_name} has been restarted by an administrator"
+  severity: "info"
+
+AP_CONNECTED:
+  description: "An AP has connected to the Mist cloud"
+  message: "{self.ap_name} at {self.site_name} has connected to the Mist cloud"
+  severity: "info"
+
+AP_DISCONNECTED:
+  description: "An AP has disconnected from the Mist cloud (reboot, internet outage, upstream failure, etc.)"
+  message: "{self.ap_name} at {self.site_name} has disconnected from the Mist cloud"
+  severity: "warning"
+
+AP_CONFIGURED:
+  description: "An AP has been configured"
+  message: "{self.ap_name} at {self.site_name} has been configured"
+  severity: "info"
+
+AP_CONFIG_CHANGED_BY_RRM:
+  description: "RRM has tuned the configuration of an AP (e.g., power, channel)"
+  message: "{self.ap_name} at {self.site_name} has been tuned by RRM: {self.text}"
+  severity: "debug"
+
+AP_RRM_ACTION:
+  description: ""
+  message: "{self.ap_name} at {self.site_name} has been tuned by RRM: {self.text}"
+  severity: "info"
