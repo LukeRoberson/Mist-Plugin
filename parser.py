@@ -131,6 +131,74 @@ class Events:
     ) -> None:
         pass
 
+    def _parse_event(
+        self,
+        event_type: str,
+        handler_map: dict,
+        config: dict,
+        event_label: str = "event",
+    ) -> None:
+        """
+        Common method to parse event data based on a handler map.
+
+        Args:
+            event_type (str): The type of the event to parse.
+            handler_map (dict): A dictionary mapping event types to handlers.
+            config (dict): Event handling configuration.
+            event_label (str): Label for the event, used in logging.
+        """
+
+        # Set defaults
+        self.teams_msg = None
+        self.severity = "info"
+        self.alert = event_type or "unspecified"
+
+        # Get the handler for this event type
+        handler = handler_map.get(self.alert, None)
+        if handler:
+            try:
+                # Get the formatted message
+                self.event_message = handler.get(
+                    "message",
+                    self.event
+                ).format(self=self)
+
+                # If there is a Teams message (optional), get it too
+                self.teams_msg = handler.get("teams", None)
+                if self.teams_msg:
+                    self.teams_msg = self.teams_msg.format(self=self)
+
+                # Get the severity from the handler, default to "info"
+                self.severity = handler.get("severity", "info")
+
+            except Exception as e:
+                logging.error(
+                    f"Error formatting event message for {self.alert}: {e}"
+                )
+                self.event_message = "No message included"
+                self.teams_msg = str(self.event)
+                self.severity = "warning"
+
+        # If no handler is found, log as an unhandled event
+        else:
+            self.event_message = f"Unhandled {event_label} event: {self.event}"
+            self.teams_msg = str(
+                f"Unhandled {event_label} event: {self.event}"
+            )
+
+        if self.alert not in config:
+            logging.info(
+                f"New type of {event_label} Event alert: %s",
+                self.event
+            )
+            self.event_message = f"Unhandled {event_label} event: {self.event}"
+            self.teams_msg = str(
+                f"Unhandled {event_label} event: {self.event}"
+            )
+
+        if self.teams_msg is None:
+            self.teams_msg = self.event_message
+
     def _action(
         self,
         config: dict,
@@ -358,10 +426,6 @@ class NacEvent(Events):
             z = Event type
         """
 
-        # Set defaults
-        self.teams_msg = None
-        self.severity = "info"
-
         # Set the group
         self.group = "nac"
 
@@ -376,55 +440,15 @@ class NacEvent(Events):
             self.category = "unspecified"
 
         # Get the event type
-        if self.type:
-            self.alert = self.type
-        else:
-            self.alert = "unspecified"
+        event_type = self.type if self.type else "unspecified"
 
-        # Check if a handler exists for this event type
-        handler = NAC_EVENTS.get(self.type, None)
-        if handler:
-            try:
-                # Get the regular message
-                self.event_message = handler.get(
-                    "message",
-                    self.event
-                ).format(self=self)
-
-                # If there is a teams message (optional), get it too
-                self.teams_msg = handler.get("teams", None)
-                if self.teams_msg:
-                    self.teams_msg = self.teams_msg.format(self=self)
-
-                # Get the severity from the handler, default to "info"
-                self.severity = handler.get("severity", "info")
-
-            # Fallback to default message if formatting fails
-            except Exception as e:
-                logging.error(
-                    f"Error formatting event message for {self.type}: {e}"
-                )
-                self.event_message = "No message included"
-                self.teams_msg = str(self.event)
-                self.severity = "warning"
-
-        # Handle events that weren't in the event handler
-        else:
-            self.event_message = f"Unhandled NAC event: {self.event}"
-            self.teams_msg = str(f"Unhandled NAC event: {self.event}")
-
-        # If the event type is not in the config file
-        if self.alert not in config:
-            logging.info(
-                "New type of NAC Event alert: %s",
-                self.event
-            )
-            self.event_message = f"Unhandled NAC event: {self.event}"
-            self.teams_msg = str(f"Unhandled NAC event: {self.event}")
-
-        # If a teams message is not set, default to the event message
-        if self.teams_msg is None:
-            self.teams_msg = self.event_message
+        # Parse the event
+        self._parse_event(
+            event_type,
+            NAC_EVENTS,
+            config,
+            event_label="NAC"
+        )
 
         # Create webhook body
         self.parsed_body = {
@@ -523,10 +547,6 @@ class ClientEvent(Events):
             z = Event type
         """
 
-        # Set defaults
-        self.teams_msg = None
-        self.severity = "info"
-
         # Set the group
         self.group = "client"
 
@@ -546,51 +566,15 @@ class ClientEvent(Events):
         # Client events don't have a 'type' field, so add it
         self.event["type"] = self.alert
         self.type = self.alert
+        event_type = self.type if self.type else "unspecified"
 
-        # Check if a handler exists for this event type
-        handler = CLIENT_EVENTS.get(self.type, None)
-        if handler:
-            try:
-                # Get the regular message
-                self.event_message = handler.get(
-                    "message",
-                    self.event
-                ).format(self=self)
-
-                # If there is a teams message (optional), get it too
-                self.teams_msg = handler.get("teams", None)
-                if self.teams_msg:
-                    self.teams_msg = self.teams_msg.format(self=self)
-
-                # Get the severity from the handler, default to "info"
-                self.severity = handler.get("severity", "info")
-
-            # Fallback to default message if formatting fails
-            except Exception as e:
-                logging.error(
-                    f"Error formatting event message for {self.type}: {e}"
-                )
-                self.event_message = "No message included"
-                self.teams_msg = str(self.event)
-                self.severity = "warning"
-
-        # Handle events that weren't in the event handler
-        else:
-            self.event_message = f"Unhandled Client event: {self.event}"
-            self.teams_msg = str(f"Unhandled Client event: {self.event}")
-
-        # If the event type is not in the config file
-        if self.alert not in config:
-            logging.info(
-                "New type of Client Event alert: %s",
-                self.event
-            )
-            self.event_message = f"Unhandled Client event: {self.event}"
-            self.teams_msg = str(f"Unhandled Client event: {self.event}")
-
-        # If a teams message is not set, default to the event message
-        if self.teams_msg is None:
-            self.teams_msg = self.event_message
+        # Parse the event
+        self._parse_event(
+            event_type,
+            CLIENT_EVENTS,
+            config,
+            event_label="Client"
+        )
 
         # Create webhook body
         self.parsed_body = {
@@ -683,10 +667,6 @@ class DeviceEvents(Events):
             config (dict): Event handling configuration.
         """
 
-        # Set defaults
-        self.teams_msg = None
-        self.severity = "info"
-
         # Set the group
         self.group = "device"
 
@@ -697,55 +677,15 @@ class DeviceEvents(Events):
             self.category = "unspecified"
 
         # Get the event type
-        if self.type:
-            self.alert = self.type
-        else:
-            self.alert = "unspecified"
+        event_type = self.type if self.type else "unspecified"
 
-        # Check if a handler exists for this event type
-        handler = DEVICE_EVENTS.get(self.type, None)
-        if handler:
-            try:
-                # Get the regular message
-                self.event_message = handler.get(
-                    "message",
-                    self.event
-                ).format(self=self)
-
-                # If there is a teams message (optional), get it too
-                self.teams_msg = handler.get("teams", None)
-                if self.teams_msg:
-                    self.teams_msg = self.teams_msg.format(self=self)
-
-                # Get the severity from the handler, default to "info"
-                self.severity = handler.get("severity", "info")
-
-            # Fallback to default message if formatting fails
-            except Exception as e:
-                logging.error(
-                    f"Error formatting event message for {self.type}: {e}"
-                )
-                self.event_message = "No message included"
-                self.teams_msg = str(self.event)
-                self.severity = "warning"
-
-        # Handle events that weren't in the event handler
-        else:
-            self.event_message = f"Unhandled Device event: {self.event}"
-            self.teams_msg = str(f"Unhandled Device event: {self.event}")
-
-        # If the event type is not in the config file
-        if self.alert not in config:
-            logging.info(
-                "New type of Device Event alert: %s",
-                self.event
-            )
-            self.event_message = f"Unhandled Device event: {self.event}"
-            self.teams_msg = str(f"Unhandled Device event: {self.event}")
-
-        # If a teams message is not set, default to the event message
-        if self.teams_msg is None:
-            self.teams_msg = self.event_message
+        # Parse the event
+        self._parse_event(
+            event_type,
+            DEVICE_EVENTS,
+            config,
+            event_label="Device"
+        )
 
         # Collect all the information we need into a single dictionary
         self.parsed_body = {
@@ -862,10 +802,6 @@ class Alarms(Events):
             config (dict): Event handling configuration.
         """
 
-        # Set defaults
-        self.teams_msg = None
-        self.severity = "info"
-
         # Set the group
         if not self.group:
             self.group = "alarm"
@@ -893,55 +829,15 @@ class Alarms(Events):
             self.category = "unspecified"
 
         # Get the event type
-        if self.type:
-            self.alert = self.type
-        else:
-            self.alert = "unspecified"
+        event_type = self.type if self.type else "unspecified"
 
-        # Check if a handler exists for this event type
-        handler = ALARM_EVENTS.get(self.type, None)
-        if handler:
-            try:
-                # Get the regular message
-                self.event_message = handler.get(
-                    "message",
-                    self.event
-                ).format(self=self)
-
-                # If there is a teams message (optional), get it too
-                self.teams_msg = handler.get("teams", None)
-                if self.teams_msg:
-                    self.teams_msg = self.teams_msg.format(self=self)
-
-                # Get the severity from the handler, default to "info"
-                self.severity = handler.get("severity", "info")
-
-            # Fallback to default message if formatting fails
-            except Exception as e:
-                logging.error(
-                    f"Error formatting event message for {self.type}: {e}"
-                )
-                self.event_message = "No message included"
-                self.teams_msg = str(self.event)
-                self.severity = "warning"
-
-        # Handle events that weren't in the event handler
-        else:
-            self.event_message = f"Unhandled Alarm event: {self.event}"
-            self.teams_msg = str(f"Unhandled Alarm event: {self.event}")
-
-        # If the event type is not in the config file
-        if self.alert not in config:
-            logging.info(
-                "New type of Client Event alert: %s",
-                self.event
-            )
-            self.event_message = f"Unhandled NAC event: {self.event}"
-            self.teams_msg = str(f"Unhandled NAC event: {self.event}")
-
-        # If a teams message is not set, default to the event message
-        if self.teams_msg is None:
-            self.teams_msg = self.event_message
+        # Parse the event
+        self._parse_event(
+            event_type,
+            ALARM_EVENTS,
+            config,
+            event_label="Alarm"
+        )
 
         # Create webhook body
         self.parsed_body = {
@@ -1016,8 +912,8 @@ class Audits(Events):
         """
 
         # Set defaults
-        self.teams_msg = None
-        self.severity = "info"
+        # self.teams_msg = None
+        # self.severity = "info"
 
         # Set the group
         self.group = "audit"
@@ -1043,51 +939,60 @@ class Audits(Events):
 
         # There is no 'type' field in audit events, so set it to the alert
         self.type = self.alert
+        event_type = self.type if self.type else "unspecified"
 
-        # Check if a handler exists for this event type
-        handler = DEVICE_EVENTS.get(self.type, None)
-        if handler:
-            try:
-                # Get the regular message
-                self.event_message = handler.get(
-                    "message",
-                    self.event
-                ).format(self=self)
+        # Parse the event
+        self._parse_event(
+            event_type,
+            AUDIT_EVENTS,
+            config,
+            event_label="Audit"
+        )
 
-                # If there is a teams message (optional), get it too
-                self.teams_msg = handler.get("teams", None)
-                if self.teams_msg:
-                    self.teams_msg = self.teams_msg.format(self=self)
+        # # Check if a handler exists for this event type
+        # handler = DEVICE_EVENTS.get(self.type, None)
+        # if handler:
+        #     try:
+        #         # Get the regular message
+        #         self.event_message = handler.get(
+        #             "message",
+        #             self.event
+        #         ).format(self=self)
 
-                # Get the severity from the handler, default to "info"
-                self.severity = handler.get("severity", "info")
+        #         # If there is a teams message (optional), get it too
+        #         self.teams_msg = handler.get("teams", None)
+        #         if self.teams_msg:
+        #             self.teams_msg = self.teams_msg.format(self=self)
 
-            # Fallback to default message if formatting fails
-            except Exception as e:
-                logging.error(
-                    f"Error formatting event message for {self.type}: {e}"
-                )
-                self.event_message = "No message included"
-                self.teams_msg = str(self.event)
-                self.severity = "warning"
+        #         # Get the severity from the handler, default to "info"
+        #         self.severity = handler.get("severity", "info")
 
-        # Handle events that weren't in the event handler
-        else:
-            self.event_message = f"Unhandled Audit event: {self.event}"
-            self.teams_msg = str(f"Unhandled Audit event: {self.event}")
+        #     # Fallback to default message if formatting fails
+        #     except Exception as e:
+        #         logging.error(
+        #             f"Error formatting event message for {self.type}: {e}"
+        #         )
+        #         self.event_message = "No message included"
+        #         self.teams_msg = str(self.event)
+        #         self.severity = "warning"
 
-        # If the event type is not in the config file
-        if self.alert not in config:
-            logging.info(
-                "New type of Audit Event alert: %s",
-                self.event
-            )
-            self.event_message = f"Unhandled Audit event: {self.event}"
-            self.teams_msg = str(f"Unhandled Audit event: {self.event}")
+        # # Handle events that weren't in the event handler
+        # else:
+        #     self.event_message = f"Unhandled Audit event: {self.event}"
+        #     self.teams_msg = str(f"Unhandled Audit event: {self.event}")
 
-        # If a teams message is not set, default to the event message
-        if self.teams_msg is None:
-            self.teams_msg = self.event_message
+        # # If the event type is not in the config file
+        # if self.alert not in config:
+        #     logging.info(
+        #         "New type of Audit Event alert: %s",
+        #         self.event
+        #     )
+        #     self.event_message = f"Unhandled Audit event: {self.event}"
+        #     self.teams_msg = str(f"Unhandled Audit event: {self.event}")
+
+        # # If a teams message is not set, default to the event message
+        # if self.teams_msg is None:
+        #     self.teams_msg = self.event_message
 
         # Create webhook body
         self.parsed_body = {
@@ -1169,10 +1074,6 @@ class DeviceUpdowns(Events):
             config (dict): Event handling configuration.
         """
 
-        # Set defaults
-        self.teams_msg = None
-        self.severity = "info"
-
         # Set the group
         self.group = "device-updown"
 
@@ -1183,55 +1084,15 @@ class DeviceUpdowns(Events):
             self.category = "unspecified"
 
         # Get the alert type
-        if self.type:
-            self.alert = self.type
-        else:
-            self.alert = "unspecified"
+        event_type = self.type if self.type else "unspecified"
 
-        # Check if a handler exists for this event type
-        handler = UPDOWN_EVENTS.get(self.type, None)
-        if handler:
-            try:
-                # Get the regular message
-                self.event_message = handler.get(
-                    "message",
-                    self.event
-                ).format(self=self)
-
-                # If there is a teams message (optional), get it too
-                self.teams_msg = handler.get("teams", None)
-                if self.teams_msg:
-                    self.teams_msg = self.teams_msg.format(self=self)
-
-                # Get the severity from the handler, default to "info"
-                self.severity = handler.get("severity", "info")
-
-            # Fallback to default message if formatting fails
-            except Exception as e:
-                logging.error(
-                    f"Error formatting event message for {self.type}: {e}"
-                )
-                self.event_message = "No message included"
-                self.teams_msg = str(self.event)
-                self.severity = "warning"
-
-        # Handle events that weren't in the event handler
-        else:
-            self.event_message = f"Unhandled UpDown event: {self.event}"
-            self.teams_msg = str(f"Unhandled UpDown event: {self.event}")
-
-        # If the event type is not in the config file
-        if self.alert not in config:
-            logging.info(
-                "New type of UpDown Event alert: %s",
-                self.event
-            )
-            self.event_message = f"Unhandled UpDown event: {self.event}"
-            self.teams_msg = str(f"Unhandled UpDown event: {self.event}")
-
-        # If a teams message is not set, default to the event message
-        if self.teams_msg is None:
-            self.teams_msg = self.event_message
+        # Parse the event
+        self._parse_event(
+            event_type,
+            UPDOWN_EVENTS,
+            config,
+            event_label="UpDown"
+        )
 
         # Create webhook body
         self.parsed_body = {
