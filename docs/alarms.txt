@@ -1,0 +1,37 @@
+JSON body format for Alarm webhooks
+-----------------------------------
+
+
+
+sw_bad_optics
+{
+    "count": 1,
+    "fw_version": "22.4R3-S6.5",
+    "group": "infrastructure",
+    "hostnames": [
+        "Switch Name"
+    ],
+    "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "last_seen": "2025-06-05T04:00:00",
+    "model": "EX4650-48Y",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "peer": {
+    },
+    "port_ids": [
+        "xe-0/0/0"
+    ],
+    "reasons": [
+        "xe-0/0/0: LaserBiasCurrent of optical interface is low (131.07 mA) < (131.07 mA); xe-0/0/0: TX power of optical interface is low (8.16 dBm) < (8.16 dBm); xe-0/0/0: ModuleVoltage of optical interface is low (6.55 V) < (6.55 V); xe-0/0/0: ModuleTemperature of optical interface is low (0.00 C/F) < (-0.00 C/F); xe-0/0/0: RX power of optical interface is low (8.16 dBm) < (8.16 dBm)"
+    ],
+    "severity": "warn",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Site Name",
+    "switches": [
+        "xxxxxxxxxxxx"
+    ],
+    "timestamp": 1749096017.5365038,
+    "type": "sw_bad_optics"
+}
+
+
+

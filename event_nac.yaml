@@ -1,0 +1,108 @@
+# Definitions to parse NAC events from Mist webhooks
+# A list of device events that can be parsed from Mist webhooks.
+#
+# Definitions below contain:
+# - description: A short description of the event. This is used for documentation purposes.
+# - message: A message template that will be used to format the event message.
+# - teams: Optional message template for Microsoft Teams notifications. If not provided, the other message will be used.
+# - severity: The severity of the event, which can be "debug", "info" "warning", "error", or "critical".
+
+
+# Accounting events
+NAC_ACCOUNTING_START:
+  description: "A client session has started, and accounting information is being collected."
+  message: "Client session started for {self.username}"
+  severity: "debug"
+
+NAC_ACCOUNTING_STOP:
+  description: "Client session has ended, and accounting information is being finalized."
+  message: "Client session ended for {self.username}"
+  severity: "debug"
+
+NAC_ACCOUNTING_UPDATE:
+  description: "Client session accounting information has been updated."
+  message: "Client session updated for {self.username}"
+  severity: "debug"
+
+
+# Session and client events
+NAC_CLIENT_COA_REAUTH:
+  description: "A Change of Authorization (CoA). This is a session reauthentication event."
+  message: "Client {self.mac} has reauthenticated: {self.text}. The device is {self.mdm_compliance}"
+  severity: "info"
+
+NAC_CLIENT_DENY:
+  description: "A client has been denied access to the network."
+  message: "Client deny for {self.username}."
+  severity: "warning"
+
+NAC_CLIENT_IP_ASSIGNED:
+  description: ""
+  message: "Client IP assigned for {self.username}. {self.client_ip}"
+  severity: "debug"
+
+NAC_CLIENT_PERMIT:
+  description: "A client has been permitted access to the network."
+  message: "Client permit for {self.username}, VLAN {self.vlan}"
+  severity: "debug"
+
+NAC_SESSION_ENDED:
+  description: "A client session has ended."
+  message: "Client session ended for {self.username}"
+  severity: "debug"
+
+NAC_SESSION_STARTED:
+  description: "A client session has started."
+  message: "Client session started for {self.username}"
+  severity: "debug"
+
+
+# Certificate and validation events
+NAC_CLIENT_CERT_CHECK_SUCCESS:
+  description: "The client's certificate is valid"
+  message: "Client certificate check succeeded for {self.cert_cn}"
+  severity: "debug"
+
+NAC_CLIENT_CERT_CHECK_FAILURE:
+  description: "A client's certificate check has failed"
+  message: "{self.event}"
+  severity: "info"
+
+NAC_SERVER_CERT_VALIDATION_SUCCESS:
+  description: "The server's certificate is valid"
+  message: "Server certificate validation succeeded for {self.username}"
+  severity: "info"
+
+NAC_SERVER_CERT_VALIDATION_FAILURE:
+  description: "A server's certificate validation has failed"
+  message: "{self.event}"
+  severity: "info"
+
+
+# IDP lookup events
+NAC_IDP_AUTHC_SUCCESS:
+  description: "The IDP has successfully authenticated a user."
+  message: "IDP authentication succeeded for {self.username}"
+  severity: "debug"
+
+NAC_IDP_GROUPS_LOOKUP_FAILURE:
+  description: "Could not retrieve groups for a user from the IDP."
+  message: "Could not retrieve IDP groups for {self.username}. {self.text}"
+  severity: "info"
+
+NAC_IDP_GROUPS_LOOKUP_SUCCESS:
+  description: "NAC has successfully retrieved the groups for a user."
+  message: "IDP groups lookup succeeded for {self.username}"
+  severity: "debug"
+
+
+# MDM lookup events
+NAC_MDM_DEVICE_NOT_ENROLLED:
+  description: "A client device is not enrolled in MDM."
+  message: "MDM device not enrolled for {self.username}. {self.text}"
+  severity: "info"
+
+NAC_MDM_LOOKUP_SUCCESS:
+  description: "Successfully looked up MDM information for a device."
+  message: "MDM lookup succeeded for {self.username}. {self.mdm_manufacturer} {self.mdm_model} is {self.mdm_compliance}"
+  severity: "info"

@@ -1,0 +1,39 @@
+# Definitions to parse audit events from Mist webhooks
+# A list of device events that can be parsed from Mist webhooks.
+#
+# Definitions below contain:
+# - description: A short description of the event. This is used for documentation purposes.
+# - message: A message template that will be used to format the event message.
+# - teams: Optional message template for Microsoft Teams notifications. If not provided, the other message will be used.
+# - severity: The severity of the event, which can be "debug", "info" "warning", "error", or "critical".
+
+
+update:
+  description: ""
+  message: ""
+  severity: "info"
+
+webshell:
+  description: "A user accessed the CLI for a device in the Mist web UI"
+  message: "{self.admin_name} {self.message} from {self.src_ip} at {self.site_name}"
+  severity: "debug"
+
+mist-login:
+  description: "When a user logs into the Mist web UI"
+  message: "{self.admin_name}: {self.message} from {self.src_ip}"
+  severity: "info"
+
+accessed-org:
+  description: "When a user accesses an organization in the Mist web UI"
+  message: "{self.admin_name}: {self.message} from {self.src_ip}"
+  severity: "debug"
+
+restart:
+  description: "An admin has restarted a device in the Mist web UI"
+  message: "{self.admin_name} has restarted the device from {self.src_ip} at {self.site_name}"
+  severity: "info"
+
+configuration:
+  description: "Configuration change made in the Mist web UI"
+  message: "{self.admin_name}: {self.message}\nOriginal: {self.before}\n New: {self.after}"
+  severity: "info"

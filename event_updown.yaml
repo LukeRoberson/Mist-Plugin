@@ -1,0 +1,39 @@
+# Definitions to parse Up/Down events from Mist webhooks
+# A list of device events that can be parsed from Mist webhooks.
+#
+# Definitions below contain:
+# - description: A short description of the event. This is used for documentation purposes.
+# - message: A message template that will be used to format the event message.
+# - teams: Optional message template for Microsoft Teams notifications. If not provided, the other message will be used.
+# - severity: The severity of the event, which can be "debug", "info" "warning", "error", or "critical".
+
+
+SW_DISCONNECTED:
+  description: "A switch has disconnected from the Mist cloud (reboot, internet outage, upstream failure, etc.)"
+  message: "{self.device_name} in {self.site_name} has disconnected."
+  severity: "info"
+
+SW_CONNECTED:
+  description: "A switch has connected to the Mist cloud"
+  message: "{self.device_name} in {self.site_name} has connected."
+  severity: "info"
+
+SW_RESTARTED:
+  description: "A switch has restarted"
+  message: "{self.device_name} in {self.site_name} has restarted. Reason: {self.reason}"
+  severity: "info"
+
+AP_DISCONNECTED:
+  description: "An access point has disconnected from the Mist cloud (reboot, internet outage, upstream failure, etc.)"
+  message: "{self.device_name} in {self.site_name} has disconnected."
+  severity: "info"
+
+AP_CONNECTED:
+  description: "An access point has connected to the Mist cloud"
+  message: "{self.device_name} in {self.site_name} has connected."
+  severity: "info"
+
+AP_RESTARTED:
+  description: "An access point has restarted"
+  message: "{self.device_name} in {self.site_name} has restarted. Reason: {self.reason}"
+  severity: "info"

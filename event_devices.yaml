@@ -8,6 +8,16 @@
 
 
 # Switch Events
+SW_CONNECTED:
+  description: "A switch has connected to the Mist cloud"
+  message: "{self.device_name} at {self.site_name} has connected to the Mist cloud"
+  severity: "info"
+
+SW_DISCONNECTED:
+  description: "A switch has disconnected from the Mist cloud (reboot, internet outage, upstream failure, etc.)"
+  message: "{self.device_name} at {self.site_name} has disconnected from the Mist cloud"
+  severity: "warning"
+
 SW_PORT_DOWN:
   description: "Switch port down event"
   message: "Switch port {self.port_id} on {self.device_name} at {self.site_name} has gone down"
@@ -54,6 +64,41 @@ SW_MAC_LIMIT_RESET:
   message: "{self.device_name} at {self.site_name} has {self.text}"
   severity: "warning"
 
+SW_BGP_NEIGHBOR_STATE_CHANGED:
+  description: "A BGP neighbour has changed state (eg, Established, Idle, Active, etc.)"
+  message: "{self.device_name} at {self.site_name} has changed BGP neighbour state:\n {self.text}"
+  severity: "warning"
+
+SW_BGP_NEIGHBOR_DOWN:
+  description: "A BGP neighbour has gone down (changed to Idle)"
+  message: "{self.device_name} at {self.site_name} lost a BGP peer:\n {self.text}"
+  severity: "error"
+
+SW_BGP_NEIGHBOR_UP:
+  description: "A BGP neighbour has come up (established)"
+  message: "{self.device_name} at {self.site_name} has a new BGP neighbour:\n {self.text}"
+  severity: "warning"
+
+SW_EVPN_BGP_PEER_STATUS_CHANGE:
+  description: "A BGP peer with the EVPN family has changed status"
+  message: "{self.device_name} at {self.site_name} has changed BGP/EVPN neighbour state:\n {self.text}"
+  severity: "warning"
+
+SW_CONFIG_CHANGED_BY_USER:
+  description: "The configuration of a switch has been changed by an administrator; There is very little information available in the webhook"
+  message: "{self.device_name} at {self.site_name} has had its configuration changed by an administrator"
+  severity: "info"
+
+SW_CONFIG_ERROR_ADDTL_COMMAND:
+  description: "A command in the 'additional commands' section of the Mist web UI has failed"
+  message: "A configuration item in the 'additional commands' section of the Mist web UI has failed on {self.device_name} at {self.site_name}:\n {self.text}"
+  severity: "info"
+
+SW_CONFIGURED:
+  description: "A switch has been configured and the commit is complete"
+  message: "Config push on {self.device_name} at {self.site_name} has been completed\n {self.text}"
+  severity: "info"
+
 
 # Access Point Events
 AP_RESTARTED:
@@ -88,5 +133,82 @@ AP_CONFIG_CHANGED_BY_RRM:
 
 AP_RRM_ACTION:
   description: ""
-  message: "{self.ap_name} at {self.site_name} has been tuned by RRM: {self.text}"
+  message: "{self.ap_name} at {self.site_name} has been tuned by RRM"
+  severity: "info"
+
+
+# Gateway Events
+GW_ALARM:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_MISTWA_CONFIGURATION_CLASH:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_CONFIGURED:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_CONFIG_GENERATED:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_CONFIG_FAILED:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_OSPF_NEIGHBOR_DOWN:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_OSPF_NEIGHBOR_UP:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_PORT_UP:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_RECONFIGURED:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_REJECTED:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_RESTART_BY_USER:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_VPN_PATH_DOWN:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_VPN_PATH_UP:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_VPN_PEER_DOWN:
+  description: ""
+  message: ""
+  severity: "info"
+
+GW_VPN_PEER_UP:
+  description: ""
+  message: ""
   severity: "info"

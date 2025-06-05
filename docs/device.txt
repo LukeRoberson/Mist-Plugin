@@ -42,7 +42,40 @@ SW_LACP_RX_STALE
     "LACP RX of interface ae340 xe-0/0/30 is no longer increasing"
 SW_MAC_LIMIT_RESET
     "Resumed adding MAC addresses learned by ge-0/0/6.0; current count is 0"
+SW_BGP_NEIGHBOR_STATE_CHANGED
+    "BGP peer 10.250.2.7 (Internal AS 132906) changed state from Established to Idle (event RecvNotify) (instance master)"
+SW_BGP_NEIGHBOR_DOWN
+    "BGP peer 10.250.2.7 (Internal AS 132906) changed state from Established to Idle (event RecvNotify) (instance master)"
+SW_EVPN_BGP_PEER_STATUS_CHANGE
+    "iBGP peer status changed to down (6 currently established)"
+SW_BGP_NEIGHBOR_UP
+    "BGP peer 10.250.2.7 (Internal AS 132906) changed state from OpenConfirm to Established (event RecvKeepAlive) (instance master)"
+SW_CONFIG_CHANGED_BY_USER
+    NO TEXT FIELD
+SW_CONFIG_ERROR_ADDTL_COMMAND
+    Command [set system services ssh no-tcp-forwarding] from the additional commands has an error in no-tcp-forwarding: syntax error
+SW_CONFIGURED
+    UI_COMMIT_COMPLETED: : commit complete
 
+
+
+Differences
+-----------
+Some have slightly different bodies:
+    SW_CONNECTED
+    SW_DISCONNECTED
+
+{
+    "device_name": "Switch Name",
+    "device_type": "switch",
+    "mac": "60c78dxxxxxx",
+    "model": "EX3400-48P",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Site Name",
+    "timestamp": 1749080793,
+    "type": "SW_DISCONNECTED"
+}
 
 
 ------

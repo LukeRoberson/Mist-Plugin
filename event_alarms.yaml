@@ -1,0 +1,144 @@
+# Definitions to parse alarm events from Mist webhooks
+# A list of device events that can be parsed from Mist webhooks.
+#
+# Definitions below contain:
+# - description: A short description of the event. This is used for documentation purposes.
+# - message: A message template that will be used to format the event message.
+# - teams: Optional message template for Microsoft Teams notifications. If not provided, the other message will be used.
+# - severity: The severity of the event, which can be "debug", "info" "warning", "error", or "critical".
+
+
+# Infrastructure Alarms
+infra_arp_failure:
+  description: "A device has failed to resolve an ARP request"
+  message: "ARP failure on VLAN {self.vlans} at {self.site_name}"
+  severity: "info"
+
+infra_arp_success:
+  description: "A device has sucessfully resolved an ARP request"
+  message: "ARP success on VLAN {self.vlans} at {self.site_name}"
+  severity: "debug"
+
+infra_dhcp_failure:
+  description: "A client failed to obtain an IP address via DHCP"
+  message: "DHCP failure on VLAN {self.vlans} at {self.site_name} on SSID {self.ssids}"
+  severity: "info"
+
+infra_dhcp_success:
+  description: "A client has successfully obtained an IP address via DHCP"
+  message: "DHCP success on VLAN {self.vlans} at {self.site_name}"
+  severity: "debug"
+
+infra_dns_failure:
+  description: "A client failed to resolve a DNS request"
+  message: "DNS failure on SSID {self.ssids} at {self.site_name} on VLAN {self.vlans}. This is affecting {self.client_count} clients."
+  severity: "info"
+
+infra_dns_success:
+  description: "A client has successfully resolved a DNS request"
+  message: "DNS success at {self.site_name} on VLAN {self.vlans}"
+  severity: "debug"
+
+
+# Devices
+device_down:
+  description: "A device has gone down, possibly due to a reboot, internet outage, or upstream failure"
+  message: "Device {self.hostname} at {self.site_name} has gone down"
+  severity: "warning"
+
+switch_down:
+  description: "A switch has gone down, possibly due to a reboot, internet outage, or upstream failure"
+  message: "Device {self.hostname} at {self.site_name} has gone down"
+  severity: "warning"
+
+device_reconnected:
+  description: "A device has reconnected to the Mist cloud after being down"
+  message: "Device {self.hostname} at {self.site_name} has reconnected"
+  severity: "info"
+
+switch_reconnected:
+  description: "A switch has reconnected to the Mist cloud after being down"
+  message: "Device {self.hostname} at {self.site_name} has reconnected"
+  severity: "info"
+
+device_restarted:
+  description: "A device has restarted"
+  message: "{self.event}"
+  severity: "warning"
+
+switch_restarted:
+  description: "A switch has restarted"
+  message: "{self.event}"
+  severity: "warning"
+
+sw_alarm_chassis_psu:
+  description: "A switch has detected an issue with its power supply unit (PSU)"
+  message: "{self.event}"
+  severity: "error"
+
+sw_alarm_chassis_poe:
+  description: "A switch has detected an issue with its Power over Ethernet (PoE) capabilities"
+  message: "{self.event}"
+  severity: "error"
+
+switch_stp_loop:
+  description: "A switch has detected a Spanning Tree Protocol (STP) loop"
+  message: "{self.event}"
+  severity: "error"
+
+vc_master_changed:
+  description: "The master for a Virtual Chassis has changed"
+  message: "{self.event}"
+  severity: "warning"
+
+
+# Configuration and Updates
+configuration:
+  description: ""
+  message: "{self.event}"
+  severity: "info"
+
+firmware:
+  description: ""
+  message: "{self.event}"
+  severity: "info"
+
+missing_vlan:
+  description: "A VLAN is missing from the configuration"
+  message: "{self.event}"
+  severity: "info"
+
+admin-action:
+  description: ""
+  message: "{self.event}"
+  severity: "info"
+
+connectivity:
+  description: ""
+  message: "{self.event}"
+  severity: "info"
+
+
+# Cabling
+sw_bad_optics:
+  description: "A switch has a problem with fibre cabling"
+  message: "{self.hostnames} at {self.site_name} has a problem with its fibre cabling:\n {self.text}"
+  severity: "error"
+
+ap_bad_cable:
+  description: "An access point has a problem with its cabling"
+  message: "{self.event}"
+  severity: "info"
+
+
+# WiFi issues
+rogue_ap:
+  description: "A rogue AP has been detected"
+  message: "{self.event}"
+  severity: "info"
+
+rogue_client:
+  description: "A rogue client has been detected"
+  message: "{self.event}"
+  severity: "info"
+

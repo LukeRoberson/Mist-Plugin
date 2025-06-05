@@ -1,0 +1,30 @@
+# Definitions to parse client events from Mist webhooks
+# A list of device events that can be parsed from Mist webhooks.
+#
+# Definitions below contain:
+# - description: A short description of the event. This is used for documentation purposes.
+# - message: A message template that will be used to format the event message.
+# - teams: Optional message template for Microsoft Teams notifications. If not provided, the other message will be used.
+# - severity: The severity of the event, which can be "debug", "info" "warning", "error", or "critical".
+
+
+user-connect:
+  description: "A regular connects to an SSID (a username has been seen)"
+  message: "Client {self.mac} at {self.site_name} has connected to {self.ssid}"
+  severity: "debug"
+
+guest-connect:
+  description: "A guest client connects to an SSID (no username has been seen)"
+  message: "Client {self.mac} at {self.site_name} has connected to {self.ssid}"
+  severity: "debug"
+
+disconnect:
+  description: "A client disconnects from an SSID"
+  message: "Client {self.mac} at {self.site_name} has disconnected from {self.ssid}"
+  teams: "{self.event}"
+  severity: "debug"
+
+client-info:
+  description: ""
+  message: "Client {self.mac} has IP {self.ip} and is in site {self.site_id}"
+  severity: "debug"
