@@ -37,3 +37,8 @@ configuration:
   description: "Configuration change made in the Mist web UI"
   message: "{self.admin_name}: {self.message}\nOriginal: {self.before}\n New: {self.after}"
   severity: "info"
+
+add-webhook:
+  description: "A webhook has been added in the Mist web UI for a site"
+  message: "{self.admin_name} has added a webhook {self.webhook_name} at {self.site_name}"
+  severity: "info"

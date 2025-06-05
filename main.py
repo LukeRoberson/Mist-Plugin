@@ -30,7 +30,13 @@ from parser import (
     DeviceEvents,
     Alarms,
     Audits,
-    DeviceUpdowns
+    DeviceUpdowns,
+    Location,
+    Occupancy,
+    RssiZone,
+    SdkClient,
+    VirtualBeacon,
+    Zone,
 )
 from systemlog import SystemLog
 
@@ -112,7 +118,46 @@ def get_event_manager(
         return Audits(event, config_data['audits'])
     elif topic == "device-updowns":
         return DeviceUpdowns(event, config_data['device-updowns'])
+
+    elif topic in ("location", "location-client", "location-unclient"):
+        logging.info(
+            "Received webhook for a location alert."
+        )
+        return Location(event, config_data['location'])
+
+    elif topic == "occupancy-alerts":
+        logging.info(
+            "Received webhook for occupancy alert."
+        )
+        return Occupancy(event, config_data['occupancy-alerts'])
+
+    elif topic == "rssizone":
+        logging.info(
+            "Received webhook for RSSI zone event."
+        )
+        return RssiZone(event, config_data['rssizone'])
+
+    elif topic == "sdkclient-scan-data":
+        logging.info(
+            "Received webhook for SDK client scan data."
+        )
+        return SdkClient(event, config_data['sdkclient-scan-data'])
+
+    elif topic == "vbeacon":
+        logging.info(
+            "Received webhook for Virtual Beacon event."
+        )
+        return VirtualBeacon(event, config_data['vbeacon'])
+
+    elif topic == "zone":
+        logging.info(
+            "Received webhook for zone entry/exit event."
+        )
+        return Zone(event, config_data['zone'])
+
     else:
+        logging.error("Unknown topic: %s", topic)
+        logging.error("Event data: %s", event)
         return None
 
 

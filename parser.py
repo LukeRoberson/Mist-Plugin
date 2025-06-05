@@ -595,13 +595,11 @@ class DeviceEvents(Events):
     """
     Represents a Device Event object.
 
-    Methods:
-        __init__(self, event: dict): Initializes the DeviceEvents object.
-        __repr__(self): Returns a string representation of the object.
-        __collect_fields(self): Collects fields from the raw event.
-        __parse(self): Parses the raw event data.
-        __action(self, config: dict): Performs an action based on the event.
+    Arguments:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
     """
+
     def __init__(
         self,
         event: dict,
@@ -614,7 +612,6 @@ class DeviceEvents(Events):
     ) -> None:
         """
         Collect fields from the raw event.
-        This is a helper function to collect fields from the raw event.
         """
 
         # The timestamp (epoch) that the event occurred
@@ -911,10 +908,6 @@ class Audits(Events):
             config (dict): Event handling configuration.
         """
 
-        # Set defaults
-        # self.teams_msg = None
-        # self.severity = "info"
-
         # Set the group
         self.group = "audit"
 
@@ -934,6 +927,8 @@ class Audits(Events):
             self.alert = "restart"
         elif "firmware upgrade" in self.message:
             self.alert = "firmware"
+        elif "Add Webhook" in self.message:
+            self.alert = "add-webhook"
         else:
             self.alert = "unspecified"
 
@@ -948,51 +943,6 @@ class Audits(Events):
             config,
             event_label="Audit"
         )
-
-        # # Check if a handler exists for this event type
-        # handler = DEVICE_EVENTS.get(self.type, None)
-        # if handler:
-        #     try:
-        #         # Get the regular message
-        #         self.event_message = handler.get(
-        #             "message",
-        #             self.event
-        #         ).format(self=self)
-
-        #         # If there is a teams message (optional), get it too
-        #         self.teams_msg = handler.get("teams", None)
-        #         if self.teams_msg:
-        #             self.teams_msg = self.teams_msg.format(self=self)
-
-        #         # Get the severity from the handler, default to "info"
-        #         self.severity = handler.get("severity", "info")
-
-        #     # Fallback to default message if formatting fails
-        #     except Exception as e:
-        #         logging.error(
-        #             f"Error formatting event message for {self.type}: {e}"
-        #         )
-        #         self.event_message = "No message included"
-        #         self.teams_msg = str(self.event)
-        #         self.severity = "warning"
-
-        # # Handle events that weren't in the event handler
-        # else:
-        #     self.event_message = f"Unhandled Audit event: {self.event}"
-        #     self.teams_msg = str(f"Unhandled Audit event: {self.event}")
-
-        # # If the event type is not in the config file
-        # if self.alert not in config:
-        #     logging.info(
-        #         "New type of Audit Event alert: %s",
-        #         self.event
-        #     )
-        #     self.event_message = f"Unhandled Audit event: {self.event}"
-        #     self.teams_msg = str(f"Unhandled Audit event: {self.event}")
-
-        # # If a teams message is not set, default to the event message
-        # if self.teams_msg is None:
-        #     self.teams_msg = self.event_message
 
         # Create webhook body
         self.parsed_body = {
@@ -1105,6 +1055,431 @@ class DeviceUpdowns(Events):
                 "severity": self.severity,
                 "timestamp": self.timestamp,
                 "message": self.event_message
+            }
+        }
+
+
+class Location(Events):
+    """
+    Represents a Location event object. This refers to a map location in Mist
+
+    Arguments:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
+    """
+
+    def __init__(
+        self,
+        event: dict,
+        config: dict,
+    ) -> None:
+        super().__init__(event, config)
+
+    def _collect_fields(
+        self
+    ) -> None:
+        """
+        Collect fields from the raw event.
+        """
+
+        # The timestamp (epoch) that the event occurred
+        self.timestamp = self.event.get("timestamp")
+
+        # Device details. 'type' is 'wifi'
+        self.type = self.event.get("type")
+        self.mac = self.event.get("mac")
+
+        # Location details
+        self.map_id = self.event.get("map_id")
+        self.site_id = self.event.get("site_id")
+        self.x = self.event.get("x")
+        self.y = self.event.get("y")
+        self.rssi = self.event.get("rssi")
+
+    def _parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        # Set log fields
+        self.group = "location"
+        self.category = "wifi"
+        self.alert = "coordinate"
+        self.severity = "info"
+
+        # Set the log mesages
+        self.event_message = (
+            f"Location event: {self.mac} at ({self.x}, {self.y}) "
+            f"on map {self.map_id}"
+        )
+        self.teams_msg = f"Location event for {self.mac}"
+
+        # Collect all the information we need into a single dictionary
+        self.parsed_body = {
+            "source": "mist",
+            "destination": ["web"],
+            "log": {
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
+                "timestamp": self.timestamp,
+                "message": self.event_message,
+            }
+        }
+
+
+class Occupancy(Events):
+    """
+    Represents an Occupancy event object.
+
+    Arguments:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
+    """
+
+    def __init__(
+        self,
+        event: dict,
+        config: dict,
+    ) -> None:
+        super().__init__(event, config)
+
+    def _collect_fields(
+        self
+    ) -> None:
+        """
+        Collect fields from the raw event.
+        """
+
+        pass
+
+    def _parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        self.group = "occupancy"
+        self.category = "unspecified"
+        self.alert = "unspecified"
+        self.severity = "info"
+        self.timestamp = datetime.now().timestamp()
+        self.event_message = str(self.event)
+        self.teams_msg = None
+
+        # Collect all the information we need into a single dictionary
+        self.parsed_body = {
+            "source": "mist",
+            "destination": ["web"],
+            "log": {
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
+                "timestamp": self.timestamp,
+                "message": self.event_message,
+            }
+        }
+
+
+class RssiZone(Events):
+    """
+    Represents an RSSI Zone event object.
+
+    Arguments:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
+    """
+
+    def __init__(
+        self,
+        event: dict,
+        config: dict,
+    ) -> None:
+        super().__init__(event, config)
+
+    def _collect_fields(
+        self
+    ) -> None:
+        """
+        Collect fields from the raw event.
+        """
+
+        pass
+
+    def _parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        self.group = "RSSI Zone"
+        self.category = "unspecified"
+        self.alert = "unspecified"
+        self.severity = "info"
+        self.timestamp = datetime.now().timestamp()
+        self.event_message = str(self.event)
+        self.teams_msg = None
+
+        # Collect all the information we need into a single dictionary
+        self.parsed_body = {
+            "source": "mist",
+            "destination": ["web"],
+            "log": {
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
+                "timestamp": self.timestamp,
+                "message": self.event_message,
+            }
+        }
+
+
+class SdkClient(Events):
+    """
+    Represents an SDK Client Scan event object.
+
+    Arguments:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
+    """
+
+    def __init__(
+        self,
+        event: dict,
+        config: dict,
+    ) -> None:
+        super().__init__(event, config)
+
+    def _collect_fields(
+        self
+    ) -> None:
+        """
+        Collect fields from the raw event.
+        """
+
+        pass
+
+    def _parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        self.group = "SDK Client Scan"
+        self.category = "unspecified"
+        self.alert = "unspecified"
+        self.severity = "info"
+        self.timestamp = datetime.now().timestamp()
+        self.event_message = str(self.event)
+        self.teams_msg = None
+
+        # Collect all the information we need into a single dictionary
+        self.parsed_body = {
+            "source": "mist",
+            "destination": ["web"],
+            "log": {
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
+                "timestamp": self.timestamp,
+                "message": self.event_message,
+            }
+        }
+
+
+class VirtualBeacon(Events):
+    """
+    Represents a Virtual Beacon event object.
+
+    Arguments:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
+    """
+
+    def __init__(
+        self,
+        event: dict,
+        config: dict,
+    ) -> None:
+        super().__init__(event, config)
+
+    def _collect_fields(
+        self
+    ) -> None:
+        """
+        Collect fields from the raw event.
+        """
+
+        pass
+
+    def _parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        self.group = "Virtual Beacon"
+        self.category = "unspecified"
+        self.alert = "unspecified"
+        self.severity = "info"
+        self.timestamp = datetime.now().timestamp()
+        self.event_message = str(self.event)
+        self.teams_msg = None
+
+        # Collect all the information we need into a single dictionary
+        self.parsed_body = {
+            "source": "mist",
+            "destination": ["web"],
+            "log": {
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
+                "timestamp": self.timestamp,
+                "message": self.event_message,
+            }
+        }
+
+
+class Zone(Events):
+    """
+    Represents a Zone event object.
+
+    Arguments:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
+    """
+
+    def __init__(
+        self,
+        event: dict,
+        config: dict,
+    ) -> None:
+        super().__init__(event, config)
+
+    def _collect_fields(
+        self
+    ) -> None:
+        """
+        Collect fields from the raw event.
+        """
+
+        # The timestamp (epoch) that the event occurred
+        self.timestamp = self.event.get("timestamp")
+
+        # Device details. 'type' is 'wifi'
+        self.type = self.event.get("type")
+        self.mac = self.event.get("mac")
+
+        # Event trigger (eg, 'exit' a zone)
+        self.trigger = self.event.get("trigger")
+
+        # Zone details
+        self.map_id = self.event.get("map_id")
+        self.site_id = self.event.get("site_id")
+        self.zone_id = self.event.get("zone_id")
+
+    def _parse(
+        self,
+        config: dict,
+    ) -> None:
+        """
+        Parse the raw event data.
+        Collates all the fields into a useful alert
+
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
+        Arguments:
+            config (dict): Event handling configuration.
+        """
+
+        # Set log fields
+        self.group = "Zone"
+        self.category = "wifi"
+        self.alert = self.trigger if self.trigger else "unspecified"
+        self.severity = "info"
+
+        # Set the log mesages
+        self.event_message = (
+            f"{self.mac} has {self.trigger} zone {self.zone_id} "
+            f"on map {self.map_id} at site {self.site_id}"
+        )
+        self.teams_msg = f"{self.mac} zone {self.trigger} event"
+
+        # Collect all the information we need into a single dictionary
+        self.parsed_body = {
+            "source": "mist",
+            "destination": ["web"],
+            "log": {
+                "group": self.group,
+                "category": self.category,
+                "alert": self.alert,
+                "severity": self.severity,
+                "timestamp": self.timestamp,
+                "message": self.event_message,
             }
         }
 

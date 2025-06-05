@@ -65,7 +65,7 @@ NAC_CLIENT_CERT_CHECK_SUCCESS:
 
 NAC_CLIENT_CERT_CHECK_FAILURE:
   description: "A client's certificate check has failed"
-  message: "{self.event}"
+  message: "{client_type} client {self.username} failed client certificate check.\n {self.text}\n {cert_subject}"
   severity: "info"
 
 NAC_SERVER_CERT_VALIDATION_SUCCESS:

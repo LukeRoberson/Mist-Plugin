@@ -34,4 +34,51 @@ sw_bad_optics
 }
 
 
+------------
+Marvis Minis
+------------
+These simulate traffic, etc, to test network functions.
+Notice that the 'group' is set to 'marvis'.
+
+dhcp_failure:
+{
+    "alert_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "category": "connectivity",
+    "count": 1,
+    "details": {
+        "action": "check_dhcp",
+        "category": "connectivity",
+        "status": "resolved",
+        "symptom": "dhcp_failure"
+    },
+    "email_content": {
+        "Reason": "wlan_site",
+        "Status": "resolved",
+        "impacted_client_count": "13",
+        "wlan": "SSID(xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)"
+    },
+    "group": "marvis",
+    "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "impacted_client_count": 13,
+    "impacted_entities": [
+        {
+            "entity_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "entity_name": "ENTITY/SSID",
+            "entity_type": "wlan",
+            "ui_display_field": "ENTITY/SSID"
+        }
+    ],
+    "last_seen": "2025-05-19T02:00:15",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "org_name": "Org Name",
+    "resolved_time": "2025-06-05T19:25:09",
+    "root_cause": "wlan_site",
+    "severity": "critical",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Pearson St Mall",
+    "status": "resolved",
+    "suggestion": "check_dhcp_failure",
+    "timestamp": 1749151526.6709626,
+    "type": "dhcp_failure"
+}
 

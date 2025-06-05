@@ -122,8 +122,8 @@ connectivity:
 # Cabling
 sw_bad_optics:
   description: "A switch has a problem with fibre cabling"
-  message: "{self.hostnames} at {self.site_name} has a problem with its fibre cabling:\n {self.text}"
-  severity: "error"
+  message: "{self.hostnames} at {self.site_name} has a problem with its fibre cabling:\n {self.reasons}"
+  severity: "info"
 
 ap_bad_cable:
   description: "An access point has a problem with its cabling"
@@ -142,3 +142,9 @@ rogue_client:
   message: "{self.event}"
   severity: "info"
 
+
+# Marvis Minis
+dhcp_failure:
+  description: "A simulated client test has failed to obtain an IP address via DHCP"
+  message: "Marvis Mini simulated a client that failed to obtain an IP address via DHCP at {self.site_name} on {self.impacted_entities['ui_display_field']}"
+  severity: "info"

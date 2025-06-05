@@ -56,6 +56,14 @@ SW_CONFIG_ERROR_ADDTL_COMMAND
     Command [set system services ssh no-tcp-forwarding] from the additional commands has an error in no-tcp-forwarding: syntax error
 SW_CONFIGURED
     UI_COMMIT_COMPLETED: : commit complete
+SW_ALARM_CHASSIS_POE
+    PoE Short CirCuit in Interface ge-0/0/7
+SW_ALARM_CHASSIS_POE_CLEAR
+    PoE Short CirCuit in Interface ge-0/0/7
+SW_DDOS_PROTOCOL_VIOLATION_SET
+    Warning: Host-bound traffic for protocol/exception L3NHOP:aggregate exceeded its allowed bandwidth at fpc 0 for 86 times, started at 2025-06-06 00:08:48 AEST
+SW_DDOS_PROTOCOL_VIOLATION_CLEAR
+    INFO: Host-bound traffic for protocol/exception L3NHOP:aggregate has returned to normal. Its allowed bandwidth was exceeded at fpc 0 for 94 times, from 2025-06-06 01:11:56 AEST to 2025-06-06 01:12:06 AEST
 
 
 
@@ -78,17 +86,18 @@ Some have slightly different bodies:
 }
 
 
+
 ------
 MARVIS
 ------
 
 CONNECTIVITY_TEST (Access Point)
 {
-    "ap": "d4dc09xxxxxx",
+    "ap": "xxxxxxxxxxxx",
     "ap_name": "AP Name",
     "device_name": "Device Name",
     "device_type": "ap",
-    "mac": "d4dc09xxxxxx",
+    "mac": "xxxxxxxxxxxx",
     "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "site_name": "Site Name",
@@ -96,4 +105,63 @@ CONNECTIVITY_TEST (Access Point)
     "timestamp": 1749073097,
     "type": "CONNECTIVITY_TEST"
 }
+
+
+
+-------------
+Access Points
+-------------
+
+These are very similar to switches, with a few differences.
+They follow this format:
+
+{
+    "ap": "xxxxxxxxxxxx",
+    "ap_name": "Device Name",
+    "audit_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "device_name": "Device Name",
+    "device_type": "ap",
+    "ev_type": "NOTICE",
+    "mac": "xxxxxxxxxxxx",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Site Name",
+    "timestamp": 1749101162,
+    "type": "AP_CONFIG_CHANGED_BY_USER"
+}
+
+
+Differences:
+
+AP_RADAR_DETECTED contains additional fields, showing how RRM has tuned it
+{
+    "band": "5",
+    "bandwidth": 40,
+    "channel": 36,
+    "pre_bandwidth": 40,
+    "pre_channel": 60,
+    "reason": "radar-detected",
+}
+
+
+
+---------------
+Gateway's (SRX)
+---------------
+
+
+{
+    "audit_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "device_name": "Device Name",
+    "device_type": "gateway",
+    "ev_type": "NOTICE",
+    "mac": "xxxxxxxxxxxx",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Site Name",
+    "timestamp": 1749101162,
+    "type": "GW_CONFIG_CHANGED_BY_USER"
+}
+
+
 

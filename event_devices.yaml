@@ -99,6 +99,26 @@ SW_CONFIGURED:
   message: "Config push on {self.device_name} at {self.site_name} has been completed\n {self.text}"
   severity: "info"
 
+SW_ALARM_CHASSIS_POE:
+  description: "A switch has detected a chassis PoE alarm, which means that the PoE budget is exceeded or there is a PoE failure"
+  message: "{self.device_name} at {self.site_name} has a PoE alarm on {self.port_id}"
+  severity: "warning"
+
+SW_ALARM_CHASSIS_POE_CLEAR:
+  description: "A PoE alarm on a switch has cleared"
+  message: "{self.device_name} at {self.site_name} has cleared the PoE alarm on {self.port_id}"
+  severity: "info"
+
+SW_DDOS_PROTOCOL_VIOLATION_SET:
+  description: "The DDoS threshold has been exceeded, and the switch is blocking traffic to prevent a DDoS attack"
+  message: "{self.device_name} at {self.site_name} has exceeded the DDoS threshold.\n {self.text}"
+  severity: "warning"
+
+SW_DDOS_PROTOCOL_VIOLATION_CLEAR:
+  description: "The DDoS threshold has been cleared, and the switch is no longer blocking traffic"
+  message: "Traffic on {self.device_name} at {self.site_name} has returned to normal after a DDoS threshold violation.\n {self.text}"
+  severity: "info"
+
 
 # Access Point Events
 AP_RESTARTED:
@@ -126,15 +146,25 @@ AP_CONFIGURED:
   message: "{self.ap_name} at {self.site_name} has been configured"
   severity: "info"
 
+AP_CONFIG_CHANGED_BY_USER:
+  description: "A template has been changed, which has caused the configuration of an AP to change"
+  message: "An administrator updated a template, which has changed the configuration of {self.ap_name} at {self.site_name}"
+  severity: "info"
+
 AP_CONFIG_CHANGED_BY_RRM:
   description: "RRM has tuned the configuration of an AP (e.g., power, channel)"
-  message: "{self.ap_name} at {self.site_name} has been tuned by RRM: {self.text}"
+  message: "The config of {self.ap_name} at {self.site_name} has been tuned by RRM"
   severity: "debug"
 
 AP_RRM_ACTION:
-  description: ""
-  message: "{self.ap_name} at {self.site_name} has been tuned by RRM"
+  description: "RRM (Radio Resource Management) has taken an action on an AP. There could be interference, radars, etc, and it needs to be tuned"
+  message: "RRM action on {self.ap_name} at {self.site_name}"
   severity: "info"
+
+AP_RADAR_DETECTED:
+  description: "A radar has been detected by an AP, and it has been tuned to avoid interference. An AP will always yield to a radar"
+  message: "A radar has been detected by {self.ap_name} in the vicinity of {self.site_name}. Channels have been adjusted according to legal requirements"
+  severity: "warning"
 
 
 # Gateway Events
@@ -146,6 +176,11 @@ GW_ALARM:
 GW_MISTWA_CONFIGURATION_CLASH:
   description: ""
   message: ""
+  severity: "info"
+
+AP_CONFIG_CHANGED_BY_USER:
+  description: "A template has been changed, which has caused the configuration of a gateway to change"
+  message: "An administrator updated a template, which has changed the configuration of {self.device_name} at {self.site_name}"
   severity: "info"
 
 GW_CONFIGURED:
@@ -211,4 +246,11 @@ GW_VPN_PEER_DOWN:
 GW_VPN_PEER_UP:
   description: ""
   message: ""
+  severity: "info"
+
+
+# Marvis Events
+CONNECTIVITY_TEST:
+  description: "A connectivity test has been run by Marvis"
+  message: "Marvis: {self.device_name} at {self.site_name}\n {self.text}"
   severity: "info"
