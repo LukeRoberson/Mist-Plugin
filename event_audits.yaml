@@ -20,12 +20,12 @@ webshell:
 
 mist-login:
   description: "When a user logs into the Mist web UI"
-  message: "{self.admin_name}: {self.message} from {self.src_ip}"
+  message: "{self.admin_name}:\n{self.message} from {self.src_ip}"
   severity: "info"
 
 accessed-org:
   description: "When a user accesses an organization in the Mist web UI"
-  message: "{self.admin_name}: {self.message} from {self.src_ip}"
+  message: "{self.admin_name}:\n{self.message} from {self.src_ip}"
   severity: "debug"
 
 restart:
@@ -35,7 +35,7 @@ restart:
 
 configuration:
   description: "Configuration change made in the Mist web UI"
-  message: "{self.admin_name}: {self.message}\nOriginal: {self.before}\n New: {self.after}"
+  message: "{self.admin_name}:\n{self.message}\nOriginal: {self.before}\n New: {self.after}"
   severity: "info"
 
 add-webhook:

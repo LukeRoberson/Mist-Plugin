@@ -108,21 +108,23 @@ def get_event_manager(
 
     if topic in ("nac-events", "nac-accounting"):
         return NacEvent(event, config_data['nac-events'])
+
     elif topic in ("client-sessions", "client-join", "client-info"):
         return ClientEvent(event, config_data['client-events'])
+
     elif topic == "device-events":
         return DeviceEvents(event, config_data['device-events'])
+
     elif topic == "alarms":
         return Alarms(event, config_data['alarms'])
+
     elif topic == "audits":
         return Audits(event, config_data['audits'])
+
     elif topic == "device-updowns":
         return DeviceUpdowns(event, config_data['device-updowns'])
 
     elif topic in ("location", "location-client", "location-unclient"):
-        logging.info(
-            "Received webhook for a location alert."
-        )
         return Location(event, config_data['location'])
 
     elif topic == "occupancy-alerts":
@@ -150,9 +152,6 @@ def get_event_manager(
         return VirtualBeacon(event, config_data['vbeacon'])
 
     elif topic == "zone":
-        logging.info(
-            "Received webhook for zone entry/exit event."
-        )
         return Zone(event, config_data['zone'])
 
     else:

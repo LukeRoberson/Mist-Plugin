@@ -1464,7 +1464,7 @@ class Zone(Events):
 
         # Set the log mesages
         self.event_message = (
-            f"{self.mac} has {self.trigger} zone {self.zone_id} "
+            f"{self.mac} has {self.trigger}ed zone {self.zone_id} "
             f"on map {self.map_id} at site {self.site_id}"
         )
         self.teams_msg = f"{self.mac} zone {self.trigger} event"
