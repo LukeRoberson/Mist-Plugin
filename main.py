@@ -55,6 +55,9 @@ from parser import (
 from systemlog import SystemLog
 
 CONFIG_URL = "http://core:5100/api/config"
+LOG_URL = "http://logging:5100/api/log"
+PLUGINS_URL = "http://web-interface:5100/api/plugins"
+HASH_URL = "http://security:5100/api/hash"
 
 
 def fetch_global_config(
@@ -228,7 +231,7 @@ logging_setup(global_config)
 # Initialize the SystemLog with default values
 #   Values can be overridden when sending a log
 system_log = SystemLog(
-    logging_url="http://logging:5100/api/log",
+    logging_url=LOG_URL,
     source="mist-plugin",
     destination=["web"],
     group="plugin",
@@ -280,7 +283,7 @@ def webhook():
         # Get the secret from the web-interface
         try:
             secret_resp = requests.get(
-                "http://web-interface:5100/api/plugins",
+                PLUGINS_URL,
                 headers={'X-Plugin-Name': config_data['name']}
             )
             secret_resp.raise_for_status()
@@ -302,7 +305,7 @@ def webhook():
         # Send to security service for validation
         try:
             sec_resp = requests.post(
-                "http://security:5100/api/hash",
+                HASH_URL,
                 json={
                     "signature": signature,
                     "message": request.get_data().decode('utf-8'),
