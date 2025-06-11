@@ -119,6 +119,11 @@ SW_DDOS_PROTOCOL_VIOLATION_CLEAR:
   message: "Traffic on {self.device_name} at {self.site_name} has returned to normal after a DDoS threshold violation.\n {self.text}"
   severity: "info"
 
+SW_STP_TOPO_CHANGED:
+  description: "The Spanning Tree Protocol (STP) topology has changed, which means that a port has gone down or up, or a new root bridge has been elected"
+  message: "{self.device_name} at {self.site_name} has detected an STP topology change:\n {self.text}"
+  severity: "warning"
+
 
 # Access Point Events
 AP_RESTARTED:

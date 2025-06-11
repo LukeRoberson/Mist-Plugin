@@ -106,3 +106,8 @@ NAC_MDM_LOOKUP_SUCCESS:
   description: "Successfully looked up MDM information for a device."
   message: "MDM lookup succeeded for {self.username}. {self.mdm_manufacturer} {self.mdm_model} is {self.mdm_compliance}"
   severity: "info"
+
+NAC_MDM_LOOKUP_FAILURE:
+  description: "Failed to look up MDM information for a device."
+  message: "MDM lookup failed for {self.mdm_provider}. {self.text}"
+  severity: "info"

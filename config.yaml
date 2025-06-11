@@ -97,6 +97,11 @@ nac-events:
     sql: false
     syslog: false
     teams: false
+  NAC_MDM_LOOKUP_FAILURE:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
   
   default:
     web: true
@@ -455,7 +460,7 @@ device-events:
     web: true
     sql: false
     syslog: false
-    teams: true
+    teams: false
   AP_CONFIG_CHANGED_BY_USER:
     web: true
     sql: false
@@ -572,10 +577,10 @@ alarms:
     syslog: false
     teams: false
   infra_dns_success:
-    web: true
+    web: false
     sql: false
     syslog: false
-    teams: true
+    teams: false
   missing_vlan:
     web: true
     sql: false
@@ -689,6 +694,11 @@ audits:
     sql: false
     syslog: false
     teams: true
+  add-webhook:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
 
   default:
     web: true

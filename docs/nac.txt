@@ -739,3 +739,28 @@ NAC_MDM_LOOKUP_SUCCESS
     "username": "user@domain.com"
 }
 
+
+
+NAC_MDM_LOOKUP_FAILURE
+
+{
+    "client_type": "wired",
+    "crc": [
+        3292832317,
+        3561678071,
+        ...
+    ],
+    "device_mac": "xxxxxxxxxxxx",
+    "mac": "xxxxxxxxxxxx",
+    "mdm_account_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "mdm_client_id": "xxxxxxxxxxxx",
+    "mdm_provider": "intune",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "port_id": "ge-0/0/25.0",
+    "random_mac": "false",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "text": "Reason : Gateway Timeout",
+    "timestamp": 1749592710466,
+    "type": "NAC_MDM_LOOKUP_FAILURE",
+    "username": "xxxxxxxxxxxx"
+}

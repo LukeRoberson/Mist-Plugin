@@ -64,7 +64,8 @@ SW_DDOS_PROTOCOL_VIOLATION_SET
     Warning: Host-bound traffic for protocol/exception L3NHOP:aggregate exceeded its allowed bandwidth at fpc 0 for 86 times, started at 2025-06-06 00:08:48 AEST
 SW_DDOS_PROTOCOL_VIOLATION_CLEAR
     INFO: Host-bound traffic for protocol/exception L3NHOP:aggregate has returned to normal. Its allowed bandwidth was exceeded at fpc 0 for 94 times, from 2025-06-06 01:11:56 AEST to 2025-06-06 01:12:06 AEST
-
+SW_STP_TOPO_CHANGED
+    TopoChgCnt 5, RootID 32768.08:05:e2:5e:dc:7e, RootCost 10000, RootPort ae0
 
 
 Differences
@@ -84,6 +85,10 @@ Some have slightly different bodies:
     "timestamp": 1749080793,
     "type": "SW_DISCONNECTED"
 }
+
+
+SW_STP_TOPO_CHANGED
+    The same as the main body at the top, but does not have a port_id.
 
 
 

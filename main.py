@@ -25,6 +25,8 @@ Functions:
         Returns the event manager class based on the topic of the event.
 
 Routes:
+    - /api/health:
+        Health check endpoint to ensure the service is running.
     - webhook:
         Handles webhook requests, validates them, and processes events.
 """
@@ -246,6 +248,19 @@ app = create_app(
     config=global_config,
     system_log=system_log
 )
+
+
+@app.route(
+    '/api/health',
+    methods=['GET']
+)
+def health():
+    """
+    Health check endpoint.
+    Returns a JSON response indicating the service is running.
+    """
+
+    return jsonify({'status': 'ok'})
 
 
 @app.route('/webhook', methods=['POST'])
