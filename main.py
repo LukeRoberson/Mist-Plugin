@@ -84,6 +84,7 @@ system_log = SystemLog(
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('api_master_pw')
 app.config['SESSION_TYPE'] = 'filesystem'
+app.config['SESSION_FILE_DIR'] = '/app/flask_session'
 app.config['SYSTEM_LOG'] = system_log
 Session(app)
 
