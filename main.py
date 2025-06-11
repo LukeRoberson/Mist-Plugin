@@ -1,12 +1,26 @@
 """
+Module: main.py
+
 The Mist plugin
     Receives and processes webhooks from the Mist plugin.
     Events are grouped by topic and processed by the appropriate event manager.
     Event manager classes are imported from the parser module.
 
+Module Tasks:
+    1. Fetch global configuration from the web interface.
+    2. Set up logging based on the global configuration.
+    3. Create a Flask application instance and register API endpoints.
+
+Usage:
+    This is a Flask application that should run behind a WSGI server inside
+        a Docker container.
+    Build the Docker image and run it with the provided Dockerfile.
+
 Functions:
-    - send_log:
-        Sends a log message to the logging service.
+    - fetch_global_config:
+        Fetches the global configuration from the core service.
+    - logging_setup:
+        Sets up the root logger for the web service.
     - get_event_manager:
         Returns the event manager class based on the topic of the event.
 
@@ -40,53 +54,93 @@ from parser import (
 )
 from systemlog import SystemLog
 
+CONFIG_URL = "http://core:5100/api/config"
 
-# Get global config
-global_config = None
-try:
-    response = requests.get("http://web-interface:5100/api/config", timeout=3)
-    response.raise_for_status()  # Raise an error for bad responses
-    global_config = response.json()
 
-except Exception as e:
-    logging.critical(
-        "Failed to fetch global config from web interface."
-        f" Error: {e}"
+def fetch_global_config(
+    url: str = CONFIG_URL,
+) -> dict:
+    """
+    Fetch the global configuration from the core service.
+
+    Args:
+        None
+
+    Returns:
+        dict: The global configuration loaded from the core service.
+
+    Raises:
+        RuntimeError: If the global configuration cannot be loaded.
+    """
+
+    global_config = None
+    try:
+        response = requests.get(url, timeout=3)
+        response.raise_for_status()
+        global_config = response.json()
+
+    except Exception as e:
+        logging.critical(
+            "Failed to fetch global config from core service."
+            f" Error: {e}"
+        )
+
+    if global_config is None:
+        raise RuntimeError("Could not load global config from core service")
+
+    return global_config['config']
+
+
+def logging_setup(
+    config: dict,
+) -> None:
+    """
+    Set up the root logger for the web service.
+
+    Args:
+        config (dict): The global configuration dictionary
+
+    Returns:
+        None
+    """
+
+    # Get the logging level from the configuration (eg, "INFO")
+    log_level_str = config['web']['logging-level'].upper()
+    log_level = getattr(logging, log_level_str, logging.INFO)
+
+    # Set up the logging configuration
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
+    logging.info("Logging setup complete with level: %s", log_level)
 
-if global_config is None:
-    raise RuntimeError("Could not load global config from web interface")
 
-# Load the plugin configuration file
-with open('config.yaml', 'r') as f:
-    config_data = yaml.safe_load(f)
+def create_app(
+    config: dict,
+    system_log: SystemLog,
+) -> Flask:
+    """
+    Create the Flask application instance and set up the configuration.
+    Registers the necessary blueprints for the web service.
 
-# Set up logging
-log_level_str = global_config['config']['web']['logging-level'].upper()
-log_level = getattr(logging, log_level_str, logging.INFO)
-logging.basicConfig(level=log_level)
-logging.info("Logging level set to: %s", log_level_str)
+    Args:
+        config (dict): The global configuration dictionary
 
-# Initialize the SystemLog with default values
-#   Values can be overridden when sending a log
-system_log = SystemLog(
-    logging_url="http://logging:5100/api/log",
-    source="mist-plugin",
-    destination=["web"],
-    group="plugin",
-    category="mist",
-    alert="system",
-    severity="info",
-    teams_chat_id=config_data.get('chat-id', None)
-)
+    Returns:
+        Flask: The Flask application instance.
+    """
 
-# Initialize the Flask application
-app = Flask(__name__)
-app.config['SECRET_KEY'] = os.getenv('api_master_pw')
-app.config['SESSION_TYPE'] = 'filesystem'
-app.config['SESSION_FILE_DIR'] = '/app/flask_session'
-app.config['SYSTEM_LOG'] = system_log
-Session(app)
+    # Create the Flask application
+    app = Flask(__name__)
+    app.config['SECRET_KEY'] = os.getenv('api_master_pw')
+    app.config['SESSION_TYPE'] = 'filesystem'
+    app.config['SESSION_FILE_DIR'] = '/app/flask_session'
+    app.config['GLOBAL_CONFIG'] = config
+    app.config['SYSTEM_LOG'] = system_log
+    Session(app)
+
+    return app
 
 
 def get_event_manager(
@@ -159,6 +213,36 @@ def get_event_manager(
         logging.error("Unknown topic: %s", topic)
         logging.error("Event data: %s", event)
         return None
+
+
+# Load the global configuration from the core service
+global_config = fetch_global_config()
+
+# Load the plugin configuration file
+with open('config.yaml', 'r') as f:
+    config_data = yaml.safe_load(f)
+
+# Set up logging
+logging_setup(global_config)
+
+# Initialize the SystemLog with default values
+#   Values can be overridden when sending a log
+system_log = SystemLog(
+    logging_url="http://logging:5100/api/log",
+    source="mist-plugin",
+    destination=["web"],
+    group="plugin",
+    category="mist",
+    alert="system",
+    severity="info",
+    teams_chat_id=config_data.get('chat-id', None)
+)
+
+# Initialize the Flask application
+app = create_app(
+    config=global_config,
+    system_log=system_log
+)
 
 
 @app.route('/webhook', methods=['POST'])
@@ -279,16 +363,3 @@ def webhook():
         logging.debug(event_manager)
 
     return "Received", 200
-
-
-'''
-NOTE: When running in a container, the host and port are set in the
-    uWSGI config. uWSGI starts the process, which means the
-    Flask app is not run directly.
-    This can be uncommented for local testing.
-'''
-# if __name__ == "__main__":
-#     app.run(
-#         debug=True,
-#         port=5000
-#     )
