@@ -7,11 +7,18 @@ Manage system and event logs from the plugin. The plugin will parse webhooks
 Classes:
     SystemLog: Class to manage system logs.
         It can send logs to the logging service with default values.
+
+Dependencies:
+    requests: For making HTTP requests to the logging service.
+    datetime: For timestamping log messages.
+    logging: For logging errors and warnings within the module.
 """
 
+# Standard library imports
 import logging
 import requests
 from datetime import datetime
+from typing import Optional
 
 
 # Default values for logging
@@ -29,7 +36,7 @@ class SystemLog:
     Class to manage system logs.
     Gets logs, and sends them to the logging service.
 
-    Attributes:
+    Args:
         logging_url (str): The URL of the logging service API.
         source (str): The source of the log message.
         destination (list): The destinations for the log message.
@@ -50,7 +57,7 @@ class SystemLog:
         category: str,
         alert: str,
         severity: str,
-        teams_chat_id: str = None,
+        teams_chat_id: Optional[str] = None,
     ) -> None:
         '''
         Initialise the SystemLog class.
@@ -85,13 +92,13 @@ class SystemLog:
     def log(
         self,
         message: str,
-        source: str = None,
-        destination: list = None,
-        group: str = None,
-        category: str = None,
-        alert: str = None,
-        severity: str = None,
-        teams_msg: str = None
+        source: Optional[str] = None,
+        destination: Optional[list] = None,
+        group: Optional[str] = None,
+        category: Optional[str] = None,
+        alert: Optional[str] = None,
+        severity: Optional[str] = None,
+        teams_msg: Optional[str] = None
     ) -> bool:
         """
         Send a log message to the logging service.

@@ -21,6 +21,8 @@ Functions:
         Fetches the global configuration from the core service.
     - logging_setup:
         Sets up the root logger for the web service.
+    - create_app:
+        Creates the Flask application instance and sets up the configuration.
     - get_event_manager:
         Returns the event manager class based on the topic of the event.
 
@@ -29,17 +31,35 @@ Routes:
         Health check endpoint to ensure the service is running.
     - webhook:
         Handles webhook requests, validates them, and processes events.
+
+Dependencies:
+    - Flask: For creating the web application.
+    - Flask-Session: For session management.
+    - requests: For making HTTP requests to other services.
+    - yaml: For loading configuration files.
+    - logging: For logging messages to the terminal.
+    - os: For environment variable access.
+
+Custom Dependencies:
+    - parser: Contains event manager classes for processing different topics.
+    - systemlog: Manages system logs and sends them to the logging service.
 """
 
-from flask import Flask, request, jsonify
-
+# Standard library imports
+from flask import (
+    Flask,
+    request,
+    jsonify,
+    make_response
+)
+from flask_session import Session
 import yaml
 import logging
 import requests
 from typing import Optional
 import os
-from flask_session import Session
 
+# Custom imports
 from parser import (
     NacEvent,
     ClientEvent,
@@ -69,7 +89,8 @@ def fetch_global_config(
     Fetch the global configuration from the core service.
 
     Args:
-        None
+        url (str): The URL of the core service API endpoint to fetch
+            the global configuration. Defaults to CONFIG_URL.
 
     Returns:
         dict: The global configuration loaded from the core service.
@@ -276,13 +297,19 @@ def webhook():
     '''
 
     # Parse the incoming webhook request
+    result_json = {}
     data = request.get_json()
     if not data:
         logging.error("No JSON body received.")
-        return jsonify({
-            'result': 'error',
-            'message': 'No JSON body received.'
-        }), 400
+        return make_response(
+            jsonify(
+                {
+                    'result': 'error',
+                    'message': 'No JSON body received.'
+                }
+            ),
+            400
+        )
 
     signature = request.headers.get('X-Mist-Signature-v2', None)
     if not signature:
@@ -312,10 +339,15 @@ def webhook():
             system_log.log(
                 "Failed to retrieve plugin secret from web interface."
             )
-            return jsonify({
-                'result': 'error',
-                'message': 'Could not retrieve plugin secret.'
-            }), 502
+            return make_response(
+                jsonify(
+                    {
+                        'result': 'error',
+                        'message': 'Could not retrieve plugin secret.'
+                    }
+                ),
+                502
+            )
 
         # Send to security service for validation
         try:
@@ -335,10 +367,15 @@ def webhook():
                 "Failed to send message to security for validation:",
                 e
             )
-            return jsonify({
-                'result': 'error',
-                'message': 'Security validation failed.'
-            }), 502
+            return make_response(
+                jsonify(
+                    {
+                        'result': 'error',
+                        'message': 'Security validation failed.'
+                    }
+                ),
+                502
+            )
 
     # Check the result from the security service
     if result_json.get('result') != 'success':
@@ -349,11 +386,14 @@ def webhook():
         system_log.log(
             "Received webhook with invalid signature."
         )
-        return jsonify(
-            {
-                'result': 'error',
-                'message': 'Invalid signature',
-            }, 403
+        return make_response(
+            jsonify(
+                {
+                    'result': 'error',
+                    'message': 'Invalid signature',
+                },
+                403
+            )
         )
 
     # Create an object to represent the alert
@@ -362,10 +402,15 @@ def webhook():
 
     if not topic or not event_list:
         logging.error("Missing topic or events in webhook data.")
-        return jsonify({
-            'result': 'error',
-            'message': 'Missing topic or events.'
-        }), 400
+        return make_response(
+            jsonify(
+                {
+                    'result': 'error',
+                    'message': 'Missing topic or events.'
+                }
+            ),
+            400
+        )
 
     if len(event_list) > 1:
         logging.warning(

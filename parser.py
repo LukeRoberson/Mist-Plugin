@@ -18,9 +18,15 @@ Classes:
     - Alarms: Represents an alarm object.
     - Audits: Represents an audit object.
     - DeviceUpdowns: Represents a device up or down event object.
+
+Dependencies:
+    - datetime: For handling timestamps.
+    - logging: For logging events and errors.
+    - flask: For accessing the current application context.
+    - yaml: For loading event handler configurations from YAML files.
 """
 
-
+# Standard library imports
 from datetime import datetime
 import logging
 from flask import current_app
@@ -76,8 +82,8 @@ class Events:
             event (dict): The event data from the webhook.
             config (dict): Event handling configuration.
 
-        Side Effects:
-            Calls _collect_fields, _parse, and _action in sequence.
+        Returns:
+            None
         """
 
         # Time the webhook was received
@@ -86,6 +92,11 @@ class Events:
 
         # This is the original event data from the webhook
         self.event = event
+
+        # Initialize default values
+        self.parsed_body = {}
+        self.group = ""
+        self.category = ""
 
         # Collect and store fields from the raw event
         self._collect_fields()
@@ -96,21 +107,6 @@ class Events:
         # Perform an action based on the event type
         self._action(config)
 
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Return a string representation of this object.
-        This will be the parsed message body.
-        """
-
-        message = f"Event:\n \
-                {self.group}.{self.category}.{self.alert}\n \
-                {self.timestamp}\n \
-                {self.message}"
-
-        return message
-
     def _collect_fields(
         self
     ) -> None:
@@ -120,15 +116,31 @@ class Events:
         This method should be overridden by subclasses to extract
             event-specific fields.
 
+        Args:
+            None
+
         Returns:
             None
         """
+
         pass
 
     def _parse(
         self,
         config: dict,
     ) -> None:
+        """
+        Parse the raw event data and prepare it for logging.
+        This method should be overridden by subclasses to implement
+            event-specific parsing logic.
+
+        Args:
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         pass
 
     def _parse_event(
@@ -146,6 +158,9 @@ class Events:
             handler_map (dict): A dictionary mapping event types to handlers.
             config (dict): Event handling configuration.
             event_label (str): Label for the event, used in logging.
+
+        Returns:
+            None
         """
 
         # Set defaults
@@ -215,6 +230,9 @@ class Events:
         Args:
             config (dict): Event handling configuration specifying which
                 actions to perform.
+
+        Returns:
+            None
         """
 
         # Log if the event does not have a timestamp
@@ -283,12 +301,9 @@ class NacEvent(Events):
         - WiFi device roaming
         - Client session started or ended
 
-    Methods:
-        __init__(self, event: dict): Initializes the NacEvent object.
-        __repr__(self): Returns a string representation of the NacEvent object.
-        __collect_fields(self): Collects fields from the raw event.
-        __parse(self): Parses the raw event data.
-        __action(self, config: dict): Performs an action based on the event.
+    Args:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
     """
 
     def __init__(
@@ -296,6 +311,18 @@ class NacEvent(Events):
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the NacEvent object and process the event.
+            Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -303,7 +330,13 @@ class NacEvent(Events):
     ) -> None:
         """
         Collect fields from the raw event.
-        This is a helper function to collect fields from the raw event.
+            This is a helper function to collect fields.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         # The timestamp (epoch) that the event occurred
@@ -420,10 +453,16 @@ class NacEvent(Events):
         Wired events do not have a 'type' field
             They require some extra parsing to determine the event type
 
-        Event is in the format:
+        The parsed event is in the format:
             y.z
             y = Client type; wireless, wired
             z = Event type
+
+        Args:
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
         """
 
         # Set the group
@@ -469,18 +508,28 @@ class ClientEvent(Events):
     """
     Represents a Client Session object.
 
-    Methods:
-        __init__(self, event: dict): Initializes the ClientSessions object.
-        __repr__(self): Returns a string representation of the object.
-        __collect_fields(self): Collects fields from the raw event.
-        __parse(self): Parses the raw event data.
-        __action(self, config: dict): Performs an action based on the event.
+    Args:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
     """
+
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the ClientEvent object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -605,6 +654,18 @@ class DeviceEvents(Events):
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the DeviceEvents object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -612,6 +673,12 @@ class DeviceEvents(Events):
     ) -> None:
         """
         Collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         # The timestamp (epoch) that the event occurred
@@ -703,18 +770,28 @@ class Alarms(Events):
     """
     Represents an Alarm object.
 
-    Methods:
-        __init__(self, event: dict): Initializes the Alarms object.
-        __repr__(self): Returns a string representation of the Alarms object.
-        __collect_fields(self): Collects fields from the raw event.
-        __parse(self): Parses the raw event data.
-        __action(self, config: dict): Performs an action based on the event.
+    Args:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
     """
+
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the Alarms object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -722,7 +799,12 @@ class Alarms(Events):
     ) -> None:
         """
         Collect fields from the raw event.
-        This is a helper function to collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         # The timestamp (epoch) that the event occurred
@@ -807,7 +889,7 @@ class Alarms(Events):
         if self.category:
             self.category = self.category
         elif (
-            ('switch' in self.type) or
+            (self.type is not None and 'switch' in self.type) or
             (self.type and self.type.startswith('sw_')) or
             (self.port_ids) or
             (self.port_id)
@@ -852,18 +934,28 @@ class Audits(Events):
     """
     Represents an Audit object.
 
-    Methods:
-        __init__(self, event: dict): Initializes the Audits object.
-        __repr__(self): Returns a string representation of the Audits object.
-        __collect_fields(self): Collects fields from the raw event.
-        __parse(self): Parses the raw event data.
-        __action(self, config: dict): Performs an action based on the event.
+    Args:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
     """
+
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the Audits object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -871,7 +963,12 @@ class Audits(Events):
     ) -> None:
         """
         Collect fields from the raw event.
-        This is a helper function to collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         # The timestamp (epoch) that the event occurred
@@ -904,6 +1001,11 @@ class Audits(Events):
         Parse the raw event data.
         Collates all the fields into a useful alert
 
+        Event is in the format:
+            x.y
+            x = Device type; switch, ap, etc
+            y = Event type; 'type' field
+
         Arguments:
             config (dict): Event handling configuration.
         """
@@ -917,17 +1019,17 @@ class Audits(Events):
         # Get the event type
         if self.before and self.after:
             self.alert = "configuration"
-        elif "Invoked Webshell" in self.message:
+        elif self.message is not None and "Invoked Webshell" in self.message:
             self.alert = "webshell"
-        elif "Login with Role" in self.message:
+        elif self.message is not None and "Login with Role" in self.message:
             self.alert = "mist-login"
-        elif "Accessed Org" in self.message:
+        elif self.message is not None and "Accessed Org" in self.message:
             self.alert = "accessed-org"
-        elif "manually restarted" in self.message:
+        elif self.message is not None and "manually restarted" in self.message:
             self.alert = "restart"
-        elif "firmware upgrade" in self.message:
+        elif self.message is not None and "firmware upgrade" in self.message:
             self.alert = "firmware"
-        elif "Add Webhook" in self.message:
+        elif self.message is not None and "Add Webhook" in self.message:
             self.alert = "add-webhook"
         else:
             self.alert = "unspecified"
@@ -963,18 +1065,28 @@ class DeviceUpdowns(Events):
     """
     Represents a Device Up or Down object.
 
-    Methods:
-        __init__(self, event: dict): Initializes the DeviceUpdowns object.
-        __repr__(self): Returns a string representation of the object.
-        __collect_fields(self): Collects fields from the raw event.
-        __parse(self): Parses the raw event data.
-        __action(self, config: dict): Performs an action based on the event.
+    Args:
+        event (dict): The raw event data from the webhook.
+        config (dict): Event handling configuration.
     """
+
     def __init__(
         self,
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the DeviceUpdowns object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -982,7 +1094,12 @@ class DeviceUpdowns(Events):
     ) -> None:
         """
         Collect fields from the raw event.
-        This is a helper function to collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         # The timestamp (epoch) that the event occurred
@@ -1017,8 +1134,6 @@ class DeviceUpdowns(Events):
             x.y
             x = Device type; switch, ap, etc
             y = Event type; 'type' field
-
-        Where possible the parsed message is taken from the text field.
 
         Arguments:
             config (dict): Event handling configuration.
@@ -1073,6 +1188,18 @@ class Location(Events):
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the Location object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -1080,6 +1207,12 @@ class Location(Events):
     ) -> None:
         """
         Collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         # The timestamp (epoch) that the event occurred
@@ -1155,6 +1288,18 @@ class Occupancy(Events):
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the Occupancy object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -1162,6 +1307,12 @@ class Occupancy(Events):
     ) -> None:
         """
         Collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         pass
@@ -1220,6 +1371,18 @@ class RssiZone(Events):
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the RssiZone object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -1227,6 +1390,12 @@ class RssiZone(Events):
     ) -> None:
         """
         Collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         pass
@@ -1285,6 +1454,18 @@ class SdkClient(Events):
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the SdkClient object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -1292,6 +1473,12 @@ class SdkClient(Events):
     ) -> None:
         """
         Collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         pass
@@ -1350,6 +1537,18 @@ class VirtualBeacon(Events):
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the VirtualBeacon object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -1357,6 +1556,12 @@ class VirtualBeacon(Events):
     ) -> None:
         """
         Collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         pass
@@ -1415,6 +1620,18 @@ class Zone(Events):
         event: dict,
         config: dict,
     ) -> None:
+        """
+        Initialize the Zone object and process the event.
+        Inherits from the base Events class.
+
+        Args:
+            event (dict): The event data from the webhook.
+            config (dict): Event handling configuration.
+
+        Returns:
+            None
+        """
+
         super().__init__(event, config)
 
     def _collect_fields(
@@ -1422,6 +1639,12 @@ class Zone(Events):
     ) -> None:
         """
         Collect fields from the raw event.
+
+        Args:
+            None
+
+        Returns:
+            None
         """
 
         # The timestamp (epoch) that the event occurred
