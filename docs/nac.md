@@ -1,19 +1,21 @@
+# NAC Webhooks
+
 JSON body format for NAC webhooks
----------------------------------
 
 This will break down the events in to categories
-- NAC Accounting
-- Session and client events
-- Certificate events
-- IDP Events
-- MDM Events
+* NAC Accounting
+* Session and client events
+* Certificate events
+* IDP Events
+* MDM Events
 
 
 
---------------
-NAC Accounting
---------------
+## NAC Accounting
+
 NAC_ACCOUNTING_START
+
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "bssid": "xxxxxxxxxxxx",
@@ -37,9 +39,14 @@ NAC_ACCOUNTING_START
     "type": "NAC_ACCOUNTING_START",
     "username": "user@domain.com"
 }
+```
+</br></br>
+
 
 
 NAC_ACCOUNTING_STOP
+
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "bssid": "xxxxxxxxxxxx",
@@ -69,9 +76,14 @@ NAC_ACCOUNTING_STOP
     "type": "NAC_ACCOUNTING_STOP",
     "username": "user@domain.com"
 }
+```
+</br></br>
+
 
 
 NAC_ACCOUNTING_UPDATE
+
+```json
 {
     "crc": [
         2905138499,
@@ -93,12 +105,15 @@ NAC_ACCOUNTING_UPDATE
     "type": "NAC_ACCOUNTING_UPDATE",
     "username": "user@domain.com"
 }
+```
+</br></br>
 
 
--------------------------
-Session and client events
--------------------------
+
+## Session and client events
+
 NAC_CLIENT_DENY
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "auth_type": "eap-peap",
@@ -136,9 +151,13 @@ NAC_CLIENT_DENY
     "type": "NAC_CLIENT_DENY",
     "username": "user@domain.com"
 }
+```
+</br></br>
+
 
 
 NAC_CLIENT_IP_ASSIGNED
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "aps": [
@@ -182,9 +201,13 @@ NAC_CLIENT_IP_ASSIGNED
     "type": "NAC_CLIENT_IP_ASSIGNED",
     "username": "user@domain.com"
 }
+```
+</br></br>
+
 
 
 NAC_CLIENT_PERMIT
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "auth_type": "eap-tls",
@@ -251,9 +274,13 @@ NAC_CLIENT_PERMIT
     "vlan": "15",
     "vlan_source": "nactag"
 }
+```
+</br></br>
+
 
 
 NAC_SESSION_ENDED
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "aps": [
@@ -359,9 +386,13 @@ NAC_SESSION_ENDED
     "type": "NAC_SESSION_ENDED",
     "username": "user@domain.com"
 }
+```
+</br></br>
+
 
 
 NAC_SESSION_STARTED
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "client_type": "wireless",
@@ -385,12 +416,15 @@ NAC_SESSION_STARTED
     "type": "NAC_SESSION_STARTED",
     "username": "user@domain.com"
 }
+```
+</br></br>
 
 
-------------------
-Certificate events
-------------------
+
+## Certificate events
+
 NAC_CLIENT_CERT_CHECK_SUCCESS
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "auth_type": "eap-tls",
@@ -438,9 +472,13 @@ NAC_CLIENT_CERT_CHECK_SUCCESS
     "type": "NAC_CLIENT_CERT_CHECK_SUCCESS",
     "username": "user@domain.com"
 }
+```
+</br></br>
+
 
 
 NAC_CLIENT_CERT_CHECK_FAILURE
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "auth_type": "eap-tls",
@@ -479,9 +517,13 @@ NAC_CLIENT_CERT_CHECK_FAILURE
     "type": "NAC_CLIENT_CERT_CHECK_FAILURE",
     "username": "username"
 }
+```
+</br></br>
+
 
 
 NAC_SERVER_CERT_VALIDATION_SUCCESS
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "auth_type": "eap-tls",
@@ -523,15 +565,17 @@ NAC_SERVER_CERT_VALIDATION_SUCCESS
     "type": "NAC_SERVER_CERT_VALIDATION_SUCCESS",
     "username": "user@domain.com"
 }
+```
+</br></br>
 
 
-NAC_SERVER_CERT_VALIDATION_FAILURE
 
 
-----------
-IDP Events
-----------
+
+## IDP Events
+
 NAC_IDP_AUTHC_SUCCESS
+```json
 {
     "client_type": "wired",
     "crc": [
@@ -568,9 +612,13 @@ NAC_IDP_AUTHC_SUCCESS
     "type": "NAC_IDP_AUTHC_SUCCESS",
     "username": "user@domain.com"
 }
+```
+</br></br>
+
 
 
 NAC_IDP_GROUPS_LOOKUP_FAILURE
+```json
 {
     "auth_type": "eap-tls",
     "cert_cn": "xxxxxxxxxxxx",
@@ -621,9 +669,13 @@ NAC_IDP_GROUPS_LOOKUP_FAILURE
     "type": "NAC_IDP_GROUPS_LOOKUP_FAILURE",
     "username": "Username"
 }
+```
+</br></br>
+
 
 
 NAC_IDP_GROUPS_LOOKUP_SUCCESS
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "auth_type": "eap-tls",
@@ -679,12 +731,15 @@ NAC_IDP_GROUPS_LOOKUP_SUCCESS
     "type": "NAC_IDP_GROUPS_LOOKUP_SUCCESS",
     "username": "user@domain.com"
 }
+```
+</br></br>
 
 
-----------
-MDM Events
-----------
+
+## MDM Events
+
 NAC_CLIENT_COA_REAUTH
+```json
 {
     "client_type": "wired",
     "coa_source": "MDM",
@@ -707,12 +762,14 @@ NAC_CLIENT_COA_REAUTH
     "timestamp": 1749090165143,
     "type": "NAC_CLIENT_COA_REAUTH"
 }
+```
+</br></br>
 
-
-NAC_MDM_DEVICE_NOT_ENROLLED
 
 
 NAC_MDM_LOOKUP_SUCCESS
+
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "client_type": "wireless",
@@ -738,11 +795,15 @@ NAC_MDM_LOOKUP_SUCCESS
     "type": "",
     "username": "user@domain.com"
 }
+```
+</br></br>
+
 
 
 
 NAC_MDM_LOOKUP_FAILURE
 
+```json
 {
     "client_type": "wired",
     "crc": [
@@ -764,3 +825,7 @@ NAC_MDM_LOOKUP_FAILURE
     "type": "NAC_MDM_LOOKUP_FAILURE",
     "username": "xxxxxxxxxxxx"
 }
+```
+</br></br>
+
+

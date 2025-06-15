@@ -1,8 +1,12 @@
+# Audit Events
+
+JSON body formats to audit events
+</br></br>
 
 
+**Add webhook event**
 
-Add webhook event
-
+```json
 {
     "admin_name": "username",
     "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -15,4 +19,4 @@ Add webhook event
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36",
     "webhook_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
-
+```

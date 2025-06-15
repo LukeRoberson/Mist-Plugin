@@ -1,20 +1,22 @@
+# Client Webhooks
+
 JSON body format for Client webhooks
-------------------------------------
 
 Unlike NAC or device events, there is no 'type' field to categorise these webhooks.
 These custom 'types' are used:
-- user-connect
-- guest-connect
-- disconnect
-- client-info
+* user-connect
+* guest-connect
+* disconnect
+* client-info
+</br></br>
 
 
-----------
-Disconnect
-----------
+## Disconnect
+
 When there is a 'connect' and a 'disconnect' field, this is a client disconnection
 
 Example:
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "ap_name": "AP Name",
@@ -43,15 +45,18 @@ Example:
     "wlan_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "type": "disconnect"
 }
+```
+</br></br>
 
 
 
----------------
-Connect & Guest
----------------
+
+## Connect & Guest
+
 If there is a 'connect' field, but no 'disconnect' field, this is a client connection of some type.
 
 Example:
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "ap_name": "AP Name",
@@ -70,35 +75,43 @@ Example:
     "version": 2,
     "wlan_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 }
+```
+</br></br>
+
 
 
 Sometimes these will include extra fields, if Mist can work them out.
 For example, if a user authenticates with username/password, these fields will be here.
 If the device is on guest WiFi, they won't be here
 
+```json
 {
     "client_hostname": "Hostname",
     "client_ip": "x.x.x.x",
     "client_username": "user@domain.com",
 }
+```
+</br></br>
+
 
 
 If client_username is present:
-- user-connect
+* user-connect
 
 If not:
-- guest-connect
+* guest-connect
+</br></br>
 
 
 
------------
-Client-info
------------
+## Client-info
+
 Anything with very little information is 'client-info'
 This is a fragment of an update, and probably correlates to some other webhook.
 This may be an event within an aggregated webhook
 
 Example:
+```json
 {
     "ip": "x.x.x.x",
     "mac": "xxxxxxxxxxxx",
@@ -106,4 +119,4 @@ Example:
     "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "timestamp": 1749088902
 }
-
+```

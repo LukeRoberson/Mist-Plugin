@@ -1,12 +1,14 @@
+# Device Webhooks
+
 JSON body format for device webhooks
 
 
---------
-Switches
---------
+## Switches
+
 Unless specified, they all follow the format below.
 The 'type' will be "SW_PORT_DOWN" or similar.
 
+```json
 {
     "device_name": "Switch name",
     "device_type": "switch",
@@ -20,10 +22,12 @@ The 'type' will be "SW_PORT_DOWN" or similar.
     "timestamp": 1749073244,
     "type": "SW_PORT_DOWN"
 }
+```
+</br></br>
 
 
-Sample text fields
-------------------
+## Sample text fields
+
 SW_PORT_DOWN
     "ifIndex 546, ifAdminStatus up(1), ifOperStatus down(2), ifName ge-0/0/31 Port Description: Management"
 SW_PORT_UP
@@ -68,12 +72,13 @@ SW_STP_TOPO_CHANGED
     TopoChgCnt 5, RootID 32768.08:05:e2:5e:dc:7e, RootCost 10000, RootPort ae0
 
 
-Differences
------------
+## Differences
+
 Some have slightly different bodies:
     SW_CONNECTED
     SW_DISCONNECTED
 
+```json
 {
     "device_name": "Switch Name",
     "device_type": "switch",
@@ -85,6 +90,8 @@ Some have slightly different bodies:
     "timestamp": 1749080793,
     "type": "SW_DISCONNECTED"
 }
+```
+</br></br>
 
 
 SW_STP_TOPO_CHANGED
@@ -92,10 +99,9 @@ SW_STP_TOPO_CHANGED
 
 
 
-------
-MARVIS
-------
+## MARVIS
 
+```json
 CONNECTIVITY_TEST (Access Point)
 {
     "ap": "xxxxxxxxxxxx",
@@ -110,16 +116,17 @@ CONNECTIVITY_TEST (Access Point)
     "timestamp": 1749073097,
     "type": "CONNECTIVITY_TEST"
 }
+```
+</br></br>
 
 
 
--------------
-Access Points
--------------
+## Access Points
 
 These are very similar to switches, with a few differences.
 They follow this format:
 
+```json
 {
     "ap": "xxxxxxxxxxxx",
     "ap_name": "Device Name",
@@ -134,11 +141,16 @@ They follow this format:
     "timestamp": 1749101162,
     "type": "AP_CONFIG_CHANGED_BY_USER"
 }
+```
+</br></br>
+
 
 
 Differences:
 
 AP_RADAR_DETECTED contains additional fields, showing how RRM has tuned it
+
+```json
 {
     "band": "5",
     "bandwidth": 40,
@@ -147,14 +159,15 @@ AP_RADAR_DETECTED contains additional fields, showing how RRM has tuned it
     "pre_channel": 60,
     "reason": "radar-detected",
 }
+```
+</br></br>
 
 
 
----------------
-Gateway's (SRX)
----------------
 
+## Gateway's (SRX)
 
+```json
 {
     "audit_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "device_name": "Device Name",
@@ -167,6 +180,8 @@ Gateway's (SRX)
     "timestamp": 1749101162,
     "type": "GW_CONFIG_CHANGED_BY_USER"
 }
+```
+</br></br>
 
 
 

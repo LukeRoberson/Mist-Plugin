@@ -2,7 +2,7 @@
 Module: main.py
 
 The Mist plugin
-    Receives and processes webhooks from the Mist plugin.
+    Receives and processes webhooks from the Mist platform.
     Events are grouped by topic and processed by the appropriate event manager.
     Event manager classes are imported from the parser module.
 
@@ -80,6 +80,7 @@ CONFIG_URL = "http://core:5100/api/config"
 LOG_URL = "http://logging:5100/api/log"
 PLUGINS_URL = "http://web-interface:5100/api/plugins"
 HASH_URL = "http://security:5100/api/hash"
+MIST_SIGNATURE_HEADER = 'X-Mist-Signature-v2'
 
 
 def fetch_global_config(
@@ -152,6 +153,7 @@ def create_app(
 
     Args:
         config (dict): The global configuration dictionary
+        system_log (SystemLog): An instance of SystemLog for logging.
 
     Returns:
         Flask: The Flask application instance.
@@ -287,7 +289,7 @@ def health():
 @app.route('/webhook', methods=['POST'])
 def webhook():
     '''
-    Handle incoming webhook requests from the Mist plugin.
+    Handle incoming webhook requests from the Mist platform.
     Validates the request signature
     Creates an event manager based on the topic of the event
     Processes the event using the event manager.
@@ -311,7 +313,7 @@ def webhook():
             400
         )
 
-    signature = request.headers.get('X-Mist-Signature-v2', None)
+    signature = request.headers.get(MIST_SIGNATURE_HEADER, None)
     if not signature:
         logging.error(
             "No signature found in the message. Message will not be validated."

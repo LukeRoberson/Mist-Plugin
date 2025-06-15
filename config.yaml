@@ -581,6 +581,11 @@ alarms:
     sql: false
     syslog: false
     teams: false
+  dhcp_failure:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   missing_vlan:
     web: true
     sql: false

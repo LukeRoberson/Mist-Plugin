@@ -63,7 +63,7 @@ switch_reconnected:
 
 device_restarted:
   description: "A device has restarted"
-  message: "{self.event}"
+  message: "{len(self.hostnames)} devices have restarted at {self.site_name}:\n{self.event}, due to {self.reasons}\n{self.hostnames}"
   severity: "warning"
 
 switch_restarted:
@@ -78,7 +78,7 @@ sw_alarm_chassis_psu:
 
 sw_alarm_chassis_poe:
   description: "A switch has detected an issue with its Power over Ethernet (PoE) capabilities"
-  message: "{self.event}"
+  message: "{self.hostnames[0]} at {self.site_name} has a PoE issue on port {self.port_id}\n{self.reasons}"
   severity: "error"
 
 switch_stp_loop:
@@ -127,7 +127,7 @@ sw_bad_optics:
 
 ap_bad_cable:
   description: "An access point has a problem with its cabling"
-  message: "{self.event}"
+  message: "Marvis has detected a bac cable on {self.email_content['Connected switch'] on port {self.port_ids[0]} at {self.site_name}:\nMarvis recommends: {self.suggestion}"
   severity: "info"
 
 

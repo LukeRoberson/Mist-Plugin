@@ -1,11 +1,10 @@
---------
-Location
---------
+# Location Events
 
 These are site based webhooks.
 They show the location of a device on a map.
 The map must be configured correctly for this to work.
 
+```json
 {
     "mac": "xxxxxxxxxxxx",
     "map_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -16,5 +15,5 @@ The map must be configured correctly for this to work.
     "x": 66.36483,
     "y": 41.912815
 }
-
+```
 

@@ -1,9 +1,15 @@
-JSON body format for Alarm webhooks
------------------------------------
+# JSON body format for Alarm webhooks
+
+# Regular Alarms
+
+There are several different formats, depending on the alarm type
+</br></br>
 
 
+**sw_bad_optics**
+**sw_alarm_chassis_poe**
 
-sw_bad_optics
+```json
 {
     "count": 1,
     "fw_version": "22.4R3-S6.5",
@@ -32,15 +38,107 @@ sw_bad_optics
     "timestamp": 1749096017.5365038,
     "type": "sw_bad_optics"
 }
+```
+</br></br>
 
 
-------------
-Marvis Minis
-------------
+
+
+**ap_bad_cable**
+```json
+{
+    "alert_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "category": "layer_1",
+    "count": 1,
+    "details": {
+        "action": "test_replace_cable",
+        "category": "layer_1",
+        "status": "resolved",
+        "symptom": "bad_cable"
+    },
+    "email_content": {
+        "Connected switch": "Switch-Name(xxxxxxxxxxxx)",
+        "Status": "resolved",
+        "ap": "Switch-Name(xxxxxxxxxxxx)"
+    },
+    "group": "marvis",
+    "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "impacted_entities": [
+        {
+            "connected_switch_mac": "xxxxxxxxxxxx",
+            "connected_switch_name": "Switch Name",
+            "entity_mac": "xxxxxxxxxxxx",
+            "entity_name": "Switch Name",
+            "entity_type": "ap",
+            "port_id": "ge-0/0/19"
+        }
+    ],
+    "last_seen": "2025-04-01T16:58:27",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "org_name": "Org Name",
+    "port_ids": [
+        "ge-0/0/19"
+    ],
+    "resolved_time": "2025-06-13T15:01:20",
+    "severity": "critical",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Site Name",
+    "status": "resolved",
+    "suggestion": "test_replace_cable",
+    "timestamp": 1749826902.0342431,
+    "type": "ap_bad_cable"
+}
+```
+</br></br>
+
+
+
+
+**device_restarted**
+```json
+{
+    "aps": [
+        "xxxxxxxxxxxx",
+        "xxxxxxxxxxxx",
+        ...
+    ],
+    "count": 4,
+    "group": "infrastructure",
+    "hostname": "AP Hostname",
+    "hostnames": [
+        "Hostname",
+        "Hostname",
+        ...
+    ],
+    "id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "last_seen": "2025-06-15T14:25:19",
+    "org_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "reasons": [
+        "power_cycle"
+    ],
+    "severity": "info",
+    "site_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+    "site_name": "Site Name",
+    "timestamp": 1749998077.6217253,
+    "type": "device_restarted"
+}
+```
+</br></br>
+
+
+
+
+
+
+## Marvis Minis
+
 These simulate traffic, etc, to test network functions.
 Notice that the 'group' is set to 'marvis'.
+</br></br>
 
-dhcp_failure:
+
+**dhcp_failure**
+```json
 {
     "alert_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
     "category": "connectivity",
@@ -81,4 +179,4 @@ dhcp_failure:
     "timestamp": 1749151526.6709626,
     "type": "dhcp_failure"
 }
-
+```
