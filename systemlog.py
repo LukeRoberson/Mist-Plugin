@@ -57,7 +57,7 @@ class SystemLog:
         category: str,
         alert: str,
         severity: str,
-        teams_chat_id: Optional[str] = None,
+        teams_chat_list: Optional[dict] = None,
     ) -> None:
         '''
         Initialise the SystemLog class.
@@ -72,6 +72,8 @@ class SystemLog:
             category (str): The category of the log message.
             alert (str): The alert type for the log message.
             severity (str): The severity level of the log message.
+            teams_chat_list (Optional[dict]): Optional list of Teams chat IDs
+                for sending messages to Teams.
 
         Returns:
             None
@@ -87,7 +89,8 @@ class SystemLog:
         self.severity = severity
 
         # Optional: Teams chat ID for sending messages to Teams
-        self.teams_chat_id = teams_chat_id
+        #   Should contain an entry for 'default'
+        self.teams_chat_id = teams_chat_list
 
     def log(
         self,
@@ -146,7 +149,10 @@ class SystemLog:
                         "message": message
                     },
                     "teams": {
-                        "destination": self.teams_chat_id,
+                        "destination": (
+                            self.teams_chat_id['default']
+                            if self.teams_chat_id else None
+                        ),
                         "message": teams_msg
                     }
                 },

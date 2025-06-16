@@ -36,15 +36,24 @@ Everything runs from main.py.
 # Configuration
 
 ## Plugin Configuration
-
-Configuration is handled in config.yaml. The two mandatory sections are:
+### Main Configuration
+Configuration is handled in config.yaml. The two mandatory parts are:
 
 ```yaml
 name: "Mist"
-chat-id: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+chats:
+  default: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 ```
 
 This defines the name of the plugin, and the Teams Chat ID that alerts are sent to.
+
+The **chats** fields is a list of chats to send to. Think of this as a list of _aliases_ of 1:1 chats or group chats.
+
+Certain events can be sent to a specific chat destination. The **default** chat ID is for all other events (most of them really), that aren't configured with a specific chat alias.
+</br></br>
+
+
+### Alert Configuration
 
 There are a series of alert types, with actions assigned. This is the action to take, such as sending to Teams, logging to live alerts, etc, when that particular event is received. They are further grouped into main areas (as defined by Mist).
 
@@ -71,6 +80,32 @@ alarms:
         syslog: false
         teams: true
 ```
+
+If we add the **chat** field to an event, we can send the Teams message for the event to a specific chat group. For example:
+
+```yaml
+chats:
+  default: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  network_admin: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+alarms:
+  ap_bad_cable:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+
+  device_down:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+    chat: network_admin
+```
+
+In this example, any **device_down** event will be sent to the **network_admin** chat ID. The **ap_bad_cable** event does not have a chat ID listed, so it will go to the **default** chat ID.
+
+
 </br></br>
 
 

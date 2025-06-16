@@ -263,7 +263,7 @@ system_log = SystemLog(
     category="mist",
     alert="system",
     severity="info",
-    teams_chat_id=config_data.get('chat-id', None)
+    teams_chat_list=config_data.get('chats', None)
 )
 
 # Initialize the Flask application
@@ -412,12 +412,6 @@ def webhook():
                 }
             ),
             400
-        )
-
-    if len(event_list) > 1:
-        logging.warning(
-            "Received webhook with multiple events for topic: %s",
-            topic
         )
 
     for event in event_list:

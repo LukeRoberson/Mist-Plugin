@@ -1,6 +1,8 @@
 name: "mist"
 
-chat-id: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+chats:
+    user: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    default: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 nac-events:
   NAC_ACCOUNTING_START:
