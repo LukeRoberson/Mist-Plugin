@@ -483,9 +483,9 @@ class NacEvent(Events):
 
         # Parse the event
         self._parse_event(
-            event_type,
-            NAC_EVENTS,
-            config,
+            event_type=event_type,
+            handler_map=NAC_EVENTS,
+            config=config,
             event_label="NAC"
         )
 
