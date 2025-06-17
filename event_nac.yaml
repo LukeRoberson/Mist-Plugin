@@ -65,7 +65,12 @@ NAC_CLIENT_CERT_CHECK_SUCCESS:
 
 NAC_CLIENT_CERT_CHECK_FAILURE:
   description: "A client's certificate check has failed"
-  message: "{client_type} client {self.username} failed client certificate check.\n {self.text}\n {cert_subject}"
+  message: "{self.client_type} client {self.username} failed client certificate check.\n {self.text}\n {cert_subject}"
+  severity: "info"
+
+NAC_CLIENT_CERT_EXPIRED:
+  description: "A client's certificate has expired"
+  message: "{self.cert_cn}'s certificate has expired."
   severity: "info"
 
 NAC_SERVER_CERT_VALIDATION_SUCCESS:
