@@ -31,28 +31,32 @@ from datetime import datetime
 import logging
 from flask import current_app
 import yaml
+import os
+
+
+CONFIG_DIR = os.path.join(os.path.dirname(__file__), "config")
 
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
 # Get the event handler configs
-with open("event_nac.yaml", "r") as file:
+with open(os.path.join(CONFIG_DIR, "event_nac.yaml"), "r") as file:
     NAC_EVENTS = yaml.safe_load(file)
 
-with open("event_clients.yaml", "r") as file:
+with open(os.path.join(CONFIG_DIR, "event_clients.yaml"), "r") as file:
     CLIENT_EVENTS = yaml.safe_load(file)
 
-with open("event_devices.yaml", "r") as file:
+with open(os.path.join(CONFIG_DIR, "event_devices.yaml"), "r") as file:
     DEVICE_EVENTS = yaml.safe_load(file)
 
-with open("event_alarms.yaml", "r") as file:
+with open(os.path.join(CONFIG_DIR, "event_alarms.yaml"), "r") as file:
     ALARM_EVENTS = yaml.safe_load(file)
 
-with open("event_audits.yaml", "r") as file:
+with open(os.path.join(CONFIG_DIR, "event_audits.yaml"), "r") as file:
     AUDIT_EVENTS = yaml.safe_load(file)
 
-with open("event_updown.yaml", "r") as file:
+with open(os.path.join(CONFIG_DIR, "event_updown.yaml"), "r") as file:
     UPDOWN_EVENTS = yaml.safe_load(file)
 
 
@@ -94,7 +98,6 @@ class Events:
         self.event = event
 
         # Initialize default values
-        self.parsed_body = {}
         self.group = ""
         self.category = ""
 
@@ -266,7 +269,6 @@ class Events:
         action_list = [
             k for k in ("web", "teams", "syslog", "sql") if actions.get(k)
         ]
-        self.parsed_body["destination"] = action_list
 
         # If no actions are specified, do nothing
         if not action_list:
@@ -489,20 +491,6 @@ class NacEvent(Events):
             event_label="NAC"
         )
 
-        # Create webhook body
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
-
 
 class ClientEvent(Events):
     """
@@ -625,20 +613,6 @@ class ClientEvent(Events):
             event_label="Client"
         )
 
-        # Create webhook body
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
-
 
 class DeviceEvents(Events):
     """
@@ -750,20 +724,6 @@ class DeviceEvents(Events):
             config,
             event_label="Device"
         )
-
-        # Collect all the information we need into a single dictionary
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
 
 
 class Alarms(Events):
@@ -918,17 +878,6 @@ class Alarms(Events):
             event_label="Alarm"
         )
 
-        # Create webhook body
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "type": f"{self.group}.{self.category}.{self.alert}",
-                "timestamp": self.timestamp,
-                "message": self.event_message
-            }
-        }
-
 
 class Audits(Events):
     """
@@ -1046,20 +995,6 @@ class Audits(Events):
             event_label="Audit"
         )
 
-        # Create webhook body
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message
-            }
-        }
-
 
 class DeviceUpdowns(Events):
     """
@@ -1159,20 +1094,6 @@ class DeviceUpdowns(Events):
             event_label="UpDown"
         )
 
-        # Create webhook body
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message
-            }
-        }
-
 
 class Location(Events):
     """
@@ -1259,20 +1180,6 @@ class Location(Events):
         )
         self.teams_msg = f"Location event for {self.mac}"
 
-        # Collect all the information we need into a single dictionary
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
-
 
 class Occupancy(Events):
     """
@@ -1341,20 +1248,6 @@ class Occupancy(Events):
         self.timestamp = datetime.now().timestamp()
         self.event_message = str(self.event)
         self.teams_msg = None
-
-        # Collect all the information we need into a single dictionary
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
 
 
 class RssiZone(Events):
@@ -1425,20 +1318,6 @@ class RssiZone(Events):
         self.event_message = str(self.event)
         self.teams_msg = None
 
-        # Collect all the information we need into a single dictionary
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
-
 
 class SdkClient(Events):
     """
@@ -1508,20 +1387,6 @@ class SdkClient(Events):
         self.event_message = str(self.event)
         self.teams_msg = None
 
-        # Collect all the information we need into a single dictionary
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
-
 
 class VirtualBeacon(Events):
     """
@@ -1590,20 +1455,6 @@ class VirtualBeacon(Events):
         self.timestamp = datetime.now().timestamp()
         self.event_message = str(self.event)
         self.teams_msg = None
-
-        # Collect all the information we need into a single dictionary
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
 
 
 class Zone(Events):
@@ -1691,20 +1542,6 @@ class Zone(Events):
             f"on map {self.map_id} at site {self.site_id}"
         )
         self.teams_msg = f"{self.mac} zone {self.trigger} event"
-
-        # Collect all the information we need into a single dictionary
-        self.parsed_body = {
-            "source": "mist",
-            "destination": ["web"],
-            "log": {
-                "group": self.group,
-                "category": self.category,
-                "alert": self.alert,
-                "severity": self.severity,
-                "timestamp": self.timestamp,
-                "message": self.event_message,
-            }
-        }
 
 
 if __name__ == "__main__":
