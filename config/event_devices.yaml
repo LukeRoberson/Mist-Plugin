@@ -175,12 +175,12 @@ AP_RADAR_DETECTED:
 # Gateway Events
 GW_ALARM:
   description: ""
-  message: ""
+  message: "devices/GW_ALARM: {self.event}"
   severity: "info"
 
 GW_MISTWA_CONFIGURATION_CLASH:
   description: ""
-  message: ""
+  message: "devices/GW_MISTWA_CONFIGURATION_CLASH: {self.event}"
   severity: "info"
 
 AP_CONFIG_CHANGED_BY_USER:
@@ -190,67 +190,67 @@ AP_CONFIG_CHANGED_BY_USER:
 
 GW_CONFIGURED:
   description: ""
-  message: ""
+  message: "devices/GW_CONFIGURED: {self.event}"
   severity: "info"
 
 GW_CONFIG_GENERATED:
   description: ""
-  message: ""
+  message: "devices/GW_CONFIG_GENERATED: {self.event}"
   severity: "info"
 
 GW_CONFIG_FAILED:
   description: ""
-  message: ""
+  message: "devices/GW_CONFIG_FAILED: {self.event}"
   severity: "info"
 
 GW_OSPF_NEIGHBOR_DOWN:
   description: ""
-  message: ""
+  message: "devices/GW_OSPF_NEIGHBOR_DOWN: {self.event}"
   severity: "info"
 
 GW_OSPF_NEIGHBOR_UP:
   description: ""
-  message: ""
+  message: "devices/GW_OSPF_NEIGHBOR_UP: {self.event}"
   severity: "info"
 
 GW_PORT_UP:
   description: ""
-  message: ""
+  message: "devices/GW_PORT_UP: {self.event}"
   severity: "info"
 
 GW_RECONFIGURED:
   description: ""
-  message: ""
+  message: "devices/GW_RECONFIGURED: {self.event}"
   severity: "info"
 
 GW_REJECTED:
   description: ""
-  message: ""
+  message: "devices/GW_REJECTED: {self.event}"
   severity: "info"
 
 GW_RESTART_BY_USER:
   description: ""
-  message: ""
+  message: "devices/GW_RESTART_BY_USER: {self.event}"
   severity: "info"
 
 GW_VPN_PATH_DOWN:
   description: ""
-  message: ""
+  message: "devices/GW_VPN_PATH_DOWN: {self.event}"
   severity: "info"
 
 GW_VPN_PATH_UP:
   description: ""
-  message: ""
+  message: "devices/GW_VPN_PATH_UP: {self.event}"
   severity: "info"
 
 GW_VPN_PEER_DOWN:
   description: ""
-  message: ""
+  message: "devices/GW_VPN_PEER_DOWN: {self.event}"
   severity: "info"
 
 GW_VPN_PEER_UP:
   description: ""
-  message: ""
+  message: "devices/GW_VPN_PEER_UP: {self.event}"
   severity: "info"
 
 

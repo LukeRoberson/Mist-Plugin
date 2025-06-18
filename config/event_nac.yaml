@@ -37,7 +37,7 @@ NAC_CLIENT_DENY:
   severity: "warning"
 
 NAC_CLIENT_IP_ASSIGNED:
-  description: ""
+  description: "An IP was assigned to a client."
   message: "Client IP assigned for {self.username}. {self.client_ip}"
   severity: "debug"
 
@@ -80,7 +80,7 @@ NAC_SERVER_CERT_VALIDATION_SUCCESS:
 
 NAC_SERVER_CERT_VALIDATION_FAILURE:
   description: "A server's certificate validation has failed"
-  message: "{self.event}"
+  message: "NAC_SERVER_CERT_VALIDATION_FAILURE: {self.event}"
   severity: "info"
 
 

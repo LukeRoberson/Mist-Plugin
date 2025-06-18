@@ -68,12 +68,12 @@ device_restarted:
 
 switch_restarted:
   description: "A switch has restarted"
-  message: "{self.event}"
+  message: "alarm/switch_restarted: {self.event}"
   severity: "warning"
 
 sw_alarm_chassis_psu:
   description: "A switch has detected an issue with its power supply unit (PSU)"
-  message: "{self.event}"
+  message: "alarm/sw_alarm_chassis_psu: {self.event}"
   severity: "error"
 
 sw_alarm_chassis_poe:
@@ -83,39 +83,39 @@ sw_alarm_chassis_poe:
 
 switch_stp_loop:
   description: "A switch has detected a Spanning Tree Protocol (STP) loop"
-  message: "{self.event}"
+  message: "alarm/switch_stp_loop: {self.event}"
   severity: "error"
 
 vc_master_changed:
   description: "The master for a Virtual Chassis has changed"
-  message: "{self.event}"
+  message: "alarm/vc_master_changed: {self.event}"
   severity: "warning"
 
 
 # Configuration and Updates
 configuration:
   description: ""
-  message: "{self.event}"
+  message: "alarm/configuration: {self.event}"
   severity: "info"
 
 firmware:
   description: ""
-  message: "{self.event}"
+  message: "alarm/firmware: {self.event}"
   severity: "info"
 
 missing_vlan:
   description: "A VLAN is missing from the configuration"
-  message: "{self.event}"
+  message: "alarm/missing_vlan: {self.event}"
   severity: "info"
 
 admin-action:
   description: ""
-  message: "{self.event}"
+  message: "alarm/admin-action: {self.event}"
   severity: "info"
 
 connectivity:
   description: ""
-  message: "{self.event}"
+  message: "alarm/connectivity: {self.event}"
   severity: "info"
 
 
@@ -134,12 +134,12 @@ ap_bad_cable:
 # WiFi issues
 rogue_ap:
   description: "A rogue AP has been detected"
-  message: "{self.event}"
+  message: "alarm/rogue_ap: {self.event}"
   severity: "info"
 
 rogue_client:
   description: "A rogue client has been detected"
-  message: "{self.event}"
+  message: "alarm/rogue_client: {self.event}"
   severity: "info"
 
 

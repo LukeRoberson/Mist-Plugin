@@ -21,7 +21,7 @@ guest-connect:
 disconnect:
   description: "A client disconnects from an SSID"
   message: "Client {self.mac} at {self.site_name} has disconnected from {self.ssid}"
-  teams: "{self.event}"
+  teams: "clients/disconnect: {self.event}"
   severity: "debug"
 
 client-info:
