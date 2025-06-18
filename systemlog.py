@@ -57,7 +57,7 @@ class SystemLog:
         category: str,
         alert: str,
         severity: str,
-        teams_chat_list: Optional[dict] = None,
+        teams_chat_id: Optional[dict] = None,
     ) -> None:
         '''
         Initialise the SystemLog class.
@@ -72,7 +72,7 @@ class SystemLog:
             category (str): The category of the log message.
             alert (str): The alert type for the log message.
             severity (str): The severity level of the log message.
-            teams_chat_list (Optional[dict]): Optional list of Teams chat IDs
+            teams_chat_id (Optional[dict]): The default Teams chat ID
                 for sending messages to Teams.
 
         Returns:
@@ -88,9 +88,8 @@ class SystemLog:
         self.alert = alert
         self.severity = severity
 
-        # Optional: Teams chat ID for sending messages to Teams
-        #   Should contain an entry for 'default'
-        self.teams_chat_id = teams_chat_list
+        # Optional: Default Teams chat ID for sending messages to Teams
+        self.teams_chat_id = teams_chat_id
 
     def log(
         self,
@@ -101,7 +100,8 @@ class SystemLog:
         category: Optional[str] = None,
         alert: Optional[str] = None,
         severity: Optional[str] = None,
-        teams_msg: Optional[str] = None
+        teams_msg: Optional[str] = None,
+        chat_id: Optional[str] = None,
     ) -> bool:
         """
         Send a log message to the logging service.
@@ -116,6 +116,7 @@ class SystemLog:
             category (str): The category of the log message.
             alert (str): The alert type for the log message.
             severity (str): The severity level of the log message.
+            chat_id (str): Optional Teams chat ID, if overriding the default.
 
         Returns:
             bool: True if the log was sent successfully, False otherwise.
@@ -133,6 +134,14 @@ class SystemLog:
         if teams_msg is None:
             teams_msg = message
 
+        # If a chat ID is provided, use it; otherwise, use the default
+        if chat_id:
+            teams_chat_id = chat_id
+        elif self.teams_chat_id:
+            teams_chat_id = self.teams_chat_id
+        else:
+            teams_chat_id = None
+
         # Send a log as a webhook to the logging service
         try:
             result = requests.post(
@@ -149,10 +158,7 @@ class SystemLog:
                         "message": message
                     },
                     "teams": {
-                        "destination": (
-                            self.teams_chat_id['default']
-                            if self.teams_chat_id else None
-                        ),
+                        "destination": teams_chat_id,
                         "message": teams_msg
                     }
                 },

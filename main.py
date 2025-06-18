@@ -146,6 +146,7 @@ def logging_setup(
 def create_app(
     config: dict,
     system_log: SystemLog,
+    plugin_config: dict,
 ) -> Flask:
     """
     Create the Flask application instance and set up the configuration.
@@ -154,6 +155,7 @@ def create_app(
     Args:
         config (dict): The global configuration dictionary
         system_log (SystemLog): An instance of SystemLog for logging.
+        plugin_config (dict): The plugin configuration loaded from config.yaml.
 
     Returns:
         Flask: The Flask application instance.
@@ -166,6 +168,7 @@ def create_app(
     app.config['SESSION_FILE_DIR'] = '/app/flask_session'
     app.config['GLOBAL_CONFIG'] = config
     app.config['SYSTEM_LOG'] = system_log
+    app.config['PLUGIN_CONFIG'] = plugin_config
     Session(app)
 
     return app
@@ -263,13 +266,14 @@ system_log = SystemLog(
     category="mist",
     alert="system",
     severity="info",
-    teams_chat_list=config_data.get('chats', None)
+    teams_chat_id=config_data.get('chats', None).get('default', None)
 )
 
 # Initialize the Flask application
 app = create_app(
     config=global_config,
-    system_log=system_log
+    system_log=system_log,
+    plugin_config=config_data,
 )
 
 

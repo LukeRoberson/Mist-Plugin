@@ -32,6 +32,7 @@ import logging
 from flask import current_app
 import yaml
 import os
+from typing import Optional
 
 
 CONFIG_DIR = os.path.join(os.path.dirname(__file__), "config")
@@ -78,6 +79,7 @@ class Events:
         self,
         event: dict,
         config: dict,
+        chats: Optional[dict] = None,
     ) -> None:
         """
         Initialize the Events object and process the event.
@@ -109,6 +111,9 @@ class Events:
 
         # Perform an action based on the event type
         self._action(config)
+
+        # Store chat IDs
+        self.chat_ids = chats if chats else {}
 
     def _collect_fields(
         self
@@ -274,6 +279,14 @@ class Events:
         if not action_list:
             return
 
+        # Check if there is a custom chat ID for Teams messages
+        chat_ids = current_app.config.get('PLUGIN_CONFIG', {}).get('chats', {})
+        teams_chat = chat_ids.get('default', None)
+        if 'chat' in actions:
+            teams_chat = chat_ids.get(
+                actions['chat'], None
+            )
+
         # Log to logging service
         system_log = current_app.config['SYSTEM_LOG']
         system_log.log(
@@ -284,6 +297,7 @@ class Events:
             alert=self.alert,
             severity=self.severity,
             teams_msg=self.teams_msg,
+            chat_id=teams_chat,
         )
 
 
