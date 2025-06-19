@@ -124,6 +124,11 @@ SW_STP_TOPO_CHANGED:
   message: "{self.device_name} at {self.site_name} has detected an STP topology change:\n {self.text}"
   severity: "warning"
 
+SW_RADIUS_SERVER_UNRESPONSIVE:
+  description: "A RADIUS server is unresponsive, which means that authentication requests are not being processed"
+  message: "{self.device_name} at {self.site_name} has detected an unresponsive RADIUS server:\n {self.text}"
+  severity: "warning"
+
 
 # Access Point Events
 AP_RESTARTED:

@@ -24,6 +24,9 @@ Dependencies:
     - logging: For logging events and errors.
     - flask: For accessing the current application context.
     - yaml: For loading event handler configurations from YAML files.
+
+Custom Dependencies:
+    - sdk.PluginManager: For managing plugins and configurations.
 """
 
 # Standard library imports
@@ -33,6 +36,12 @@ from flask import current_app
 import yaml
 import os
 from typing import Optional
+
+# Custom imports
+from sdk import PluginManager
+
+
+PLUGINS_URL = "http://core:5100/api/plugins"
 
 
 CONFIG_DIR = os.path.join(os.path.dirname(__file__), "config")
@@ -280,7 +289,14 @@ class Events:
             return
 
         # Check if there is a custom chat ID for Teams messages
-        chat_ids = current_app.config.get('PLUGIN_CONFIG', {}).get('chats', {})
+        plugin_config = {}
+        with PluginManager(PLUGINS_URL) as pm:
+            plugin_config = pm.read(name="mist-plugin")
+
+        chat_ids = {}
+        if isinstance(plugin_config, dict) and 'plugin' in plugin_config:
+            chat_ids = plugin_config.get('chats', {})
+
         teams_chat = chat_ids.get('default', None)
         if 'chat' in actions:
             teams_chat = chat_ids.get(
@@ -354,6 +370,9 @@ class NacEvent(Events):
         Returns:
             None
         """
+
+        # Add the topic to the event
+        self.event["topic"] = "nac"
 
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")
@@ -542,6 +561,9 @@ class ClientEvent(Events):
         This is a helper function to collect fields from the raw event.
         """
 
+        # Add the topic to the event
+        self.event["topic"] = "client"
+
         # Get the timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")
 
@@ -669,6 +691,9 @@ class DeviceEvents(Events):
             None
         """
 
+        # Add the topic to the event
+        self.event["topic"] = "device"
+
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")
 
@@ -780,6 +805,9 @@ class Alarms(Events):
         Returns:
             None
         """
+
+        # Add the topic to the event
+        self.event["topic"] = "nac"
 
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")
@@ -934,6 +962,9 @@ class Audits(Events):
             None
         """
 
+        # Add the topic to the event
+        self.event["topic"] = "audits"
+
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")
 
@@ -1051,6 +1082,9 @@ class DeviceUpdowns(Events):
             None
         """
 
+        # Add the topic to the event
+        self.event["topic"] = "updown"
+
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")
 
@@ -1150,6 +1184,9 @@ class Location(Events):
             None
         """
 
+        # Add the topic to the event
+        self.event["topic"] = "location"
+
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")
 
@@ -1236,7 +1273,8 @@ class Occupancy(Events):
             None
         """
 
-        pass
+        # Add the topic to the event
+        self.event["topic"] = "occupancy"
 
     def _parse(
         self,
@@ -1305,7 +1343,8 @@ class RssiZone(Events):
             None
         """
 
-        pass
+        # Add the topic to the event
+        self.event["topic"] = "rssi_zone"
 
     def _parse(
         self,
@@ -1374,7 +1413,8 @@ class SdkClient(Events):
             None
         """
 
-        pass
+        # Add the topic to the event
+        self.event["topic"] = "sdkclient"
 
     def _parse(
         self,
@@ -1443,7 +1483,8 @@ class VirtualBeacon(Events):
             None
         """
 
-        pass
+        # Add the topic to the event
+        self.event["topic"] = "virtual_beacon"
 
     def _parse(
         self,
@@ -1511,6 +1552,9 @@ class Zone(Events):
         Returns:
             None
         """
+
+        # Add the topic to the event
+        self.event["topic"] = "zone"
 
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")
