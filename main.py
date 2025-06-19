@@ -75,10 +75,11 @@ from parser import (
     Zone,
 )
 from systemlog import SystemLog
+from sdk import PluginManager
 
 CONFIG_URL = "http://core:5100/api/config"
 LOG_URL = "http://logging:5100/api/log"
-PLUGINS_URL = "http://web-interface:5100/api/plugins"
+PLUGINS_URL = "http://core:5100/api/plugins"
 HASH_URL = "http://security:5100/api/hash"
 MIST_SIGNATURE_HEADER = 'X-Mist-Signature-v2'
 
@@ -328,32 +329,15 @@ def webhook():
 
     # If the signature is present, validate it
     else:
-        # Get the secret from the web-interface
-        try:
-            secret_resp = requests.get(
-                PLUGINS_URL,
-                headers={'X-Plugin-Name': config_data['name']}
+        # Get the secret from the plugin config
+        plugin = {}
+        secret = ""
+        with PluginManager(PLUGINS_URL) as pm:
+            plugin = pm.read(
+                name=config_data['name']
             )
-            secret_resp.raise_for_status()
-            secret = secret_resp.json()['plugin']['webhook']['secret']
-
-        except requests.RequestException as e:
-            logging.error(
-                "Failed to request plugin secret from web interface:",
-                e
-            )
-            system_log.log(
-                "Failed to retrieve plugin secret from web interface."
-            )
-            return make_response(
-                jsonify(
-                    {
-                        'result': 'error',
-                        'message': 'Could not retrieve plugin secret.'
-                    }
-                ),
-                502
-            )
+        if isinstance(plugin, dict) and 'plugin' in plugin:
+            secret = plugin['plugin']['webhook']['secret']
 
         # Send to security service for validation
         try:
