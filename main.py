@@ -39,7 +39,7 @@ Dependencies:
 
 Custom Dependencies:
     - parser: Contains event manager classes for processing different topics.
-    - systemlog: Manages system logs and sends them to the logging service.
+    - sdk: Contains the PluginManager and Config classes for managing plugins.
 """
 
 # Standard library imports
@@ -71,8 +71,7 @@ from parser import (
     VirtualBeacon,
     Zone,
 )
-from systemlog import SystemLog
-from sdk import PluginManager, Config
+from sdk import PluginManager, Config, SystemLog
 
 CONFIG_URL = "http://core:5100/api/config"
 LOG_URL = "http://logging:5100/api/log"

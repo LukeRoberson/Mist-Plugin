@@ -15,7 +15,6 @@ Everything runs from main.py.
 | ---------------- | ------------------------------------------------------------- |
 | main.py          | Entry point to the plugin, load configuration, set up routes  |
 | parser.py        | Parses an event and builds fields for logging/alerting        |
-| systemlog.py     | Handles sending alerts to the logging service                 |
 </br></br>
 
 

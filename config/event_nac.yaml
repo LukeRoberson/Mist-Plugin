@@ -116,3 +116,10 @@ NAC_MDM_LOOKUP_FAILURE:
   description: "Failed to look up MDM information for a device."
   message: "MDM lookup failed for {self.mdm_provider}. {self.text}"
   severity: "info"
+
+
+# Marvis Events
+dhcp_failure:
+  description: "A simulated client test has failed to obtain an IP address via DHCP"
+  message: "Marvis Mini simulated a client that failed to obtain an IP address via DHCP at {self.site_name} on {self.impacted_entities['ui_display_field']}"
+  severity: "info"
