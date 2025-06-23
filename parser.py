@@ -517,12 +517,15 @@ class NacEvent(Events):
         event_type = self.type if self.type else "unspecified"
 
         # Parse the event
-        self._parse_event(
-            event_type=event_type,
-            handler_map=NAC_EVENTS,
-            config=config,
-            event_label="NAC"
-        )
+        if event_type in NAC_EVENTS:
+            self._parse_event(
+                event_type=event_type,
+                handler_map=NAC_EVENTS,
+                config=config,
+                event_label="NAC"
+            )
+        else:
+            logging.warning(f"Unhandled NAC event type: {event_type}")
 
 
 class ClientEvent(Events):
