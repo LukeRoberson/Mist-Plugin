@@ -42,6 +42,7 @@ from sdk import PluginManager
 
 
 PLUGINS_URL = "http://core:5100/api/plugins"
+PLUGIN_NAME = "mist"
 
 
 CONFIG_DIR = os.path.join(os.path.dirname(__file__), "config")
@@ -291,7 +292,7 @@ class Events:
         # Check if there is a custom chat ID for Teams messages
         plugin_config = {}
         with PluginManager(PLUGINS_URL) as pm:
-            plugin_config = pm.read(name="mist-plugin")
+            plugin_config = pm.read(name=PLUGIN_NAME)
 
         chat_ids = {}
         if isinstance(plugin_config, dict) and 'plugin' in plugin_config:
