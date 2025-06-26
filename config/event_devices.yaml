@@ -129,6 +129,11 @@ SW_RADIUS_SERVER_UNRESPONSIVE:
   message: "{self.device_name} at {self.site_name} has detected an unresponsive RADIUS server:\n {self.text}"
   severity: "warning"
 
+SW_MAC_LIMIT_EXCEEDED:
+  description: "The MAC limit has been exceeded on a switch port, which means that too many MAC addresses have been learned"
+  message: "{self.device_name} at {self.site_name} has exceeded the MAC limit on {self.port_id}:\n {self.text}"
+  severity: "warning"
+
 
 # Access Point Events
 AP_RESTARTED:

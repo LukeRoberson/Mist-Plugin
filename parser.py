@@ -206,7 +206,7 @@ class Events:
 
             except Exception as e:
                 logging.error(
-                    f"Error formatting event message for {self.alert}: {e}"
+                    f"{handler}: Error formatting event message for {self.alert}: {e}"
                 )
                 self.event_message = "No message included"
                 self.teams_msg = str(self.event)
