@@ -51,8 +51,14 @@ SW_DOT1XD_USR_SESSION_HELD:
 SW_ALARM_OPTICS_IFACE_SFP_LOW:
   description: "A switch has detected a low optical signal on an SFP interface"
   message: "{self.device_name} at {self.site_name}: {self.text}"
-  teams: "{self.device_name} at {self.site_name} is reporting low SFP power on {self.port_id}"
+  teams: "{self.device_name} at {self.site_name} is reporting low SFP power on {self.port_id} (Alarm)"
   severity: "warning"
+
+SW_WARN_OPTICS_IFACE_SFP_LOW:
+  description: "A switch has detected a low optical signal on an SFP interface"
+  message: "{self.device_name} at {self.site_name}: {self.text}"
+  teams: "{self.device_name} at {self.site_name} is reporting low SFP power on {self.port_id} (Warning)"
+  severity: "info"
 
 SW_LACP_RX_STALE:
   description: "LACP messages have not been received from a switch port recently"

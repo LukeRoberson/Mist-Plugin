@@ -1,8 +1,8 @@
 name: "mist"
 
 chats:
-    user: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    default: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    custom: xxxxxxxxxxxxxxxxxxxxxx
+    default: xxxxxxxxxxxxxxxxxxxxxxxxxx
 
 nac-events:
   NAC_ACCOUNTING_START:
@@ -57,6 +57,11 @@ nac-events:
     sql: false
     syslog: false
     teams: true
+  NAC_CLIENT_CERT_EXPIRED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   NAC_SERVER_CERT_VALIDATION_SUCCESS:
     web: false
     sql: false
@@ -104,7 +109,7 @@ nac-events:
     sql: false
     syslog: false
     teams: false
-  
+
   default:
     web: true
     sql: false
@@ -453,6 +458,16 @@ device-events:
     syslog: false
     teams: true
   SW_EVPN_BGP_PEER_STATUS_CHANGE:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_MAC_LIMIT_EXCEEDED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_WARN_OPTICS_IFACE_SFP_LOW:
     web: true
     sql: false
     syslog: false
