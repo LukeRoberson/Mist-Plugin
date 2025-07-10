@@ -10,7 +10,7 @@ LABEL org.opencontainers.image.source="https://github.com/LukeRoberson/Mist-Plug
 
 # Custom Labels for the image
 LABEL net.networkdirection.healthz="http://localhost:5100/api/health"
-LABEL net.networkdirection.plugin.name="Mist"
+LABEL net.networkdirection.plugin.name="mist"
 
 # Copy the requirements file and install dependencies
 COPY requirements.txt .
