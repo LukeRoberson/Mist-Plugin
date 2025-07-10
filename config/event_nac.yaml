@@ -118,6 +118,12 @@ NAC_MDM_LOOKUP_FAILURE:
   severity: "info"
 
 
+device_restarted:
+  description: "A device has been restarted"
+  message: "{self.hostname} has been restarted at {self.site_name}. Reason: {self.reason}"
+  severity: "warning"
+
+
 # Marvis Events
 dhcp_failure:
   description: "A simulated client test has failed to obtain an IP address via DHCP"

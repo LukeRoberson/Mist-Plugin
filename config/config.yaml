@@ -110,6 +110,18 @@ nac-events:
     syslog: false
     teams: false
 
+  device_restarted:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+
+  dhcp_failure:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+
   default:
     web: true
     sql: false
@@ -721,6 +733,11 @@ audits:
     sql: false
     syslog: false
     teams: false
+  mist-support:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
 
   default:
     web: true

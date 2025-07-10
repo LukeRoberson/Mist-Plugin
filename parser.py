@@ -206,7 +206,8 @@ class Events:
 
             except Exception as e:
                 logging.error(
-                    f"{handler}: Error formatting event message for {self.alert}: {e}"
+                    f"{handler}: Error formatting event message for "
+                    f"{self.alert}: {e}"
                 )
                 self.event_message = "No message included"
                 self.teams_msg = str(self.event)
@@ -1029,6 +1030,11 @@ class Audits(Events):
             self.alert = "firmware"
         elif self.message is not None and "Add Webhook" in self.message:
             self.alert = "add-webhook"
+        elif (
+            self.message is not None and
+            "Accessed by Mist Support" in self.message
+        ):
+            self.alert = "mist-support"
         else:
             self.alert = "unspecified"
 

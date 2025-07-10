@@ -42,3 +42,8 @@ add-webhook:
   description: "A webhook has been added in the Mist web UI for a site"
   message: "{self.admin_name} has added a webhook {self.webhook_name} at {self.site_name}"
   severity: "info"
+
+mist-support:
+  description: "The Mist support team has accessed the Org"
+  message: "{self.admin_name} from Mist support has accessed the Org."
+  severity: "info"
