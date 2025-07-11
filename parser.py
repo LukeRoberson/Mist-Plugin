@@ -272,6 +272,12 @@ class Events:
                 "Event is older than 5 minutes, not processing: %s",
                 self.event
             )
+            # Log to logging service
+            system_log = current_app.config['SYSTEM_LOG']
+            system_log.log(
+                message=f"Event is older than 5 minutes, not processing: "
+                f"{self.event}",
+            )
             return
 
         # Get the actions to perform

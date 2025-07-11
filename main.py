@@ -152,9 +152,6 @@ def get_event_manager(
                           or None if the topic is unknown.
     """
 
-    debug_event = event.get('type', 'unknown')
-    logging.info(f"{topic} -> {debug_event}")
-
     if topic in ("nac-events", "nac-accounting"):
         return NacEvent(event, config_data['nac-events'])
 
