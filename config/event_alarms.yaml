@@ -1,6 +1,9 @@
 # Definitions to parse alarm events from Mist webhooks
 # A list of device events that can be parsed from Mist webhooks.
 #
+# See also:
+#   https://www.mist.com/documentation/alert-table/
+#
 # Definitions below contain:
 # - description: A short description of the event. This is used for documentation purposes.
 # - message: A message template that will be used to format the event message.
@@ -146,5 +149,5 @@ rogue_client:
 # Marvis Minis
 dhcp_failure:
   description: "A simulated client test has failed to obtain an IP address via DHCP"
-  message: "Marvis Mini simulated a client that failed to obtain an IP address via DHCP at {self.site_name} on {self.impacted_entities['ui_display_field']}"
+  message: "Marvis Mini simulated a client that failed to obtain an IP address via DHCP at {self.site_name} on {', '.join(e['ui_display_field'] for e in self.impacted_entities)}"
   severity: "info"

@@ -55,6 +55,7 @@ import logging
 import requests
 from typing import Optional
 import os
+from colorama import Fore, Style
 
 # Custom imports
 from parser import (
@@ -276,6 +277,17 @@ def webhook():
                 }
             ),
             400
+        )
+
+    # TROUBLESHOOTING A SPECIFIC EVENT
+    if 'dhcp_failure' in data:
+        print(
+            Fore.YELLOW + Style.BRIGHT,
+            f"Received webhook with dhcp_failure event:\n {data}",
+            Style.RESET_ALL
+        )
+        system_log.log(
+            "Received webhook with dhcp_failure event: %s" % data
         )
 
     signature = request.headers.get(MIST_SIGNATURE_HEADER, None)

@@ -145,6 +145,11 @@ SW_OSPF_NEIGHBOR_UP:
   message: "{self.device_name} at {self.site_name} has established an OSPF neighbour:\n {self.text}"
   severity: "info"
 
+SW_OSPF_NEIGHBOR_DOWN:
+  description: "An OSPF neighbour has gone down"
+  message: "{self.device_name} at {self.site_name} has lost an OSPF neighbour:\n {self.text}"
+  severity: "info"
+
 SW_RESTART_BY_USER:
   description: "A switch has been restarted by an administrator"
   message: "{self.device_name} at {self.site_name} has been restarted by an administrator"

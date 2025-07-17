@@ -267,16 +267,24 @@ class Events:
 
         # If the event is older than 5 minutes, do not process it
         current_time = datetime.now().timestamp()
-        if (current_time - self.timestamp) > 300:
+        if (current_time - self.timestamp) > 600:
+            # Convert timestamp to human-readable format
+            event_time = datetime.fromtimestamp(
+                self.timestamp
+            ).strftime('%Y-%m-%d %H:%M:%S')
+
             logging.warning(
-                "Event is older than 5 minutes, not processing: %s",
+                "Event is older than 10 minutes (%s), not processing: %s",
+                event_time,
                 self.event
             )
             # Log to logging service
             system_log = current_app.config['SYSTEM_LOG']
             system_log.log(
-                message=f"Event is older than 5 minutes, not processing: "
-                f"{self.event}",
+                message=(
+                    f"Event is older than 10 minutes, not processing: "
+                    f"{self.event} (event time: {event_time})"
+                ),
             )
             return
 
