@@ -1,9 +1,9 @@
 [tool.project-metadata]
 name = "Mist Plugin"
 description = "A plugin for the AI assistant app, enhancing it with Mist capabilities."
-version = "1.0.14"
+version = "1.0.15"
 
 [tool.versioning]
 major = 1
 minor = 0
-patch = 14
+patch = 15

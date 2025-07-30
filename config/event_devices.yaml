@@ -160,6 +160,16 @@ SW_UPGRADED:
   message: "{self.device_name} at {self.site_name} has been upgraded to version {self.version}"
   severity: "info"
 
+SW_PORT_BPDU_BLOCKED:
+  description: "A switch port has been blocked due to a BPDU error"
+  message: "{self.device_name} at {self.site_name} has blocked port {self.port_id} due to a BPDU error"
+  severity: "warning"
+
+SW_BOUNCE_PORT:
+  description: "A switch port has been bounced, which means that it has been shut down and then brought back up"
+  message: "{self.port_id} bounced on {self.device_name} at {self.site_name}"
+  severity: "info"
+
 
 # Access Point Events
 AP_RESTARTED:

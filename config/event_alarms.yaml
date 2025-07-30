@@ -89,6 +89,11 @@ switch_stp_loop:
   message: "alarm/switch_stp_loop: {self.event}"
   severity: "error"
 
+sw_bpdu_error:
+  description: "A switch has detected a Bridge Protocol Data Unit (BPDU) error"
+  message: "BPDU error on {self.hostnames} at {self.site_name}:\n{self.reasons}"
+  severity: "error"
+
 vc_master_changed:
   description: "The master for a Virtual Chassis has changed"
   message: "alarm/vc_master_changed: {self.event}"

@@ -1044,6 +1044,8 @@ class Audits(Events):
             self.alert = "firmware"
         elif self.message is not None and "Add Webhook" in self.message:
             self.alert = "add-webhook"
+        elif self.message is not None and "Add NACLabel" in self.message:
+            self.alert = "add-nac_label"
         elif (
             self.message is not None and
             "Accessed by Mist Support" in self.message
