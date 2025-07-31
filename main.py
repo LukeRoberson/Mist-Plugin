@@ -153,6 +153,8 @@ def get_event_manager(
                           or None if the topic is unknown.
     """
 
+    if 'tshoot' not in event:
+        event['tshoot'] = {}
     event['tshoot']['original_topic'] = topic
 
     if topic in ("nac-events", "nac-accounting"):
@@ -291,9 +293,12 @@ def webhook():
         system_log.log(
             "Received webhook with dhcp_failure event: %s" % data
         )
-        data['tshooting']['enabled'] = True
-        data['tshooting']['event'] = 'dhcp_failure'
-        data['tshooting']['correct_topic'] = 'alarms'
+        tshoot = {
+            'enabled': True,
+            'event': 'dhcp_failure',
+            'correct_topic': 'alarms'
+        }
+        data['tshoot'] = tshoot
 
     signature = request.headers.get(MIST_SIGNATURE_HEADER, None)
     if not signature:
