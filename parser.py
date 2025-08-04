@@ -273,7 +273,7 @@ class Events:
                 self.timestamp
             ).strftime('%Y-%m-%d %H:%M:%S')
 
-            logging.warning(
+            logging.debug(
                 "Event is older than 10 minutes (%s), not processing: %s",
                 event_time,
                 self.event
@@ -826,7 +826,7 @@ class Alarms(Events):
         """
 
         # Add the topic to the event
-        self.event["topic"] = "nac"
+        self.event["topic"] = "alarms"
 
         # The timestamp (epoch) that the event occurred
         self.timestamp = self.event.get("timestamp")

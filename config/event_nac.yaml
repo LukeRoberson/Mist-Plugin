@@ -122,10 +122,3 @@ device_restarted:
   description: "A device has been restarted"
   message: "{self.hostname} has been restarted at {self.site_name}. Reason: {self.reason}"
   severity: "warning"
-
-
-# Marvis Events
-dhcp_failure:
-  description: "A simulated client test has failed to obtain an IP address via DHCP"
-  message: "Marvis Mini simulated a client that failed to obtain an IP address via DHCP at {self.site_name} on {', '.join(e['ui_display_field'] for e in self.impacted_entities)}"
-  severity: "info"

@@ -105,6 +105,11 @@ SW_CONFIGURED:
   message: "Config push on {self.device_name} at {self.site_name} has been completed\n {self.text}"
   severity: "info"
 
+SW_CONFIG_FAILED:
+  description: "A switch configuration has failed, which means that the commit did not complete successfully"
+  message: "Config push on {self.device_name} at {self.site_name} has failed\n {self.text}"
+  severity: "error"
+
 SW_ALARM_CHASSIS_POE:
   description: "A switch has detected a chassis PoE alarm, which means that the PoE budget is exceeded or there is a PoE failure"
   message: "{self.device_name} at {self.site_name} has a PoE alarm on {self.port_id}"
