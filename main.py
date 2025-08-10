@@ -284,18 +284,18 @@ def webhook():
         )
 
     # TROUBLESHOOTING A SPECIFIC EVENT
-    if 'dhcp_failure' in data:
+    if 'device_restarted' in data:
         print(
             Fore.YELLOW + Style.BRIGHT,
-            f"Received webhook with dhcp_failure event:\n {data}",
+            f"Received webhook with device_restarted event:\n {data}",
             Style.RESET_ALL
         )
         system_log.log(
-            "Received webhook with dhcp_failure event: %s" % data
+            "Received webhook with device_restarted event: %s" % data
         )
         tshoot = {
             'enabled': True,
-            'event': 'dhcp_failure',
+            'event': 'device_restarted',
             'correct_topic': 'alarms'
         }
         data['tshoot'] = tshoot

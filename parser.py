@@ -879,6 +879,7 @@ class Alarms(Events):
         )
         self.impacted_entities = self.event.get("impacted_entities")
         self.admin_name = self.event.get("admin_name")
+        self.text = self.event.get("text")
 
     def _parse(
         self,
@@ -909,6 +910,7 @@ class Alarms(Events):
         # Get the category
         if self.category:
             self.category = self.category
+
         elif (
             (self.type is not None and 'switch' in self.type) or
             (self.type and self.type.startswith('sw_')) or
@@ -916,15 +918,19 @@ class Alarms(Events):
             (self.port_id)
         ):
             self.category = "switch"
+
         elif (
             self.type and self.type.startswith('ap_') or
             self.aps
         ):
             self.category = "wireless"
+
         elif self.admin_name:
             self.category = "admin-action"
+
         elif self.severity == "info":
             self.category = "info"
+
         else:
             self.category = "unspecified"
 
@@ -1046,6 +1052,8 @@ class Audits(Events):
             self.alert = "add-webhook"
         elif self.message is not None and "Add NACLabel" in self.message:
             self.alert = "add-nac_label"
+        elif self.message is not None and "Bouncing ports" in self.message:
+            self.alert = "bounce-port"
         elif (
             self.message is not None and
             "Accessed by Mist Support" in self.message

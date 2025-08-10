@@ -175,6 +175,16 @@ SW_BOUNCE_PORT:
   message: "{self.port_id} bounced on {self.device_name} at {self.site_name}"
   severity: "info"
 
+SW_ALARM_CHASSIS_PEM:
+  description: "PEM issues, fault slot, high CPU, issues with CB, PoE, and so on."
+  message: "{self.device_name} at {self.site_name} has a PEM alarm: {self.text}"
+  severity: "warning"
+
+SW_ALARM_CHASSIS_PEM_CLEAR:
+  description: "Resolved a PEM issue, fault slot, high CPU, issues with CB, PoE, and so on."
+  message: "{self.device_name} at {self.site_name} has cleared a PEM alarm. Original error: {self.text}"
+  severity: "warning"
+
 
 # Access Point Events
 AP_RESTARTED:
