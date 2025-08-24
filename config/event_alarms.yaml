@@ -66,7 +66,7 @@ switch_reconnected:
 
 device_restarted:
   description: "A device has restarted"
-  message: "{len(self.hostnames)} devices have restarted at {self.site_name}:\n{self.event}, due to {self.reasons}\n{self.hostnames}"
+  message: "{self.hostnames[0]} has restarted at {self.site_name}:\n{self.event}, due to {self.reasons}"
   severity: "warning"
 
 switch_restarted:
@@ -155,4 +155,9 @@ rogue_client:
 dhcp_failure:
   description: "A simulated client test has failed to obtain an IP address via DHCP"
   message: "Marvis Mini simulated a client that failed to obtain an IP address via DHCP at {self.site_name} on {self.impacted_entities}"
+  severity: "info"
+
+bad_cable:
+  description: "A bad cable has been detected on a device"
+  message: "A bad cable has been detected at {self.site_name}: {self.impacted_entities}. Marvis recommends: {self.suggestion}"
   severity: "info"

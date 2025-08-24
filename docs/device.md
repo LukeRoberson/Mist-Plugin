@@ -32,6 +32,8 @@ SW_PORT_DOWN
     "ifIndex 546, ifAdminStatus up(1), ifOperStatus down(2), ifName ge-0/0/31 Port Description: Management"
 SW_PORT_UP
     "ifIndex 519, ifAdminStatus up(1), ifOperStatus up(1), ifName ge-0/0/4"
+SW_IP_CONFLICT
+    "KERN_ARP_DUPLICATE_ADDR: duplicate IP address 10.18.104.1! sent from address: 98:49:25:7b:a8:00 (error count = 1)"
 SW_DOT1XD_USR_AUTHENTICATED
     "Custom_log Dot1x User gmrichardson@lakemac.nsw.gov.au logged in MacAddress c4:d6:d3:7b:37:26 interface ge-0/0/32.0 vlan Workstations"
 SW_DOT1XD_USR_SESSION_DISCONNECTED

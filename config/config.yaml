@@ -227,46 +227,6 @@ device-events:
     syslog: false
     teams: false
 
-  SW_DOT1XD_USR_AUTHENTICATED:
-    web: false
-    sql: false
-    syslog: false
-    teams: false
-  SW_DOT1XD_USR_ON_SRVR_REJECT_VLAN:
-    web: true
-    sql: false
-    syslog: false
-    teams: false
-  SW_DOT1XD_USR_SESSION_DISCONNECTED:
-    web: false
-    sql: false
-    syslog: false
-    teams: false
-  SW_DOT1XD_USR_SESSION_HELD:
-    web: true
-    sql: false
-    syslog: false
-    teams: false
-  SW_PORT_DOWN:
-    web: false
-    sql: false
-    syslog: false
-    teams: false
-  SW_PORT_UP:
-    web: false
-    sql: false
-    syslog: false
-    teams: false
-  SW_MAC_LIMIT_RESET:
-    web: true
-    sql: false
-    syslog: false
-    teams: false
-  SW_LACP_RX_STALE:
-    web: true
-    sql: false
-    syslog: false
-    teams: false
   SW_ALARM_CHASSIS_PSU:
     web: true
     sql: false
@@ -277,17 +237,17 @@ device-events:
     sql: false
     syslog: false
     teams: true
+  SW_ALARM_CHASSIS_PEM_CLEAR:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   SW_ALARM_OPTICS_IFACE_RX_LOW:
     web: true
     sql: false
     syslog: false
     teams: true
   SW_ALARM_OPTICS_IFACE_SFP_LOW:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_BOUNCE_PORT:
     web: true
     sql: false
     syslog: false
@@ -307,6 +267,13 @@ device-events:
     sql: false
     syslog: false
     teams: true
+
+  SW_BOUNCE_PORT:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+    
   SW_CONFIG_CHANGED_BY_USER:
     web: true
     sql: false
@@ -332,11 +299,13 @@ device-events:
     sql: false
     syslog: false
     teams: true
+
   SW_CONNECTED:
     web: true
     sql: false
     syslog: false
     teams: true
+
   SW_DDOS_PROTOCOL_VIOLATION_SET:
     web: true
     sql: false
@@ -347,6 +316,55 @@ device-events:
     sql: false
     syslog: false
     teams: true
+
+  SW_DOT1XD_USR_AUTHENTICATED:
+    web: false
+    sql: false
+    syslog: false
+    teams: false
+  SW_DOT1XD_USR_ON_SRVR_REJECT_VLAN:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  SW_DOT1XD_USR_SESSION_DISCONNECTED:
+    web: false
+    sql: false
+    syslog: false
+    teams: false
+  SW_DOT1XD_USR_SESSION_HELD:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+    
+  SW_LACP_RX_STALE:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+  SW_MAC_LIMIT_RESET:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
+
+  SW_PORT_DOWN:
+    web: false
+    sql: false
+    syslog: false
+    teams: false
+  SW_PORT_UP:
+    web: false
+    sql: false
+    syslog: false
+    teams: false
+  SW_IP_CONFLICT:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+    
   SW_DISCONNECTED:
     web: true
     sql: false
@@ -357,6 +375,11 @@ device-events:
     sql: false
     syslog: false
     teams: true
+  SW_PORT_BPDU_BLOCKED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true  
   SW_RADIUS_SERVER_UNRESPONSIVE:
     web: true
     sql: false
@@ -397,6 +420,7 @@ device-events:
     sql: false
     syslog: false
     teams: true
+  
   SW_UPGRADE_BY_USER:
     web: true
     sql: false
@@ -427,6 +451,12 @@ device-events:
     sql: false
     syslog: false
     teams: true
+  SW_UPGRADED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  
   SW_VC_MASTER_CHANGED:
     web: true
     sql: false
@@ -438,6 +468,16 @@ device-events:
     syslog: false
     teams: true
   SW_ZTP_FINISHED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_OSPF_NEIGHBOR_DOWN:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_OSPF_NEIGHBOR_UP:
     web: true
     sql: false
     syslog: false
@@ -548,11 +588,32 @@ device-events:
     teams: true
 
 alarms:
+  admin-action:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   ap_bad_cable:
     web: true
     sql: false
     syslog: false
     teams: true
+  bad_cable:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  configuration:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  connectivity:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+
   device_down:
     web: true
     sql: false
@@ -568,6 +629,18 @@ alarms:
     sql: false
     syslog: false
     teams: true
+
+  dhcp_failure:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  firmware:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+
   infra_arp_failure:
     web: false
     sql: false
@@ -598,11 +671,7 @@ alarms:
     sql: false
     syslog: false
     teams: false
-  dhcp_failure:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
+
   missing_vlan:
     web: true
     sql: false
@@ -618,6 +687,7 @@ alarms:
     sql: false
     syslog: false
     teams: true
+
   switch_down:
     web: true
     sql: false
@@ -638,6 +708,7 @@ alarms:
     sql: false
     syslog: false
     teams: true
+  
   sw_alarm_chassis_psu:
     web: true
     sql: false
@@ -653,27 +724,13 @@ alarms:
     sql: false
     syslog: false
     teams: true
+  sw_bpdu_error:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  
   vc_master_changed:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  connectivity:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  admin-action:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  firmware:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  configuration:
     web: true
     sql: false
     syslog: false
@@ -721,7 +778,17 @@ audits:
     sql: false
     syslog: false
     teams: false
+  add-nac_label:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   mist-support:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  bounce-port:
     web: true
     sql: false
     syslog: false

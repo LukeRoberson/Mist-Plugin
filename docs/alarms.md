@@ -45,6 +45,7 @@ There are several different formats, depending on the alarm type
 
 
 **ap_bad_cable**
+**bad_cable**
 ```json
 {
     "alert_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",

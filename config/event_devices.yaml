@@ -28,6 +28,11 @@ SW_PORT_UP:
   message: "Switch port {self.port_id} on {self.device_name} at {self.site_name} has come up"
   severity: "debug"
 
+SW_IP_CONFLICT:
+  description: "An IP address conflict has been detected on a switch port"
+  message: "IP conflict detected on switch {self.device_name}, port {self.port_id} at {self.site_name}: {self.text}"
+  severity: "warning"
+
 SW_DOT1XD_USR_AUTHENTICATED:
   description: "A dot1x user has been authenticated"
   message: "Dot1x user on switch {self.device_name}, port {self.port_id} at {self.site_name} has been authenticated"
