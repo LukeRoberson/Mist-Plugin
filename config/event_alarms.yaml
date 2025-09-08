@@ -142,7 +142,7 @@ ap_bad_cable:
 # WiFi issues
 rogue_ap:
   description: "A rogue AP has been detected"
-  message: "alarm/rogue_ap: {self.event}"
+  message: "{self.hostnames} at {self.site_name} has detected a rogue AP:\n {self.ssids}"
   severity: "info"
 
 rogue_client:
