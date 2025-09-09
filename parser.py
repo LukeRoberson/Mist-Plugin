@@ -1056,6 +1056,8 @@ class Audits(Events):
             self.alert = "bounce-port"
         elif self.message is not None and "Delete NACRule" in self.message:
             self.alert = "delete-nac_rule"
+        elif self.message is not None and "Update Device" in self.message:
+            self.alert = "update-device"
         elif (
             self.message is not None and
             "Accessed by Mist Support" in self.message

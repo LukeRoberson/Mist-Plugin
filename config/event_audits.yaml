@@ -57,4 +57,9 @@ delete-nac_rule:
   description: "An admin has deleted a NAC rule in the Mist web UI"
   message: "{self.admin_name} has deleted a NAC rule: {self.message}"
   severity: "info"
+
+update-device:
+  description: "An admin has updated a device in the Mist web UI"
+  message: "{self.admin_name} has updated a device at {self.site_name}: {self.message}"
+  severity: "info"
   
