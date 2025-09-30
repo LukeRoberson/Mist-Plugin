@@ -32,6 +32,11 @@ infra_dhcp_success:
   message: "DHCP success on VLAN {self.vlans} at {self.site_name}"
   severity: "debug"
 
+sw_dhcp_pool_exhausted:
+  description: "A switch has exhausted its DHCP pool"
+  message: "{self.reasons} on {self.hostnames} at {self.site_name}."
+  severity: "warning"
+
 infra_dns_failure:
   description: "A client failed to resolve a DNS request"
   message: "DNS failure on SSID {self.ssids} at {self.site_name} on VLAN {self.vlans}. This is affecting {self.client_count} clients."

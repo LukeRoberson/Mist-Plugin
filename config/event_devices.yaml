@@ -33,6 +33,11 @@ SW_IP_CONFLICT:
   message: "IP conflict detected on switch {self.device_name}, port {self.port_id} at {self.site_name}: {self.text}"
   severity: "warning"
 
+SW_DHCP_POOL_EXHAUSTED:
+  description: "A DHCP pool on a switch has been exhausted, which means that there are no more available IP addresses to assign to clients"
+  message: "DHCP pool exhausted on switch {self.device_name} at {self.site_name}: {self.text}"
+  severity: "warning"
+
 SW_DOT1XD_USR_AUTHENTICATED:
   description: "A dot1x user has been authenticated"
   message: "Dot1x user on switch {self.device_name}, port {self.port_id} at {self.site_name} has been authenticated"
@@ -232,6 +237,11 @@ AP_CONFIG_CHANGED_BY_RRM:
   message: "The config of {self.ap_name} at {self.site_name} has been tuned by RRM"
   severity: "debug"
 
+AP_CERT_REGENERATED:
+  description: "An AP certificate has been regenerated"
+  message: "{self.ap_name} at {self.site_name} has regenerated its certificate"
+  severity: "info"
+
 AP_RRM_ACTION:
   description: "RRM (Radio Resource Management) has taken an action on an AP. There could be interference, radars, etc, and it needs to be tuned"
   message: "RRM action on {self.ap_name} at {self.site_name}"
@@ -241,6 +251,11 @@ AP_RADAR_DETECTED:
   description: "A radar has been detected by an AP, and it has been tuned to avoid interference. An AP will always yield to a radar"
   message: "A radar has been detected by {self.ap_name} in the vicinity of {self.site_name}. Channels have been adjusted according to legal requirements"
   severity: "warning"
+
+AP_UPGRADE_FAILED:
+  description: "An AP firmware upgrade has failed"
+  message: "{self.ap_name} at {self.site_name} has failed to upgrade. Reason: {self.reason}. {self.text}"
+  severity: "error"
 
 
 # Gateway Events

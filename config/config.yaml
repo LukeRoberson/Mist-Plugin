@@ -227,6 +227,7 @@ device-events:
     syslog: false
     teams: false
 
+  # Switch Alarms
   SW_ALARM_CHASSIS_PSU:
     web: true
     sql: false
@@ -268,12 +269,7 @@ device-events:
     syslog: false
     teams: true
 
-  SW_BOUNCE_PORT:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-    
+  # Switch Config changes
   SW_CONFIG_CHANGED_BY_USER:
     web: true
     sql: false
@@ -299,13 +295,25 @@ device-events:
     sql: false
     syslog: false
     teams: true
-
-  SW_CONNECTED:
+  SW_RECONFIGURED:
     web: true
     sql: false
     syslog: false
     teams: true
 
+  # Mist cloud connectivity
+  SW_CONNECTED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_DISCONNECTED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+
+  # DDoS
   SW_DDOS_PROTOCOL_VIOLATION_SET:
     web: true
     sql: false
@@ -317,6 +325,7 @@ device-events:
     syslog: false
     teams: true
 
+  # Dot1x
   SW_DOT1XD_USR_AUTHENTICATED:
     web: false
     sql: false
@@ -337,7 +346,13 @@ device-events:
     sql: false
     syslog: false
     teams: false
-    
+  SW_RADIUS_SERVER_UNRESPONSIVE:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  
+  # Switch port events
   SW_LACP_RX_STALE:
     web: true
     sql: false
@@ -348,7 +363,11 @@ device-events:
     sql: false
     syslog: false
     teams: false
-
+  SW_BOUNCE_PORT:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   SW_PORT_DOWN:
     web: false
     sql: false
@@ -359,18 +378,14 @@ device-events:
     sql: false
     syslog: false
     teams: false
-  SW_IP_CONFLICT:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-    
-  SW_DISCONNECTED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
   SW_DYNAMIC_PORT_ASSIGNED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+
+  # Spanning tree
+  SW_STP_TOPO_CHANGED:
     web: true
     sql: false
     syslog: false
@@ -380,47 +395,8 @@ device-events:
     sql: false
     syslog: false
     teams: true  
-  SW_RADIUS_SERVER_UNRESPONSIVE:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_RECONFIGURED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_RECOVERY_SNAPSHOT_REQUESTED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_RECOVERY_SNAPSHOT_SUCCEEDED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_REJECTED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_RESTART_BY_USER:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_RESTARTED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_STP_TOPO_CHANGED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  
+
+  # Switch upgrades
   SW_UPGRADE_BY_USER:
     web: true
     sql: false
@@ -456,28 +432,29 @@ device-events:
     sql: false
     syslog: false
     teams: true
+  SW_RECOVERY_SNAPSHOT_REQUESTED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_RECOVERY_SNAPSHOT_SUCCEEDED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   
-  SW_VC_MASTER_CHANGED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_VC_MEMBER_ADDED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
-  SW_ZTP_FINISHED:
-    web: true
-    sql: false
-    syslog: false
-    teams: true
+  # Routing
   SW_OSPF_NEIGHBOR_DOWN:
     web: true
     sql: false
     syslog: false
     teams: true
   SW_OSPF_NEIGHBOR_UP:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_OSPF_NEIGHBOR_ADJACENCY_FAILED:
     web: true
     sql: false
     syslog: false
@@ -502,7 +479,44 @@ device-events:
     sql: false
     syslog: false
     teams: true
+  
+  # Other
+  SW_DHCP_POOL_EXHAUSTED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_IP_CONFLICT:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   SW_MAC_LIMIT_EXCEEDED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_REJECTED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_RESTART_BY_USER:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_RESTARTED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_VC_MASTER_CHANGED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  SW_VC_MEMBER_ADDED:
     web: true
     sql: false
     syslog: false
@@ -512,7 +526,18 @@ device-events:
     sql: false
     syslog: false
     teams: true
+  SW_ZTP_FINISHED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
   
+  # Access Points (alphabetically sorted)
+  AP_CERT_REGENERATED:
+    web: true
+    sql: false
+    syslog: false
+    teams: false
   AP_CONFIG_CHANGED_BY_RRM:
     web: true
     sql: false
@@ -564,6 +589,11 @@ device-events:
     syslog: false
     teams: false
   AP_RADAR_DETECTED:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  AP_UPGRADE_FAILED:
     web: true
     sql: false
     syslog: false
@@ -631,6 +661,11 @@ alarms:
     teams: true
 
   dhcp_failure:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  sw_dhcp_pool_exhausted:
     web: true
     sql: false
     syslog: false
@@ -789,6 +824,21 @@ audits:
     syslog: false
     teams: true
   bounce-port:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  delete-nac_rule:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  update-device:
+    web: true
+    sql: false
+    syslog: false
+    teams: true
+  add-subscription:
     web: true
     sql: false
     syslog: false
