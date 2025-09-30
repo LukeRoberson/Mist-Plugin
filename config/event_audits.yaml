@@ -53,6 +53,11 @@ bounce-port:
   message: "{self.admin_name} has bounced ports at {self.site_name}: {self.message}"
   severity: "info"
 
+add-nac_rule:
+  description: "An admin has added a NAC rule in the Mist web UI"
+  message: "{self.admin_name} has added a NAC rule: {self.message}"
+  severity: "info"
+
 delete-nac_rule:
   description: "An admin has deleted a NAC rule in the Mist web UI"
   message: "{self.admin_name} has deleted a NAC rule: {self.message}"
