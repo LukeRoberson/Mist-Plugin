@@ -13,8 +13,12 @@ LABEL net.networkdirection.healthz="http://localhost:5100/api/health"
 LABEL net.networkdirection.plugin.name="mist"
 
 # Copy the requirements file and install dependencies
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+COPY pyproject.toml ./
+
+# Install dependencies
+RUN pip install --upgrade pip && \
+    pip install "python-sdk @ git+https://github.com/LukeRoberson/python-sdk.git@89397b4a0004f613510a55a4117a67838f6511f7" && \
+    pip install .
 
 # Copy the rest of the application code
 COPY . .
