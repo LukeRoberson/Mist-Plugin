@@ -1058,8 +1058,16 @@ class Audits(Events):
             self.alert = "delete-nac_rule"
         elif self.message is not None and "Update Device" in self.message:
             self.alert = "update-device"
+        elif self.message is not None and "firmware upgrade" in self.message:
+            self.alert = "update-device"
         elif self.message is not None and "Add Subscription" in self.message:
             self.alert = "add-subscription"
+        elif self.message is not None and "Assigned Device" in self.message:
+            self.alert = "device-profile"
+        elif self.message is not None and "Update usermac" in self.message:
+            self.alert = "update-usermac"
+        elif self.message is not None and "Create usermac" in self.message:
+            self.alert = "create-usermac"
         elif (
             self.message is not None and
             "Accessed by Mist Support" in self.message

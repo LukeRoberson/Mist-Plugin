@@ -72,3 +72,18 @@ add-subscription:
   description: "An admin has added a subscription in the Mist web UI"
   message: "{self.admin_name} has added a subscription: {self.message}"
   severity: "info"
+
+device-profile:
+  description: "An admin has assigned a device profile in the Mist web UI"
+  message: "{self.admin_name} has assigned a device profile: {self.message}"
+  severity: "info"
+
+create-usermac:
+  description: "An admin has created a user MAC address in the Mist web UI"
+  message: "{self.admin_name} has created a user MAC address: {self.message}"
+  severity: "info"
+
+update-usermac:
+  description: "An admin has updated a user MAC address in the Mist web UI"
+  message: "{self.admin_name} has updated a user MAC address: {self.message}"
+  severity: "info"

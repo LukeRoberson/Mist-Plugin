@@ -180,6 +180,31 @@ SW_UPGRADED:
   message: "{self.device_name} at {self.site_name} has been upgraded to version {self.version}"
   severity: "info"
 
+SW_UPGRADE_BY_USER:
+  description: "A user has requested a switch upgrade"
+  message: "A user has requested {self.device_name} at {self.site_name} to be upgraded {self.text}"
+  severity: "info"
+
+SW_UPGRADE_IMAGE_UPLOADED:
+  description: "A new firmware image has been uploaded to a switch"
+  message: "{self.device_name} at {self.site_name} has uploaded a new firmware image: {self.text}"
+  severity: "info"
+
+SW_UPGRADE_SOFTWARE_ADD:
+  description: "A new software version has been added to a switch, and is ready for upgrade"
+  message: "{self.device_name} at {self.site_name} has a new software version uploaded: {self.text}"
+  severity: "info"
+
+SW_UPGRADE_PENDING:
+  description: "A switch upgrade is pending, and will be applied during the next maintenance window"
+  message: "{self.device_name} at {self.site_name} has a pending upgrade {self.text}"
+  severity: "info"
+
+SW_UPGRADED:
+  description: "A switch has been upgraded to a new firmware version"
+  message: "{self.device_name} at {self.site_name} has been upgraded {self.text}"
+  severity: "info"
+
 SW_PORT_BPDU_BLOCKED:
   description: "A switch port has been blocked due to a BPDU error"
   message: "{self.device_name} at {self.site_name} has blocked port {self.port_id} due to a BPDU error"
@@ -200,6 +225,16 @@ SW_ALARM_CHASSIS_PEM_CLEAR:
   message: "{self.device_name} at {self.site_name} has cleared a PEM alarm. Original error: {self.text}"
   severity: "warning"
 
+SW_CERT_REGENERATED:
+  description: "A switch certificate has been regenerated"
+  message: "{self.device_name} at {self.site_name} has regenerated its certificate"
+  severity: "info"
+
+OC_FWUPDATE_CLEANUPSTORAGE:
+  description: "Cleanup of files due to a firmware update"
+  message: "{self.device_name} at {self.site_name} has cleaned up old firmware files"
+  severity: "info"
+
 
 # Access Point Events
 AP_RESTARTED:
@@ -210,6 +245,11 @@ AP_RESTARTED:
 AP_RESTART_BY_USER:
   description: "An access point has been restarted by an admin"
   message: "{self.ap_name} at {self.site_name} has been restarted by an administrator"
+  severity: "info"
+
+AP_RECONFIGURED:
+  description: "An access point has been reconfigured (e.g., new channel, power, etc.)"
+  message: "{self.ap_name} at {self.site_name} has been dynamically reconfigured: ({self.text})"
   severity: "info"
 
 AP_CONNECTED:
